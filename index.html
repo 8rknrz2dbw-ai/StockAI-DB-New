@@ -2,357 +2,270 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>二崙葉菜行情室 · 搶收預判 · 西螺果菜市場</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+<title>二崙葉菜行情室 · 搶收預判</title>
 <style>
+  /* ── 字級：整頁以 rem 縮放；預設「大」給長輩看 ── */
+  :root{ font-size:19px; }
+  :root[data-fs="s"]{ font-size:16px; }
+  :root[data-fs="m"]{ font-size:19px; }
+  :root[data-fs="l"]{ font-size:23px; }
+  :root[data-fs="xl"]{ font-size:28px; }
+
   :root{
     --bg:#12160E; --panel:#1B2015; --panel2:#232A1B; --line:#313A22;
-    --leaf:#A6C955; --leaf-dim:#6E8F3C; --paper:#EFEAD8; --muted:#8F9670; --muted2:#6d7554;
-    --persimmon:#E4572E; --amber:#F2B705; --cool:#6FB0A6;
-    /* 決策四燈（與 leaf accent 分離的語意色） */
-    --g:#7CC24A; --y:#F2B705; --o:#E8862E; --r:#E4572E;
-    --radius:14px;
+    --leaf:#A6C955; --leaf-dim:#6E8F3C; --paper:#EFEAD8; --muted:#9aa27a;
+    --g:#7CC24A; --y:#F2B705; --o:#E8862E; --r:#E4572E; --cool:#6FB0A6;
+    --radius:16px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;background:var(--bg);color:var(--paper);
-    font-family:"Noto Sans TC",system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
-  .mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;}
-  a{color:inherit;}
-
-  .wrap{max-width:1200px;margin:0 auto;padding:20px 18px 60px;}
-
-  /* ── 抬頭 ── */
-  header{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px;
-    padding-bottom:16px;border-bottom:1px solid var(--line);}
-  header h1{font-size:clamp(22px,4vw,32px);font-weight:900;margin:0;letter-spacing:.5px;}
-  header h1 .dot{color:var(--leaf);}
-  .sub{color:var(--muted);font-size:13px;}
-  .src{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);}
-  .badge{padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;
-    border:1px solid var(--line);white-space:nowrap;}
-  .badge.demo{color:var(--amber);border-color:#5a4d13;background:#231d07;}
-  .badge.live{color:var(--leaf);border-color:#2f4a1c;background:#182312;}
-
-  /* ── 分頁 nav ── */
-  .tabs{display:flex;gap:6px;margin:16px 0 4px;}
-  .tab{background:transparent;border:1px solid var(--line);color:var(--muted);
-    padding:9px 18px;border-radius:999px;font-size:14px;font-weight:700;cursor:pointer;
-    font-family:inherit;transition:background .15s,color .15s;}
-  .tab:hover{color:var(--paper);}
-  .tab.on{color:var(--bg);background:var(--leaf);border-color:var(--leaf);}
-  .view{display:none;}
-  .view.on{display:block;}
-
-  /* ── 拍賣看板 (signature) ── */
-  .board{margin:18px 0 22px;background:
-      repeating-linear-gradient(90deg,#171C11 0 2px,transparent 2px 40px),var(--panel);
-    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
-  .board-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
-    padding:9px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted);}
-  .board-h b{color:var(--paper);letter-spacing:3px;font-weight:700;}
-  .rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
-  .row{display:flex;align-items:center;gap:12px;padding:14px 16px;
-    border-right:1px solid var(--line);border-top:1px solid var(--line);cursor:pointer;
-    transition:background .15s;}
-  .row:hover,.row.on{background:var(--panel2);}
-  .row.on{box-shadow:inset 3px 0 0 var(--leaf);}
-  .row .nm{font-weight:700;font-size:15px;}
-  .row .nm small{display:block;color:var(--muted);font-weight:400;font-size:11px;margin-top:2px;}
-  .row .px{margin-left:auto;text-align:right;}
-  .row .px .v{font-size:20px;font-weight:700;}
-  .row .px .u{font-size:11px;color:var(--muted);}
-  .lamp{width:11px;height:11px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 3px rgba(0,0,0,.25);}
-  .lamp.g{background:var(--g);} .lamp.a{background:var(--amber);} .lamp.r{background:var(--r);}
-  .lamp.y{background:var(--y);} .lamp.o{background:var(--o);}
-
-  /* ── 主體 ── */
-  .grid{display:grid;grid-template-columns:1fr;gap:18px;}
-  @media(min-width:900px){.grid{grid-template-columns:300px 1fr;}}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;}
-  .card h3{margin:0 0 4px;font-size:13px;color:var(--muted);font-weight:500;letter-spacing:1px;}
-
-  .metric{padding:12px 0;border-bottom:1px dashed var(--line);}
-  .metric:last-child{border-bottom:0;}
-  .metric .lbl{font-size:12px;color:var(--muted);}
-  .metric .big{font-size:26px;font-weight:700;margin-top:2px;}
-  .metric .note{font-size:12px;margin-top:3px;color:var(--muted);}
-  .up{color:var(--persimmon);} .down{color:var(--leaf);} .warn{color:var(--amber);}
-
-  .ranges{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
-  .rng{background:transparent;border:1px solid var(--line);color:var(--muted);
-    padding:5px 12px;border-radius:999px;font-size:12px;cursor:pointer;font-family:inherit;}
-  .rng.on{color:var(--bg);background:var(--leaf);border-color:var(--leaf);font-weight:700;}
-  #chart{width:100%;height:420px;}
-  @media(max-width:600px){#chart{height:340px;}}
-
-  .foot{margin-top:26px;color:var(--muted);font-size:12px;line-height:1.7;}
-  .foot code{background:var(--panel2);padding:1px 6px;border-radius:5px;color:var(--paper);}
-  .hint{color:var(--muted);font-size:12px;margin-top:8px;}
-  :focus-visible{outline:2px solid var(--leaf);outline-offset:2px;}
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;line-height:1.5;}
+  .mono{font-variant-numeric:tabular-nums;}
+  button{font-family:inherit;cursor:pointer;}
+  :focus-visible{outline:3px solid var(--leaf);outline-offset:2px;}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
 
-  /* ══════════ 搶收預判 view ══════════ */
-  .alert{margin:6px 0 18px;border:1px solid #5a2c1f;border-radius:var(--radius);
-    background:linear-gradient(90deg,rgba(228,87,46,.16),rgba(228,87,46,.05) 60%,transparent);
-    padding:12px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;}
-  .alert.calm{border-color:#2f4a1c;background:linear-gradient(90deg,rgba(124,194,74,.12),transparent 60%);}
-  .alert .pulse{width:10px;height:10px;border-radius:50%;background:var(--r);
-    box-shadow:0 0 0 0 rgba(228,87,46,.6);animation:pulse 1.8s infinite;flex:0 0 auto;}
+  .wrap{max-width:760px;margin:0 auto;padding:0.9rem 0.8rem 3rem;}
+
+  /* ── 抬頭 ── */
+  header{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;
+    padding-bottom:0.7rem;border-bottom:1px solid var(--line);}
+  header h1{font-size:1.4rem;font-weight:900;margin:0;letter-spacing:.5px;line-height:1.2;}
+  header h1 .dot{color:var(--leaf);}
+  .gear{margin-left:auto;background:var(--panel2);border:1px solid var(--line);color:var(--paper);
+    width:2.4rem;height:2.4rem;border-radius:50%;font-size:1.2rem;display:flex;align-items:center;
+    justify-content:center;flex:0 0 auto;}
+  .gear:hover{background:var(--line);}
+  .subline{width:100%;display:flex;gap:0.5rem 0.8rem;flex-wrap:wrap;align-items:center;
+    font-size:0.72rem;color:var(--muted);margin-top:0.3rem;}
+  .badge{padding:0.15rem 0.55rem;border-radius:999px;font-size:0.7rem;font-weight:700;
+    border:1px solid var(--line);white-space:nowrap;}
+  .badge.demo{color:var(--y);border-color:#5a4d13;background:#231d07;}
+  .badge.live{color:var(--leaf);border-color:#2f4a1c;background:#182312;}
+
+  /* ── 分頁 ── */
+  .tabs{display:flex;gap:0.5rem;margin:0.9rem 0;}
+  .tab{flex:1;background:transparent;border:1px solid var(--line);color:var(--muted);
+    padding:0.7rem 0.5rem;border-radius:999px;font-size:1.05rem;font-weight:800;}
+  .tab.on{color:var(--bg);background:var(--leaf);border-color:var(--leaf);}
+  .view{display:none;} .view.on{display:block;}
+
+  /* ── 行情看板 ── */
+  .mkt-label{font-size:0.8rem;color:var(--muted);margin:0.2rem 0 0.6rem;}
+  .mkt-label b{color:var(--paper);}
+  .board{display:flex;flex-direction:column;gap:0.55rem;}
+  .prow{display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:0.8rem 0.9rem;text-align:left;color:inherit;width:100%;}
+  .prow.on{box-shadow:inset 4px 0 0 var(--leaf);background:var(--panel2);}
+  .prow .dot{width:0.75rem;height:0.75rem;border-radius:50%;flex:0 0 auto;}
+  .prow .dot.up{background:var(--r);} .prow .dot.dn{background:var(--g);} .prow .dot.mid{background:var(--y);}
+  .prow .nm{font-size:1.15rem;font-weight:800;}
+  .prow .nm small{display:block;font-size:0.65rem;color:var(--muted);font-weight:400;margin-top:0.1rem;}
+  .prow .px{margin-left:auto;text-align:right;white-space:nowrap;}
+  .prow .px .v{font-size:1.6rem;font-weight:900;}
+  .prow .px .u{font-size:0.7rem;color:var(--muted);}
+  .tag{font-size:0.72rem;font-weight:800;padding:0.15rem 0.5rem;border-radius:999px;white-space:nowrap;}
+  .tag.up{color:#2a1409;background:var(--r);} .tag.dn{color:#0e1a08;background:var(--g);}
+  .tag.mid{color:#2a2306;background:var(--y);}
+
+  .empty{background:var(--panel);border:1px dashed var(--line);border-radius:var(--radius);
+    padding:1.2rem;text-align:center;color:var(--muted);font-size:0.9rem;}
+
+  /* ── 品項細節 ── */
+  .detail{margin-top:0.9rem;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);padding:1rem;}
+  .detail h3{margin:0 0 0.5rem;font-size:1.15rem;}
+  .detail .big{font-size:2.3rem;font-weight:900;line-height:1;}
+  .detail .big .u{font-size:0.8rem;color:var(--muted);font-weight:400;}
+  .detail .say{font-size:1rem;margin-top:0.5rem;font-weight:700;}
+  .detail .say.up{color:var(--r);} .detail .say.dn{color:var(--leaf);} .detail .say.mid{color:var(--y);}
+  .detail .note{font-size:0.8rem;color:var(--muted);margin-top:0.35rem;}
+  .trend{margin-top:0.8rem;}
+  .trend svg{width:100%;height:5.5rem;display:block;}
+  .trend .cap{font-size:0.72rem;color:var(--muted);margin-top:0.25rem;}
+
+  /* ── 搶收預判 ── */
+  .alert{border:1px solid #5a2c1f;border-radius:var(--radius);
+    background:linear-gradient(90deg,rgba(228,87,46,.18),rgba(228,87,46,.05) 60%,transparent);
+    padding:0.9rem 1rem;display:flex;flex-wrap:wrap;align-items:center;gap:0.3rem 1rem;}
+  .alert.calm{border-color:#2f4a1c;background:linear-gradient(90deg,rgba(124,194,74,.14),transparent 60%);}
+  .alert .pulse{width:0.7rem;height:0.7rem;border-radius:50%;background:var(--r);flex:0 0 auto;
+    box-shadow:0 0 0 0 rgba(228,87,46,.6);animation:pulse 1.8s infinite;}
   .alert.calm .pulse{background:var(--g);animation:none;}
-  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(228,87,46,.55)}70%{box-shadow:0 0 0 9px rgba(228,87,46,0)}100%{box-shadow:0 0 0 0 rgba(228,87,46,0)}}
-  .alert b{color:#F6C6B4;font-weight:700;}
-  .alert.calm b{color:var(--leaf);}
-  .alert .k{color:var(--muted);font-size:12px;}
-  .alert .k b{color:var(--paper);font-weight:700;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(228,87,46,.55)}70%{box-shadow:0 0 0 0.6rem rgba(228,87,46,0)}100%{box-shadow:0 0 0 0 rgba(228,87,46,0)}}
+  .alert .big{font-size:1.05rem;font-weight:800;width:100%;}
+  .alert .big b{color:#F6C6B4;} .alert.calm .big b{color:var(--leaf);}
+  .alert .k{font-size:0.8rem;color:var(--muted);}
+  .alert .k b{color:var(--paper);}
 
-  .tally{display:flex;gap:14px;flex-wrap:wrap;}
-  .tally .t{display:flex;align-items:center;gap:7px;font-size:14px;}
-  .tally .n{font-size:22px;font-weight:800;}
-  .firstpick{margin-left:auto;font-size:12px;color:var(--muted);}
-  .firstpick b{color:var(--paper);}
+  .overview{margin-top:0.9rem;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);padding:0.9rem 1rem;}
+  .overview .tally{display:flex;gap:0.5rem 1.1rem;flex-wrap:wrap;}
+  .overview .t{display:flex;align-items:center;gap:0.4rem;font-size:0.95rem;}
+  .overview .t .n{font-size:1.4rem;font-weight:900;}
+  .lamp{width:0.75rem;height:0.75rem;border-radius:50%;flex:0 0 auto;}
+  .lamp.r{background:var(--r);} .lamp.o{background:var(--o);} .lamp.y{background:var(--y);} .lamp.g{background:var(--g);}
+  .overview .pick{font-size:0.82rem;color:var(--muted);margin-top:0.5rem;}
+  .overview .pick b{color:var(--paper);}
 
-  .sec{margin:34px 0 14px;display:flex;align-items:baseline;gap:12px;}
-  .sec h2{font-size:16px;font-weight:800;letter-spacing:.5px;margin:0;}
-  .sec .ey{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--leaf-dim);letter-spacing:2px;}
-  .sec .ln{flex:1;height:1px;background:var(--line);}
+  .sec-t{font-size:1.05rem;font-weight:800;margin:1.2rem 0 0.6rem;}
+  .sched{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:0.9rem;}
+  .sched .sum{font-size:0.9rem;font-weight:700;margin:0 0 0.7rem;}
+  .sched .sum b{color:var(--leaf);}
+  .srow{display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;border:1px solid var(--line);
+    border-radius:12px;padding:0.6rem 0.7rem;margin-bottom:0.5rem;}
+  .srow:last-child{margin-bottom:0;}
+  .srow.bad{border-color:#5a2c1f;background:rgba(228,87,46,.08);}
+  .srow .rk{width:1.3rem;text-align:center;color:var(--muted);font-weight:800;flex:0 0 auto;}
+  .srow .snm{font-weight:800;font-size:0.98rem;}
+  .srow .snm small{color:var(--muted);font-weight:400;}
+  .srow .team{font-size:0.72rem;font-weight:700;color:var(--bg);background:var(--cool);padding:0.1rem 0.5rem;border-radius:999px;}
+  .srow .tw{font-size:0.85rem;color:var(--paper);}
+  .srow .ok{margin-left:auto;color:var(--g);font-weight:800;font-size:0.82rem;}
+  .srow .no{margin-left:auto;color:var(--r);font-weight:800;font-size:0.82rem;}
+  .srow .snote{flex-basis:100%;font-size:0.75rem;color:#F6C6B4;}
 
-  .cards{display:grid;grid-template-columns:1fr;gap:14px;}
-  @media(min-width:680px){.cards{grid-template-columns:1fr 1fr;}}
-  @media(min-width:1000px){.cards{grid-template-columns:1fr 1fr 1fr;}}
+  .cards{display:flex;flex-direction:column;gap:0.7rem;}
   .fcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-    padding:15px 15px 13px;display:flex;flex-direction:column;gap:11px;position:relative;overflow:hidden;}
-  .fcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--dec,var(--muted));}
+    padding:0.9rem;position:relative;overflow:hidden;}
+  .fcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--dec,var(--muted));}
   .fcard.dec-r{--dec:var(--r)} .fcard.dec-o{--dec:var(--o)} .fcard.dec-y{--dec:var(--y)} .fcard.dec-g{--dec:var(--g)}
-  .c-top{display:flex;align-items:flex-start;gap:8px;}
-  .c-id{font-weight:700;font-size:15px;}
-  .c-id small{display:block;color:var(--muted);font-weight:400;font-size:11px;margin-top:1px;}
-  .pill{margin-left:auto;font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;
-    white-space:nowrap;color:#12160E;background:var(--dec);}
-  .pill.dec-y{color:#2a2306;}
-  .risk{display:flex;flex-direction:column;gap:5px;}
-  .risk .rl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
-  .risk .rl b{color:var(--paper);font-size:13px;}
-  .bar{height:8px;border-radius:6px;background:#0e1109;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line);}
-  .bar>i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--dec),color-mix(in srgb,var(--dec) 55%,#000));}
-  .count{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--panel2);}
-  .count .cl{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;}
-  .count .cd{font-family:"JetBrains Mono",monospace;font-size:26px;font-weight:700;letter-spacing:1px;margin-top:1px;}
+  .fcard .ctop{display:flex;align-items:baseline;gap:0.5rem;flex-wrap:wrap;}
+  .fcard .cid{font-size:1.1rem;font-weight:800;}
+  .fcard .cid small{color:var(--muted);font-weight:400;font-size:0.75rem;}
+  .fcard .pill{margin-left:auto;font-size:0.85rem;font-weight:800;padding:0.25rem 0.7rem;border-radius:999px;
+    color:#12160E;background:var(--dec);white-space:nowrap;}
+  .fcard .pill.dec-y{color:#2a2306;}
+  .fcard .riskword{font-size:0.85rem;color:var(--muted);margin-top:0.4rem;}
+  .fcard .riskword b.hi{color:var(--r);} .fcard .riskword b.mid{color:var(--o);} .fcard .riskword b.lo{color:var(--g);}
+  .count{margin-top:0.6rem;border:1px solid var(--line);border-radius:12px;padding:0.6rem 0.7rem;background:var(--panel2);}
+  .count .cl{font-size:0.72rem;color:var(--muted);}
+  .count .cd{font-size:1.9rem;font-weight:900;letter-spacing:1px;line-height:1.1;}
   .count.soon .cd{color:var(--r);animation:blink 1.1s steps(2,jump-none) infinite;}
-  .count .cn{font-size:11px;color:var(--muted);margin-top:2px;}
+  .count .cn{font-size:0.72rem;color:var(--muted);margin-top:0.15rem;}
+  .count.none .cd{font-size:1rem;color:var(--muted);font-weight:700;}
   @keyframes blink{50%{opacity:.45}}
-  .count.none .cd{font-size:15px;color:var(--muted);font-family:"Noto Sans TC",sans-serif;font-weight:600;}
-  .dilemma{border:1px solid #6a5410;background:#241d06;border-radius:10px;padding:9px 11px;}
-  .dilemma .dh{color:var(--y);font-weight:800;font-size:13px;}
-  .dilemma .dt{font-size:12px;color:#e7dcb4;margin-top:4px;}
-  .dilemma .dt em{color:#F6C6B4;font-style:normal;font-weight:700;}
-  .partial{font-size:12px;color:#F6C6B4;background:rgba(228,87,46,.10);border:1px solid #5a2c1f;
-    border-radius:10px;padding:8px 11px;}
-  .ev{display:flex;gap:8px;}
-  .ev .e{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--panel2);}
-  .ev .e.win{border-color:var(--leaf-dim);background:#182312;}
-  .ev .e .el{font-size:11px;color:var(--muted);}
-  .ev .e .en{font-family:"JetBrains Mono",monospace;font-size:16px;font-weight:700;margin-top:1px;}
-  .ev .e.win .en{color:var(--leaf);}
-  .ev-hint{font-size:11px;color:var(--muted);margin-top:-3px;}
-  .reasons{margin:0;padding:0;list-style:none;display:none;flex-direction:column;gap:6px;}
-  .reasons.open{display:flex;}
-  .reasons li{font-size:12px;color:var(--muted);padding-left:14px;position:relative;line-height:1.45;}
-  .reasons li::before{content:"›";position:absolute;left:2px;color:var(--leaf-dim);}
-  .reasons li.warn{color:#F6C6B4;}
-  .toggle{background:none;border:0;color:var(--leaf-dim);font-family:inherit;font-size:12px;
-    cursor:pointer;padding:2px 0;text-align:left;}
-  .toggle:hover{color:var(--leaf);}
-  .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted2);
-    border-top:1px dashed var(--line);padding-top:9px;}
-  .meta b{color:var(--muted);font-weight:600;}
+  .dilemma{margin-top:0.6rem;border:1px solid #6a5410;background:#241d06;border-radius:12px;padding:0.6rem 0.7rem;}
+  .dilemma .dh{color:var(--y);font-weight:800;font-size:0.92rem;}
+  .dilemma .dt{font-size:0.8rem;color:#e7dcb4;margin-top:0.25rem;}
+  .fcard .why{font-size:0.82rem;color:var(--muted);margin-top:0.55rem;line-height:1.5;}
 
-  /* 全區搶收排程 (v4) */
-  .sched-sum{font-size:13px;color:var(--paper);margin:0 0 12px;font-weight:600;line-height:1.5;}
-  .sched-sum b{color:var(--leaf);}
-  .sched-list{display:flex;flex-direction:column;gap:8px;}
-  .sched-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
-    border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--panel2);}
-  .sched-row.bad{border-color:#5a2c1f;background:rgba(228,87,46,.08);}
-  .sched-row .rk{font-family:"JetBrains Mono",monospace;color:var(--muted);width:18px;text-align:center;flex:0 0 auto;}
-  .sched-row .snm{font-weight:700;font-size:14px;}
-  .sched-row .snm small{color:var(--muted);font-weight:400;}
-  .sched-row .team{font-size:11px;font-weight:700;color:var(--bg);background:var(--cool);padding:2px 9px;border-radius:999px;}
-  .sched-row .tw{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--paper);}
-  .sched-row .ok{margin-left:auto;font-size:12px;font-weight:700;color:var(--g);}
-  .sched-row .no{margin-left:auto;font-size:12px;font-weight:700;color:var(--r);}
-  .sched-row .note{flex-basis:100%;font-size:11px;color:#F6C6B4;}
+  .foot{margin-top:1.6rem;color:var(--muted);font-size:0.72rem;line-height:1.7;
+    border-top:1px solid var(--line);padding-top:0.9rem;}
 
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;}
-  .flow{display:flex;gap:10px;align-items:stretch;overflow-x:auto;padding-bottom:6px;}
-  .flow .stage{flex:0 0 auto;min-width:150px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);padding:11px 12px;}
-  .flow .stage h4{margin:0 0 6px;font-size:12px;color:var(--leaf);letter-spacing:.5px;}
-  .flow .stage .chip{display:block;font-size:12px;color:var(--paper);padding:3px 0;}
-  .flow .stage .chip span{color:var(--muted);font-family:"JetBrains Mono",monospace;font-size:10px;}
-  .flow .arrow{flex:0 0 auto;align-self:center;color:var(--leaf-dim);font-size:20px;}
-  .flow .stage.gate{border-color:#6a5410;background:#211b08;}
-  .flow .stage.gate h4{color:var(--y);}
-  .flow .stage.out{border-color:var(--leaf-dim);background:#172311;}
-  .flow .stage.out h4{color:var(--leaf);}
-  .tri{display:grid;gap:12px;margin-top:4px;}
-  @media(min-width:760px){.tri{grid-template-columns:1fr 1fr 1fr;}}
-  .tri .box{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:var(--panel2);}
-  .tri .box h4{margin:0 0 5px;font-size:13px;}
-  .tri .box p{margin:0;font-size:12px;color:var(--muted);}
-  .tri .box .rule{margin-top:8px;font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--leaf);
-    background:#141a0e;border:1px solid var(--line);border-radius:8px;padding:6px 8px;overflow-x:auto;}
-  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);}
-  table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:640px;}
-  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
-  th{color:var(--muted);font-weight:600;background:var(--panel2);letter-spacing:.3px;}
-  td b{color:var(--paper);}
-  td .id{font-family:"JetBrains Mono",monospace;color:var(--leaf);font-size:11.5px;}
-  .freq{color:var(--cool);white-space:nowrap;}
-  tr:last-child td{border-bottom:0;}
+  /* ── 設定 modal ── */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:50;
+    align-items:flex-end;justify-content:center;}
+  .modal.on{display:flex;}
+  .sheet{background:var(--panel);border:1px solid var(--line);border-radius:20px 20px 0 0;
+    width:100%;max-width:760px;max-height:88vh;overflow-y:auto;padding:1.1rem 1rem 1.6rem;}
+  @media(min-width:520px){.modal{align-items:center;} .sheet{border-radius:20px;}}
+  .sheet h2{margin:0 0 0.2rem;font-size:1.25rem;font-weight:900;display:flex;align-items:center;}
+  .sheet .close{margin-left:auto;background:var(--panel2);border:1px solid var(--line);color:var(--paper);
+    width:2.1rem;height:2.1rem;border-radius:50%;font-size:1.1rem;}
+  .setblk{margin-top:1.2rem;}
+  .setblk h4{margin:0 0 0.5rem;font-size:0.95rem;color:var(--muted);font-weight:700;letter-spacing:.5px;}
+  .fsrow{display:flex;gap:0.5rem;}
+  .fsrow button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--paper);
+    padding:0.6rem 0.3rem;border-radius:12px;font-weight:800;}
+  .fsrow button[data-v="s"]{font-size:0.85rem;} .fsrow button[data-v="m"]{font-size:1rem;}
+  .fsrow button[data-v="l"]{font-size:1.2rem;} .fsrow button[data-v="xl"]{font-size:1.45rem;}
+  .fsrow button.on{background:var(--leaf);color:var(--bg);border-color:var(--leaf);}
+  select.mkt{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--paper);
+    padding:0.65rem 0.7rem;border-radius:12px;font-size:1rem;font-family:inherit;}
+  .watchlist{display:flex;flex-direction:column;gap:0.45rem;margin-top:0.2rem;}
+  .witem{display:flex;align-items:center;gap:0.6rem;background:var(--panel2);border:1px solid var(--line);
+    border-radius:12px;padding:0.55rem 0.7rem;}
+  .witem .wn{font-weight:700;font-size:1rem;}
+  .witem .rm{margin-left:auto;background:transparent;border:1px solid #5a2c1f;color:var(--r);
+    border-radius:999px;padding:0.2rem 0.7rem;font-size:0.82rem;font-weight:800;}
+  .addrow{display:flex;gap:0.5rem;margin-top:0.6rem;flex-wrap:wrap;}
+  .addrow select{flex:1;min-width:8rem;background:var(--panel2);border:1px solid var(--line);color:var(--paper);
+    padding:0.55rem 0.6rem;border-radius:12px;font-size:0.95rem;font-family:inherit;}
+  .addrow button{background:var(--leaf);color:var(--bg);border:0;border-radius:12px;padding:0.55rem 1rem;font-weight:800;}
+  .addrow button:disabled{opacity:.4;}
+  .hintline{font-size:0.75rem;color:var(--muted);margin-top:0.5rem;line-height:1.6;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>二崙葉菜行情室<span class="dot">.</span></h1>
-    <span class="sub">西螺果菜市場 · 拍賣行情 ＋ 颱風搶收預判</span>
-    <div class="src">
+    <button class="gear" id="gear" aria-label="設定">⚙️</button>
+    <div class="subline">
       <span id="updated">—</span>
       <span id="mode" class="badge demo">示範資料</span>
+      <span>西螺果菜市場 · 拍賣行情 ＋ 颱風搶收預判</span>
     </div>
   </header>
 
-  <nav class="tabs" role="tablist">
-    <button class="tab on" id="tab-market" role="tab" aria-selected="true">行情看板</button>
-    <button class="tab" id="tab-harvest" role="tab" aria-selected="false">搶收預判</button>
+  <nav class="tabs">
+    <button class="tab on" id="tab-market">行情看板</button>
+    <button class="tab" id="tab-harvest">搶收預判</button>
   </nav>
 
-  <!-- ══════════ VIEW 1：行情看板 ══════════ -->
+  <!-- 行情看板 -->
   <div class="view on" id="view-market">
-    <section class="board" aria-label="今日行情看板">
-      <div class="board-h"><b>行 情 看 板</b><span>單位：元 / 公斤　·　點選品項看走勢</span></div>
-      <div class="rows" id="board"></div>
-    </section>
-
-    <div class="grid">
-      <aside class="card" id="panel">
-        <h3 id="panelTitle">本檔體檢</h3>
-        <div id="metrics"></div>
-        <p class="hint" id="cropNote"></p>
-      </aside>
-
-      <section class="card">
-        <div class="ranges" id="ranges">
-          <button class="rng" data-d="90">近 3 個月</button>
-          <button class="rng on" data-d="365">近 1 年</button>
-          <button class="rng" data-d="730">近 2 年</button>
-        </div>
-        <div id="chart"></div>
-        <p class="hint">綠線＝當日均價；黃虛線＝<b>季節基準線</b>（過去兩年同一週的中位價，看出這作物慣性漲跌的月份）；下方柱＝交易量。</p>
-      </section>
-    </div>
-
-    <p class="foot">
-      資料來源：農業部「農產品交易行情」開放資料。部署後前端會自動改讀 data 分支的
-      <code>veg_prices.json</code>（動態 <code>ghBase</code> 解析）；抓不到時退回示範資料，不當機。<br>
-      註：<b>蚵白菜</b>與<b>奶油白菜</b>在批發端併入「小白菜」大類，無法細分，兩者共用同一條行情。
-    </p>
+    <p class="mkt-label">市場：<b id="mktName">—</b>　·　點品項看走勢</p>
+    <div class="board" id="board"></div>
+    <div id="detail"></div>
   </div>
 
-  <!-- ══════════ VIEW 2：搶收預判 ══════════ -->
+  <!-- 搶收預判 -->
   <div class="view" id="view-harvest">
     <div class="alert" id="hAlert"></div>
-
-    <section class="board" aria-label="本區搶收總覽">
-      <div class="board-h"><b>本 區 總 覽</b><span>雲林 二崙／西螺 · 依「風險 × 急迫度」排序</span></div>
-      <div class="board-b" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:14px 16px;">
-        <div class="tally" id="hTally"></div>
-        <div class="firstpick" id="hFirstpick"></div>
-      </div>
-    </section>
-
-    <div class="sec" id="hSchedSec" style="display:none"><span class="ey">PLAN</span><h2>全區搶收排程（人力調度）</h2><span class="ln"></span></div>
-    <div class="panel" id="hSchedule" style="display:none"></div>
-
-    <div class="sec"><span class="ey">FIELDS</span><h2>各田搶收預判</h2><span class="ln"></span></div>
+    <div class="overview" id="hOverview"></div>
+    <div id="hSchedWrap" style="display:none">
+      <div class="sec-t">全區搶收排程（人力調度）</div>
+      <div class="sched" id="hSchedule"></div>
+    </div>
+    <div class="sec-t">各田搶收預判</div>
     <div class="cards" id="hCards"></div>
+  </div>
 
-    <div class="sec"><span class="ey">ENGINE</span><h2>七因子 → 決策管線</h2><span class="ln"></span></div>
-    <div class="panel">
-      <div class="flow">
-        <div class="stage"><h4>① 輸入 7 因子</h4>
-          <span class="chip">歷史天氣 <span>O-A0003</span></span>
-          <span class="chip">歷史雨量 <span>O-A0002</span></span>
-          <span class="chip">地勢高低 <span>DEM+淹水潛勢</span></span>
-          <span class="chip">收成時間 <span>生育期</span></span>
-          <span class="chip">農藥滯留 <span>PHI</span></span>
-          <span class="chip">颱風警報 <span>W-C0034-001</span></span>
-          <span class="chip">颱風預判 <span>W-C0034-005/003</span></span></div>
-        <div class="arrow">→</div>
-        <div class="stage gate"><h4>② 硬約束閘門</h4>
-          <span class="chip">PHI 未到 → ⚠不可上市</span>
-          <span class="chip">成熟度 &lt; 門檻 → 殘值低</span>
-          <span class="chip" style="color:var(--muted)">一票否決 / 降級</span></div>
-        <div class="arrow">→</div>
-        <div class="stage"><h4>③ 滅田風險 R</h4>
-          <span class="chip">P<span>到達機率</span> × I<span>風雨強度</span></span>
-          <span class="chip">× W<span>淹水權重</span> × V<span>作物脆弱</span></span>
-          <span class="chip" style="color:var(--muted)">歷史類比校準 → 0–100</span></div>
-        <div class="arrow">→</div>
-        <div class="stage"><h4>④ 時間軸求解</h4>
-          <span class="chip">颱風時窗 ∩ PHI ∩ 成熟</span>
-          <span class="chip">− 搶收工時</span>
-          <span class="chip" style="color:var(--muted)">→ 最晚 deadline</span></div>
-        <div class="arrow">→</div>
-        <div class="stage out"><h4>⑤ 決策 + EV</h4>
-          <span class="chip">照常／觀望／建議／立即</span>
-          <span class="chip">早收 vs 賭一把 期望值</span>
-          <span class="chip" style="color:var(--muted)">+ 信心度 + 理由</span></div>
+  <p class="foot">
+    價格為農業部「農產品交易行情」公開資料；颱風/雨量為中央氣象署資料。抓不到時顯示示範資料，不當機。<br>
+    設定（字體大小、市場、品項增刪）都在右上齒輪 ⚙️ 裡。
+  </p>
+</div>
+
+<!-- 設定 -->
+<div class="modal" id="modal">
+  <div class="sheet" role="dialog" aria-label="設定">
+    <h2>設定 <button class="close" id="closeSet" aria-label="關閉">✕</button></h2>
+
+    <div class="setblk">
+      <h4>字體大小</h4>
+      <div class="fsrow" id="fsRow">
+        <button data-v="s">小</button>
+        <button data-v="m">中</button>
+        <button data-v="l">大</button>
+        <button data-v="xl">特大</button>
       </div>
     </div>
 
-    <div class="sec"><span class="ey">CORE</span><h2>決策三角：同一條時間線上比最嚴格者</h2><span class="ln"></span></div>
-    <div class="tri">
-      <div class="box"><h4>🌱 成熟度</h4>
-        <p>收了值不值錢。未達門檻→搶收殘值過低，EV 壓低。</p>
-        <div class="rule">熟度 = (今日 − 播種日) / 生育期　≥ 0.8 才具商品價值</div></div>
-      <div class="box"><h4>🧪 農藥滯留（PHI）— 硬限制</h4>
-        <p>能不能合法收。未到期即採收＝殘留超標，恐遭銷毀裁罰。</p>
-        <div class="rule">今日 ≥ 最後施藥日 + max(各藥 PHI)　否則 ⚠不可上市</div></div>
-      <div class="box"><h4>🌀 颱風時窗 × 淹水急迫</h4>
-        <p>最晚幾點前要收完。低窪田提前 12–24hr，泡水 48hr 起爛根。</p>
-        <div class="rule">deadline = 暴風到達 − 安全緩衝 − 搶收工時</div></div>
+    <div class="setblk">
+      <h4>果菜市場</h4>
+      <select class="mkt" id="mktSelect"></select>
     </div>
 
-    <div class="sec"><span class="ey">DATA</span><h2>資料來源（全部走後端排程快取）</h2><span class="ln"></span></div>
-    <div class="tblwrap">
-      <table>
-        <thead><tr><th>因子</th><th>資料集（代號）</th><th>來源平臺</th><th>更新頻率</th></tr></thead>
-        <tbody>
-          <tr><td><b>歷史天氣</b></td><td><span class="id">O-A0003-001 / O-A0001-001</span></td><td>CWA 開放資料</td><td class="freq">10 分–1 小時</td></tr>
-          <tr><td><b>歷史雨量</b></td><td><span class="id">O-A0002-001</span></td><td>CWA 開放資料</td><td class="freq">約 10 分鐘</td></tr>
-          <tr><td><b>地勢高低</b></td><td><span class="id">DEM 20m(35430) + 淹水潛勢(25766)</span></td><td>內政部 / 水利署</td><td class="freq">年度改版</td></tr>
-          <tr><td><b>蔬菜收成時間</b></td><td><span class="id">生育期參數表</span></td><td>農業知識入口網 + 田區檔</td><td class="freq">靜態</td></tr>
-          <tr><td><b>農藥滯留時間</b></td><td><span class="id">安全採收期 PHI</span></td><td>植物保護資訊系統 / 農藥資訊網</td><td class="freq">靜態</td></tr>
-          <tr><td><b>颱風警報</b></td><td><span class="id">W-C0034-001 / W-C0033-001</span></td><td>CWA 開放資料</td><td class="freq">事件驅動</td></tr>
-          <tr><td><b>颱風預判</b></td><td><span class="id">W-C0034-005 / W-C0034-003</span></td><td>CWA 開放資料</td><td class="freq">約 3 小時</td></tr>
-        </tbody>
-      </table>
+    <div class="setblk">
+      <h4>我的品項（點「移除」隱藏、下方可新增）</h4>
+      <div class="watchlist" id="watchList"></div>
+      <div class="addrow">
+        <select id="addSelect"></select>
+        <button id="addBtn">＋ 新增</button>
+      </div>
+      <p class="hintline">只會顯示你選的品項；新增清單來自這個市場目前有行情的葉菜。</p>
     </div>
-
-    <p class="foot">
-      本頁搶收資料部署後改讀 <code>harvest_advisory.json</code>／<code>typhoon_status.json</code>（後端排程產出）；抓不到時退回示範資料。<br>
-      ⚠ CWA／水利署 API 需授權金鑰、CORS 不保證 → 金鑰只放後端，前端只讀你自產的靜態 JSON。<br>
-      上線前 <b>PHI 與菠菜生育日數務必以「植物保護資訊系統／農藥資訊服務網」實查登記值</b>寫入資料庫。
-    </p>
   </div>
 </div>
 
 <script>
-/* ═══════════ 動態 ghBase（對齊三分支規則） ═══════════ */
+/* ═══════════ 動態 ghBase ═══════════ */
 function resolveGhBase(){
   const {origin, pathname, hostname} = location;
   if (hostname.endsWith("github.io")) {
@@ -361,524 +274,317 @@ function resolveGhBase(){
   }
   return ".";
 }
-
-/* ═══════════ 共用日算法（純 UTC，消除本地/UTC 混用） ═══════════ */
+/* ═══════════ 小工具 ═══════════ */
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);
   return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
-function weekOf(iso){return Math.floor(doyOf(iso)/7);}
 function median(a){const s=[...a].sort((x,y)=>x-y);const m=s.length>>1;
   return s.length%2?s[m]:(s[m-1]+s[m])/2;}
 function mean(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;}
+function pad(n){return String(n).padStart(2,"0");}
 
-/* ══════════════════════════════════════════════════════
-   行情看板 VIEW
-   ══════════════════════════════════════════════════════ */
+/* ═══════════ 設定（localStorage） ═══════════ */
+const S = {
+  get fs(){return localStorage.getItem("vs_fs")||"l";},
+  set fs(v){localStorage.setItem("vs_fs",v);},
+  get market(){return localStorage.getItem("vs_market")||"";},
+  set market(v){localStorage.setItem("vs_market",v);},
+  watch(mk){try{return JSON.parse(localStorage.getItem("vs_watch_"+mk));}catch(e){return null;}},
+  setWatch(mk,arr){localStorage.setItem("vs_watch_"+mk,JSON.stringify(arr));},
+};
+function applyFont(){document.documentElement.setAttribute("data-fs",S.fs);
+  document.querySelectorAll("#fsRow button").forEach(b=>b.classList.toggle("on",b.dataset.v===S.fs));}
 
-/* 資料載入：先讀真實 json，失敗退回示範 */
+/* ═══════════ 價格資料 ═══════════ */
 async function loadPrices(){
   try{
-    const res = await fetch(`${resolveGhBase()}/veg_prices.json`, {cache:"no-store"});
-    if(!res.ok) throw new Error(res.status);
-    const j = await res.json();
-    // [FIX #1] shape 檢查加嚴：缺 markets / crop_map / 市場資料都退回 demo，不裸奔
-    if(!j || !j.data || !Array.isArray(j.markets) || !j.markets.length
-       || !j.crop_map || !j.data[j.markets[0]]) throw new Error("shape");
+    const res=await fetch(`${resolveGhBase()}/veg_prices.json`,{cache:"no-store"});
+    if(!res.ok) throw 0;
+    const j=await res.json();
+    if(!j||!j.data||!Array.isArray(j.markets)||!j.markets.length||!j.crop_map||!j.data[j.markets[0]]) throw 0;
     return {payload:j, live:true};
-  }catch(e){
-    return {payload:makeDemo(), live:false};
-  }
+  }catch(e){ return {payload:makeDemo(), live:false}; }
 }
-
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
   t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
-
 function makeDemo(){
-  const rnd = mulberry32(20250704);
-  const models = {
-    "青江白菜":{base:22, amp:5,  peak:20,  vol:1500, summerHole:0,   spike:[7,8,9]},
-    "芥藍":    {base:30, amp:6,  peak:15,  vol:900,  summerHole:0,   spike:[8,9]},
-    "菠菜":    {base:32, amp:18, peak:200, vol:800,  summerHole:0.6, spike:[]},
-    "小白菜":  {base:20, amp:6,  peak:210, vol:1800, summerHole:0,   spike:[7,8,9]},
+  const rnd=mulberry32(20250704);
+  // 展開成完整葉菜清單，讓「新增/移除品項」有東西可選
+  const M={
+    "青江白菜":{b:22,a:5,pk:20,v:1500,sp:[7,8,9]},"芥藍":{b:30,a:6,pk:15,v:900,sp:[8,9]},
+    "菠菜":{b:34,a:18,pk:200,v:800,hole:0.6,sp:[]},"小白菜":{b:20,a:6,pk:210,v:1800,sp:[7,8,9]},
+    "空心菜":{b:18,a:5,pk:200,v:1600,sp:[7,8]},"甘藷葉":{b:16,a:4,pk:200,v:1200,sp:[]},
+    "莧菜":{b:20,a:5,pk:200,v:700,sp:[7,8]},"茼蒿":{b:28,a:10,pk:20,v:600,hole:0.4,sp:[]},
+    "油菜":{b:19,a:5,pk:30,v:800,sp:[]},"萵苣菜":{b:26,a:7,pk:25,v:900,sp:[]},"芥菜":{b:22,a:6,pk:20,v:500,sp:[]},
   };
-  const today = new Date();
-  const start = new Date(today); start.setFullYear(start.getFullYear()-2);
-  const data = {"西螺鎮":{}};
-  for(const [name,m] of Object.entries(models)){
-    const series={};
-    for(let d=new Date(start); d<=today; d.setDate(d.getDate()+1)){
-      const iso = d.toISOString().slice(0,10);
-      const doy = doyOf(iso);
-      const mon = d.getMonth()+1;
-      let gapP = 0.08 + (m.summerHole && mon>=6 && mon<=9 ? m.summerHole : 0);
-      if(rnd()<gapP) continue;
-      const seas = Math.cos((doy - m.peak)/365*2*Math.PI);
-      let px = m.base + m.amp*seas + (rnd()-0.5)*4;
-      let qty = m.vol*(1.1 - 0.4*seas) * (0.7+rnd()*0.6);
-      if(m.spike.includes(mon) && rnd()<0.03){ px*=1.8+rnd(); qty*=0.35; }
-      px=Math.max(6,px);
-      series[iso]={avg:+px.toFixed(1),
-        high:+(px*(1.12+rnd()*0.1)).toFixed(1),
-        mid:+px.toFixed(1),
-        low:+(px*(0.82-rnd()*0.08)).toFixed(1),
-        qty:+qty.toFixed(0)};
-    }
-    data["西螺鎮"][name]=series;
-  }
-  return {
-    updated:new Date().toISOString().slice(0,16).replace("T"," "),
-    years_back:2, markets:["西螺鎮"],
-    crop_map:{"青江菜":"青江白菜","芥藍菜":"芥藍","菠菜":"菠菜","蚵白菜":"小白菜","奶油白菜":"小白菜"},
-    data
-  };
+  const today=new Date(); const start=new Date(today); start.setFullYear(start.getFullYear()-1);
+  function series(m){const s={};
+    for(let d=new Date(start);d<=today;d.setDate(d.getDate()+1)){
+      const iso=d.toISOString().slice(0,10); const mon=d.getMonth()+1; const doy=doyOf(iso);
+      let gp=0.08+((m.hole&&mon>=6&&mon<=9)?m.hole:0); if(rnd()<gp)continue;
+      const seas=Math.cos((doy-m.pk)/365*2*Math.PI);
+      let px=m.b+m.a*seas+(rnd()-0.5)*4, qty=m.v*(1.1-0.4*seas)*(0.7+rnd()*0.6);
+      if(m.sp.includes(mon)&&rnd()<0.03){px*=1.8+rnd();qty*=0.35;} px=Math.max(6,px);
+      s[iso]={avg:+px.toFixed(1),high:+(px*1.15).toFixed(1),mid:+px.toFixed(1),low:+(px*0.85).toFixed(1),qty:+qty.toFixed(0)};
+    } return s;}
+  const xiluo={}, taipei={};
+  for(const [n,m] of Object.entries(M)) xiluo[n]=series(m);
+  ["青江白菜","小白菜","空心菜","菠菜"].forEach(n=>taipei[n]=series(M[n]));
+  const crop_map={"青江菜":"青江白菜","芥藍菜":"芥藍","菠菜":"菠菜","小白菜":"小白菜",
+    "空心菜":"空心菜","地瓜葉":"甘藷葉","莧菜":"莧菜","茼蒿":"茼蒿","油菜":"油菜","萵苣(A菜)":"萵苣菜","芥菜":"芥菜"};
+  return {updated:new Date().toISOString().slice(0,16).replace("T"," "),markets:["西螺","台北一"],
+    crop_map,data:{"西螺":xiluo,"台北一":taipei}};
 }
 
-function seasonalBaseline(series){
-  const wk = Array.from({length:54},()=>[]);
-  for(const [iso,v] of Object.entries(series)){
-    const w=weekOf(iso);
-    (wk[w]||(wk[w]=[])).push(v.avg);
-  }
-  return wk.map(a=>a.length?median(a):null);
+/* ═══════════ 狀態 ═══════════ */
+let PRICES=null, MARKET="", CUR=null;
+
+function wholesaleOf(disp){return PRICES.crop_map[disp];}
+function seriesFor(disp){const w=wholesaleOf(disp);return (w&&PRICES.data[MARKET]&&PRICES.data[MARKET][w])||{};}
+function sortedEntries(s){return Object.entries(s).sort((a,b)=>a[0]<b[0]?-1:1);}
+/* 這個市場「有行情」的展示品項（依 crop_map 順序） */
+function availableCrops(){
+  const d=PRICES.data[MARKET]||{};
+  return Object.keys(PRICES.crop_map).filter(disp=>{
+    const w=PRICES.crop_map[disp]; return d[w]&&Object.keys(d[w]).length;});
+}
+function watchCrops(){
+  let w=S.watch(MARKET); const avail=availableCrops();
+  if(!Array.isArray(w)) return avail.slice();               // 預設全顯示
+  w=w.filter(c=>avail.includes(c));                          // 濾掉已無資料的
+  return w.length?w:avail.slice();
 }
 
-/* [FIX #3] 量能窗口以「日曆天」計，而非「最近 N 筆」——缺料作物才不會誤判 */
-function windowQty(es, days){
-  if(!es.length) return [];
-  const lastD=new Date(es[es.length-1][0]);
-  const cut=new Date(lastD); cut.setDate(cut.getDate()-days);
-  return es.filter(e=>new Date(e[0])>=cut).map(e=>e[1].qty).filter(v=>v>0);
+/* 貴/便宜判斷：最新均價 vs 近90日中位 */
+function priceView(disp){
+  const es=sortedEntries(seriesFor(disp)); if(!es.length) return null;
+  const last=es[es.length-1]; const lastAvg=last[1].avg;
+  const recent=es.slice(-90).map(e=>e[1].avg);
+  const base=median(recent); const diff=base?((lastAvg-base)/base*100):0;
+  let cls,say;
+  if(diff>10){cls="up";say="偏貴";} else if(diff<-10){cls="dn";say="偏便宜";} else {cls="mid";say="正常";}
+  return {date:last[0],avg:lastAvg,diff,cls,say,es};
 }
 
-let PAYLOAD=null, MARKET="西螺鎮", CUR=null, RANGE=365, chart=null, chartReady=false;
-const CROP_ORDER=["青江菜","芥藍菜","菠菜","蚵白菜","奶油白菜"];
-
-/* [FIX #1] seriesFor 加防呆，任何漏鍵都回空物件而非 throw */
-function seriesFor(myName){
-  const ws = PAYLOAD?.crop_map?.[myName];
-  return (ws && PAYLOAD?.data?.[MARKET]?.[ws]) || {};
-}
-function sortedEntries(series){
-  return Object.entries(series).sort((a,b)=>a[0]<b[0]?-1:1);
-}
-
-function lampFor(series){
-  const es=sortedEntries(series);
-  const recent=windowQty(es,7);
-  const base=windowQty(es,90);
-  const r=(mean(recent)&&mean(base))?mean(recent)/mean(base):1;
-  if(r>1.4) return {c:"r",t:"量能爆增，慎防崩盤"};
-  if(r<0.6) return {c:"g",t:"量縮，價格易撐"};
-  return {c:"a",t:"量能正常"};
-}
+/* ═══════════ 看板 ═══════════ */
 function renderBoard(){
+  document.getElementById("mktName").textContent=MARKET;
   const el=document.getElementById("board"); el.innerHTML="";
-  CROP_ORDER.forEach(nm=>{
-    const s=seriesFor(nm); const es=sortedEntries(s);
-    const last=es.length?es[es.length-1][1].avg:null;
-    const lamp=es.length?lampFor(s):{c:"a",t:""};
-    const div=document.createElement("div");
-    div.className="row"+(nm===CUR?" on":"");
-    div.tabIndex=0; div.setAttribute("role","button");
-    div.innerHTML=`<span class="lamp ${lamp.c}" title="${lamp.t}"></span>
-      <span class="nm">${nm}${nm==="蚵白菜"||nm==="奶油白菜"?"<small>批發歸「小白菜」</small>":""}</span>
-      <span class="px"><span class="v mono">${last!=null?last.toFixed(1):"—"}</span> <span class="u">元</span></span>`;
-    div.onclick=()=>select(nm);
-    div.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(nm);}};
-    el.appendChild(div);
+  const list=watchCrops();
+  if(!list.length){el.innerHTML='<div class="empty">尚未選擇品項。點右上 ⚙️ → 我的品項 → 新增。</div>';return;}
+  list.forEach(disp=>{
+    const pv=priceView(disp);
+    const b=document.createElement("button"); b.className="prow"+(disp===CUR?" on":"");
+    if(pv){
+      b.innerHTML=`<span class="dot ${pv.cls}"></span>
+        <span class="nm">${disp}</span>
+        <span class="px"><span class="v mono">${pv.avg.toFixed(1)}</span> <span class="u">元/公斤</span></span>
+        <span class="tag ${pv.cls}">${pv.say}</span>`;
+    }else{
+      b.innerHTML=`<span class="dot mid"></span><span class="nm">${disp}</span>
+        <span class="px"><span class="v">—</span></span>`;
+    }
+    b.onclick=()=>selectCrop(disp);
+    el.appendChild(b);
   });
 }
+function selectCrop(disp){CUR=disp;renderBoard();renderDetail(disp);}
 
-function renderMetrics(nm){
-  document.getElementById("panelTitle").textContent=`本檔體檢 · ${nm}`;
-  const s=seriesFor(nm); const es=sortedEntries(s);
-  const box=document.getElementById("metrics");
-  const note=document.getElementById("cropNote");
-  note.textContent=(nm==="蚵白菜"||nm==="奶油白菜")
-    ? "此品項批發端併入「小白菜」大類，行情為小白菜整體。"
-    : (nm==="菠菜" ? "涼季作：雲林平地夏季不易種植，夏季資料常缺、價高量縮屬正常。" : "");
-  if(!es.length){box.innerHTML='<p class="metric">目前無資料。</p>';return;}
-
-  const last=es[es.length-1];
-  const base=seasonalBaseline(s);
-  const seasNow=base[weekOf(last[0])];
-  const diff=seasNow?((last[1].avg-seasNow)/seasNow*100):null;
-
-  const recent=windowQty(es,7);
-  const base90=windowQty(es,90);
-  const volR=(mean(recent)&&mean(base90))?mean(recent)/mean(base90):null;
-
-  // [FIX #2] 百分位改用「排名分位」，區間端點用 5%/95% 分位裁離群，颱風噴出價不再壓扁分佈
-  const avgs=es.map(e=>e[1].avg);
-  const sortedAvgs=[...avgs].sort((a,b)=>a-b);
-  const q=p=>sortedAvgs[Math.min(sortedAvgs.length-1,Math.floor(sortedAvgs.length*p))];
-  const lo=q(0.05), hi=q(0.95);
-  const rank=sortedAvgs.filter(v=>v<=last[1].avg).length;
-  const pctile=Math.round(rank/sortedAvgs.length*100);
-
-  let vTxt,vCls;
-  if(volR==null){vTxt="—";vCls="";}
-  else if(volR>1.4){vTxt=`爆量 ×${volR.toFixed(2)}　慎防崩盤`;vCls="up";}
-  else if(volR<0.6){vTxt=`量縮 ×${volR.toFixed(2)}　價格易撐`;vCls="down";}
-  else{vTxt=`正常 ×${volR.toFixed(2)}`;vCls="warn";}
-
-  let dTxt,dCls;
-  if(diff==null){dTxt="—";dCls="";}
-  else if(diff>8){dTxt=`偏貴 ${diff.toFixed(0)}%`;dCls="up";}
-  else if(diff<-8){dTxt=`偏便宜 ${Math.abs(diff).toFixed(0)}%`;dCls="down";}
-  else{dTxt="接近常態";dCls="";}
-
-  box.innerHTML=`
-    <div class="metric"><div class="lbl">最新均價（${last[0]}）</div>
-      <div class="big mono">${last[1].avg.toFixed(1)} <span class="lbl">元/公斤</span></div>
-      <div class="note ${dCls}">對比季節中位：${dTxt}</div></div>
-    <div class="metric"><div class="lbl">量能（近7日 vs 近90日）</div>
-      <div class="big ${vCls}" style="font-size:20px">${vTxt}</div>
-      <div class="note">爆量常伴隨供給過剩、價格下殺。</div></div>
-    <div class="metric"><div class="lbl">兩年價格區間（5–95% 分位）</div>
-      <div class="big mono" style="font-size:18px">${lo.toFixed(0)} – ${hi.toFixed(0)} <span class="lbl">元</span></div>
-      <div class="note">目前價格在序列第 <b>${pctile}%</b>（排名分位）。</div></div>`;
+function renderDetail(disp){
+  const box=document.getElementById("detail"); const pv=priceView(disp);
+  if(!pv){box.innerHTML="";return;}
+  const arrow=pv.diff>10?"▲":pv.diff<-10?"▼":"＝";
+  box.innerHTML=`<div class="detail">
+    <h3>${disp}</h3>
+    <div class="big mono">${pv.avg.toFixed(1)} <span class="u">元/公斤</span></div>
+    <div class="say ${pv.cls}">${arrow} ${pv.say}（比近三個月常態 ${pv.diff>=0?"+":""}${pv.diff.toFixed(0)}%）</div>
+    <div class="note">最新行情日期 ${pv.date}</div>
+    <div class="trend">${trendSVG(pv.es)}<div class="cap">近 60 個交易日 均價走勢</div></div>
+  </div>`;
+}
+/* 自繪 SVG 走勢（不依賴外部 CDN） */
+function trendSVG(es){
+  const pts=es.slice(-60).map(e=>e[1].avg); if(pts.length<2) return "";
+  const W=600,H=110,pad=6; const lo=Math.min(...pts),hi=Math.max(...pts),rng=(hi-lo)||1;
+  const x=i=>pad+i*(W-2*pad)/(pts.length-1);
+  const y=v=>H-pad-(v-lo)/rng*(H-2*pad);
+  const line=pts.map((v,i)=>(i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1)).join(" ");
+  const area=line+` L${x(pts.length-1).toFixed(1)} ${H-pad} L${x(0).toFixed(1)} ${H-pad} Z`;
+  const up=pts[pts.length-1]>=pts[0];
+  const col=up?"#E4572E":"#7CC24A";
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="均價走勢">
+    <path d="${area}" fill="${col}" opacity="0.12"/>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${x(pts.length-1).toFixed(1)}" cy="${y(pts[pts.length-1]).toFixed(1)}" r="4" fill="${col}"/>
+  </svg>`;
 }
 
-function renderChart(nm){
-  if(!chartReady) return;
-  const s=seriesFor(nm); let es=sortedEntries(s);
-  const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-RANGE);
-  es=es.filter(e=>new Date(e[0])>=cutoff);
-  const base=seasonalBaseline(s);
-
-  const dates=es.map(e=>e[0]);
-  const price=es.map(e=>e[1].avg);
-  const qty=es.map(e=>e[1].qty);
-  const seas=es.map(e=>base[weekOf(e[0])]);
-
-  chart.setOption({
-    backgroundColor:"transparent",
-    grid:{left:48,right:52,top:22,bottom:70},
-    tooltip:{trigger:"axis",backgroundColor:"#1B2015",borderColor:"#313A22",
-      textStyle:{color:"#EFEAD8",fontFamily:"JetBrains Mono"},
-      valueFormatter:v=>v==null?"—":(+v).toFixed(1)},
-    legend:{data:["當日均價","季節基準線","交易量"],textStyle:{color:"#8F9670"},top:0,right:0},
-    xAxis:{type:"category",data:dates,boundaryGap:false,
-      axisLine:{lineStyle:{color:"#313A22"}},axisLabel:{color:"#8F9670",fontSize:11},
-      axisTick:{show:false}},
-    yAxis:[
-      {type:"value",name:"元/公斤",nameTextStyle:{color:"#8F9670"},scale:true,
-        axisLabel:{color:"#8F9670"},splitLine:{lineStyle:{color:"rgba(49,58,34,.5)"}}},
-      {type:"value",name:"公斤",nameTextStyle:{color:"#8F9670"},splitLine:{show:false},
-        axisLabel:{color:"#5f6748"}}
-    ],
-    dataZoom:[{type:"inside"},{type:"slider",height:16,bottom:34,
-      borderColor:"#313A22",fillerColor:"rgba(166,201,85,.15)",
-      handleStyle:{color:"#A6C955"},textStyle:{color:"#8F9670"}}],
-    series:[
-      {name:"交易量",type:"bar",yAxisIndex:1,data:qty,
-        itemStyle:{color:"rgba(111,176,166,.28)"},barMaxWidth:6},
-      {name:"當日均價",type:"line",data:price,smooth:true,symbol:"none",
-        lineStyle:{color:"#A6C955",width:2.4},
-        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,
-          [{offset:0,color:"rgba(166,201,85,.22)"},{offset:1,color:"rgba(166,201,85,0)"}])}},
-      // [FIX #4] 季節基準線是「每7天同值」階梯序列 → 關掉 smooth，避免平滑捏造假波動
-      {name:"季節基準線",type:"line",data:seas,smooth:false,step:"middle",symbol:"none",connectNulls:true,
-        lineStyle:{color:"#F2B705",width:1.6,type:"dashed"}}
-    ]
-  },true);
-}
-
-function select(nm){CUR=nm;renderBoard();renderMetrics(nm);renderChart(nm);}
-document.getElementById("ranges").addEventListener("click",e=>{
-  const b=e.target.closest(".rng"); if(!b)return;
-  document.querySelectorAll(".rng").forEach(x=>x.classList.remove("on"));
-  b.classList.add("on"); RANGE=+b.dataset.d; renderChart(CUR);
-});
-
-function ensureChart(){
-  if(chartReady) return;
-  // ECharts 由 CDN 載入；若 CDN 掛掉（未定義或 init 失敗），略過圖表即可，
-  // 看板／體檢／搶收預判都不受影響（不因單一圖表拖垮整頁）。
-  if(typeof echarts==="undefined") return;
-  try{
-    chart=echarts.init(document.getElementById("chart"),null,{renderer:"canvas"});
-    chartReady=true;
-    if(CUR) renderChart(CUR);
-  }catch(e){ chartReady=false; }
-}
-
-/* ══════════════════════════════════════════════════════
-   搶收預判 VIEW
-   ══════════════════════════════════════════════════════ */
-const H=3600e3;
-const DEC={
-  HARVEST_NOW:{c:"r",t:"立即搶收"}, HARVEST_ADVISED:{c:"o",t:"建議搶收"},
-  WATCH:{c:"y",t:"觀望"}, NORMAL:{c:"g",t:"照常"},
-};
-let hTimers=[];
-
+/* ═══════════ 搶收預判 ═══════════ */
+const DEC={HARVEST_NOW:{c:"r",t:"立即搶收"},HARVEST_ADVISED:{c:"o",t:"建議搶收"},WATCH:{c:"y",t:"觀望"},NORMAL:{c:"g",t:"照常"}};
+let ADV=null, hTimers=[];
 async function loadAdvisory(){
   try{
-    const res = await fetch(`${resolveGhBase()}/harvest_advisory.json`, {cache:"no-store"});
-    if(!res.ok) throw new Error(res.status);
-    const j = await res.json();
-    if(!j || !Array.isArray(j.fields)) throw new Error("shape");
-    return {payload:j, live:true};
-  }catch(e){
-    return {payload:makeHarvestDemo(), live:false};
-  }
+    const res=await fetch(`${resolveGhBase()}/harvest_advisory.json`,{cache:"no-store"});
+    if(!res.ok) throw 0; const j=await res.json();
+    if(!j||!Array.isArray(j.fields)) throw 0; return j;
+  }catch(e){ return makeAdvDemo(); }
 }
-
-/* 示範資料：與後端 build_advisory.py 產出的決策物件同 schema */
-function makeHarvestDemo(){
-  const iso = h => new Date(Date.now()+h*H).toISOString();
-  return {
-    updated:new Date().toISOString().slice(0,16).replace("T"," "),
-    typhoon:{ name:"克蘿莎 KROSA", warning:"海上陸上颱風警報中",
-      invade_prob:0.70, eta_text:"約 40 小時後", rain_24h_mm:300, active:true },
+function makeAdvDemo(){
+  const iso=h=>new Date(Date.now()+h*3600e3).toISOString();
+  return {updated:new Date().toISOString().slice(0,16).replace("T"," "),
+    typhoon:{name:"克蘿莎 KROSA",warning:"海上陸上颱風警報中",invade_prob:0.70,eta_text:"約 40 小時後",rain_24h_mm:300,active:true},
+    schedule:{teams:2,summary:"2 隊人力：可救 3 塊；YL-A12 來不及完收，建議部分搶收/保田。",items:[
+      {field_id:"YL-C03",crop:"芥藍菜",risk_score:71,team:1,start:iso(0.2),finish:iso(6),feasible:true},
+      {field_id:"YL-B07",crop:"小白菜",risk_score:55,team:2,start:iso(0.2),finish:iso(5),feasible:true},
+      {field_id:"YL-F14",crop:"奶油白菜",risk_score:52,team:2,start:iso(5),finish:iso(11),feasible:true},
+      {field_id:"YL-A12",crop:"青江菜",risk_score:64,team:null,start:null,finish:null,feasible:false,note:"來不及完收 → 建議部分搶收/保田"}]},
     fields:[
-      { field_id:"YL-A12", crop:"青江菜", decision:"HARVEST_NOW", confidence:0.72, risk_score:64,
-        maturity:0.83, flood_potential_level:4, harvest_deadline:iso(25),
-        dilemma:{days_short:3, chemical:"陶斯松"}, partial_pct:null,
-        ev:{early:82000, gamble:65000, hint:"數字上早收較穩，但 PHI 未到 → 只能走加工通路"},
-        reasons:["暴風圈 48h 到達機率 70%，歷史類比同路徑青江菜損失率 55%",
-          "淹水潛勢等級 4 ＋預估雨量 300mm，低窪田積水風險高",
-          "⚠ 不可上市：距安全採收期還差 3 天（陶斯松）",
-          "搶收窗僅 25 小時，須在 deadline 前開始收"] },
-      { field_id:"YL-C03", crop:"芥藍菜", decision:"HARVEST_NOW", confidence:0.68, risk_score:71,
-        maturity:0.78, flood_potential_level:3, harvest_deadline:iso(11),
-        dilemma:null, partial_pct:60,
-        ev:{early:61000, gamble:40000, hint:"工時不足，先收高風險田"},
-        reasons:["中長期作物（60–80 天）曝險最久，成熟前遇颱機率最高",
-          "暴風圈 11h 後逼近，人手僅能收約 60% 面積",
-          "PHI 已過、成熟度 78%，可合法上市",
-          "建議依風險排序，此田排最前"] },
-      { field_id:"YL-B07", crop:"小白菜", decision:"HARVEST_ADVISED", confidence:0.75, risk_score:55,
-        maturity:0.90, flood_potential_level:3, harvest_deadline:iso(40),
-        dilemma:null, partial_pct:null,
-        ev:{early:74000, gamble:62000, hint:"數字上早收較穩"},
-        reasons:["成熟度 90%、PHI 已過，搶收商品化損失小",
-          "暴風圈到達機率 50%，仍有排工餘裕（slack 充足）","淹水等級 3，一般田"] },
-      { field_id:"YL-F14", crop:"奶油白菜", decision:"HARVEST_ADVISED", confidence:0.70, risk_score:52,
-        maturity:0.86, flood_potential_level:2, harvest_deadline:iso(33),
-        dilemma:null, partial_pct:null,
-        ev:{early:48000, gamble:41000, hint:"早收較穩，排工從容"},
-        reasons:["成熟度 86%、PHI 已過","排水尚可（淹水等級 2），但仍在暴風圈範圍",
-          "建議黃金窗（陸警前 18–48hr）內完收"] },
-      { field_id:"YL-D21", crop:"菠菜", decision:"WATCH", confidence:0.55, risk_score:38,
-        maturity:0.58, flood_potential_level:2, harvest_deadline:null,
-        dilemma:null, partial_pct:null, immature:true, ev:null,
-        reasons:["颱風路徑潛勢未定，雲林侵襲機率僅 40%",
-          "成熟度 58%，搶收殘值過低，收了不值錢",
-          "建議續盯預報、備料勿動；賭一把或改天災救助"] },
-      { field_id:"YL-E09", crop:"青江菜", decision:"NORMAL", confidence:0.80, risk_score:18,
-        maturity:0.70, flood_potential_level:1, harvest_deadline:null,
-        dilemma:null, partial_pct:null, ev:null,
-        reasons:["田區相對高亢、排水良好（淹水等級 1）","無迫近颱風時窗，風險分數低","按原計畫管理即可"] },
-    ],
-    region:{ surge_ratio:1.6, loss_rate:0.5, price_source:"demo" },
-    schedule:{
-      teams:2, saveable_count:3, unsaveable:["YL-A12"],
-      summary:"2 隊人力：可救 <b>3</b> 塊；YL-A12 來不及完收，建議部分搶收/保田。",
-      items:[
-        { field_id:"YL-C03", crop:"芥藍菜", risk_score:71, team:1, start:iso(0.2), finish:iso(6),  dur_h:5.8, feasible:true,  note:"" },
-        { field_id:"YL-B07", crop:"小白菜", risk_score:55, team:2, start:iso(0.2), finish:iso(5),  dur_h:4.8, feasible:true,  note:"" },
-        { field_id:"YL-F14", crop:"奶油白菜", risk_score:52, team:2, start:iso(5),   finish:iso(11), dur_h:6.0, feasible:true,  note:"" },
-        { field_id:"YL-A12", crop:"青江菜", risk_score:64, team:null, start:null, finish:null, dur_h:9.0, feasible:false,
-          note:"人力/時間不足，來不及完收 → 建議部分搶收高價區或加強排水保田" },
-      ]
-    }
-  };
+      {field_id:"YL-A12",crop:"青江菜",decision:"HARVEST_NOW",risk_score:64,harvest_deadline:iso(25),
+        dilemma:{days_short:3,chemical:"陶斯松"},reasons:["低窪田積水風險高，暴風圈 48h 到達機率 70%"]},
+      {field_id:"YL-C03",crop:"芥藍菜",decision:"HARVEST_NOW",risk_score:71,harvest_deadline:iso(11),
+        reasons:["中長期作物曝險最久，人手僅能收約 60% 面積"]},
+      {field_id:"YL-B07",crop:"小白菜",decision:"HARVEST_ADVISED",risk_score:55,harvest_deadline:iso(40),
+        reasons:["成熟度足、可合法上市，仍有排工餘裕"]},
+      {field_id:"YL-D21",crop:"菠菜",decision:"WATCH",risk_score:38,harvest_deadline:null,
+        reasons:["路徑未定、成熟度不足，先盯預報"]},
+      {field_id:"YL-E09",crop:"青江菜",decision:"NORMAL",risk_score:18,harvest_deadline:null,
+        reasons:["地勢高、排水良好，按原計畫管理"]}]};
 }
+function riskWord(r){if(r>=65)return['hi','高'];if(r>=40)return['mid','中'];return['lo','低'];}
 
-function decColor(d){return (DEC[d]||{c:"g"}).c;}
-function decLabel(d){return (DEC[d]||{t:"—"}).t;}
-function fmtMoney(n){return "NT$ "+(n/10000).toFixed(1)+"萬";}
-function pad(n){return String(n).padStart(2,"0");}
-function targetOf(f){
-  if(!f.harvest_deadline) return null;
-  const t=new Date(f.harvest_deadline).getTime();
-  return isNaN(t)?null:t;
-}
-
-function renderHarvest(payload){
-  const fields=[...payload.fields];
-  // 排序：風險 × 急迫度(1/slack) 降序
-  const prio=f=>{const t=targetOf(f);const slackH=t?Math.max((t-Date.now())/H,1):0;
-    return f.risk_score*(t?(1/slackH)*60:0.01);};
-  fields.sort((a,b)=>prio(b)-prio(a));
-
-  // 颱風警報帶
-  const ty=payload.typhoon||{};
-  const alert=document.getElementById("hAlert");
-  if(ty.active){
-    alert.className="alert";
-    alert.innerHTML=`<span class="pulse"></span>
-      <span>颱風 <b>${ty.name||"—"}</b> · ${ty.warning||""}</span>
+function renderHarvest(){
+  const fields=[...ADV.fields].sort((a,b)=>{
+    const ta=a.harvest_deadline?new Date(a.harvest_deadline).getTime():Infinity;
+    const tb=b.harvest_deadline?new Date(b.harvest_deadline).getTime():Infinity;
+    if(b.risk_score!==a.risk_score) return b.risk_score-a.risk_score; return ta-tb;});
+  // 警報帶
+  const ty=ADV.typhoon||{}; const al=document.getElementById("hAlert");
+  if(ty.active){al.className="alert";
+    al.innerHTML=`<span class="pulse"></span>
+      <span class="big">颱風 <b>${ty.name||"—"}</b> · ${ty.warning||""}</span>
       <span class="k">雲林侵襲機率 <b>${ty.invade_prob!=null?Math.round(ty.invade_prob*100)+"%":"—"}</b></span>
-      <span class="k">暴風圈預估到達 <b>${ty.eta_text||"—"}</b></span>
-      ${ty.rain_24h_mm!=null?`<span class="k">24hr 預期雨量 <b>${ty.rain_24h_mm} mm</b></span>`:""}`;
-  }else{
-    alert.className="alert calm";
-    alert.innerHTML=`<span class="pulse"></span><span>目前<b>無颱風警報</b>，各田按原計畫管理。</span>`;
-  }
-
+      <span class="k">暴風圈到達 <b>${ty.eta_text||"—"}</b></span>`;
+  }else{al.className="alert calm";
+    al.innerHTML=`<span class="pulse"></span><span class="big">目前<b>無颱風警報</b></span><span class="k">各田按原計畫管理</span>`;}
   // 總覽
-  const cnt={r:0,o:0,y:0,g:0};
-  fields.forEach(f=>cnt[decColor(f.decision)]++);
-  document.getElementById("hTally").innerHTML=
-    [["r","立即"],["o","建議"],["y","觀望"],["g","照常"]].map(([k,t])=>
-      `<div class="t"><span class="lamp ${k}"></span><span class="n mono">${cnt[k]}</span> ${t}</div>`).join("");
-  const picks=fields.filter(f=>targetOf(f)).slice(0,2).map(f=>f.field_id);
-  document.getElementById("hFirstpick").innerHTML=
-    `共 <b>${fields.length}</b> 塊田 · ${picks.length?`建議先收 <b>${picks.join("、")}</b>`:"目前無迫近搶收田"}`;
-
+  const cnt={r:0,o:0,y:0,g:0}; fields.forEach(f=>cnt[(DEC[f.decision]||{c:"g"}).c]++);
+  const picks=fields.filter(f=>f.harvest_deadline).slice(0,2).map(f=>f.field_id);
+  document.getElementById("hOverview").innerHTML=`
+    <div class="tally">
+      <span class="t"><span class="lamp r"></span><span class="n mono">${cnt.r}</span> 立即</span>
+      <span class="t"><span class="lamp o"></span><span class="n mono">${cnt.o}</span> 建議</span>
+      <span class="t"><span class="lamp y"></span><span class="n mono">${cnt.y}</span> 觀望</span>
+      <span class="t"><span class="lamp g"></span><span class="n mono">${cnt.g}</span> 照常</span>
+    </div>
+    <div class="pick">共 <b>${fields.length}</b> 塊田${picks.length?`　·　建議先收 <b>${picks.join("、")}</b>`:""}</div>`;
+  // 排程
+  renderSchedule(ADV.schedule);
   // 卡片
   const wrap=document.getElementById("hCards"); wrap.innerHTML=""; hTimers=[];
-  fields.forEach((f,idx)=>{
-    const c=decColor(f.decision);
-    const el=document.createElement("div");
-    el.className="fcard dec-"+c;
-    const t=targetOf(f);
-
-    let countHtml;
-    if(t){
-      countHtml=`<div class="count" id="hc${idx}">
-        <div class="cl"><span>⏳ 最晚開始搶收</span><span>slack</span></div>
-        <div class="cd" id="hcd${idx}">--:--:--</div>
-        <div class="cn" id="hcn${idx}"></div></div>`;
-    }else{
-      countHtml=`<div class="count none">
-        <div class="cl"><span>搶收 deadline</span></div>
-        <div class="cd">${f.immature?"殘值過低・暫不排收":"無迫近時窗"}</div></div>`;
-    }
-    const dilemmaHtml=f.dilemma?`<div class="dilemma">
-        <div class="dh">⚠ 兩難：距安全採收期還差 ${f.dilemma.days_short} 天（${f.dilemma.chemical}）</div>
-        <div class="dt">現在收 = <em>不可上市</em>（走加工通路）　·　不收 = 恐泡水滅田。模型不替你賭，只攤開代價。</div></div>`:"";
-    const partialHtml=f.partial_pct?`<div class="partial">⏰ 恐收不完：人手僅能搶收約 <b>${f.partial_pct}%</b> 面積 → 依風險先收此田。</div>`:"";
-    const evHtml=f.ev?`<div class="ev">
-        <div class="e ${f.ev.early>=f.ev.gamble?'win':''}"><div class="el">早收保命</div><div class="en">${fmtMoney(f.ev.early)}</div></div>
-        <div class="e ${f.ev.gamble>f.ev.early?'win':''}"><div class="el">賭一把</div><div class="en">${fmtMoney(f.ev.gamble)}</div></div>
-      </div><div class="ev-hint">▸ ${f.ev.hint||""}</div>`:"";
-    const reasonsHtml=(f.reasons||[]).map(r=>{
-      const warn=/⚠|不可上市|殘留|超標/.test(r);
-      return `<li class="${warn?'warn':''}">${r}</li>`;}).join("");
-
-    el.innerHTML=`
-      <div class="c-top">
-        <div class="c-id">${f.field_id}<small>${f.crop}${f.maturity!=null?` · 成熟度 ${Math.round(f.maturity*100)}%`:""}</small></div>
-        <span class="pill dec-${c}">${decLabel(f.decision)}</span>
-      </div>
-      <div class="risk">
-        <div class="rl"><span>滅田風險</span><span><b>${f.risk_score}</b>/100${f.confidence!=null?`　信心 ${Math.round(f.confidence*100)}%`:""}</span></div>
-        <div class="bar"><i style="width:${f.risk_score}%"></i></div>
-      </div>
-      ${countHtml}${dilemmaHtml}${partialHtml}${evHtml}
-      <button class="toggle" aria-expanded="false">▸ 展開理由（${(f.reasons||[]).length}）</button>
-      <ul class="reasons">${reasonsHtml}</ul>
-      <div class="meta"><span><b>淹水潛勢</b> 等級 ${f.flood_potential_level??"—"}</span><span><b>決策</b> ${decLabel(f.decision)}</span></div>`;
-
-    const btn=el.querySelector(".toggle"), ul=el.querySelector(".reasons");
-    btn.addEventListener("click",()=>{
-      const open=ul.classList.toggle("open");
-      btn.setAttribute("aria-expanded",open);
-      btn.textContent=(open?"▾ 收合理由（":"▸ 展開理由（")+(f.reasons||[]).length+"）";
-    });
-    if(t) hTimers.push({idx,target:t});
+  fields.forEach((f,i)=>{
+    const c=(DEC[f.decision]||{c:"g"}).c, t=(DEC[f.decision]||{}).t||"—";
+    const el=document.createElement("div"); el.className="fcard dec-"+c;
+    const tgt=f.harvest_deadline?new Date(f.harvest_deadline).getTime():null;
+    const [rc,rw]=riskWord(f.risk_score);
+    let count = tgt
+      ? `<div class="count" id="hc${i}"><div class="cl">⏳ 最晚開始搶收</div><div class="cd" id="cd${i}">--:--:--</div><div class="cn" id="cn${i}"></div></div>`
+      : `<div class="count none"><div class="cl">搶收 deadline</div><div class="cd">無迫近時窗</div></div>`;
+    let dil = f.dilemma
+      ? `<div class="dilemma"><div class="dh">⚠ 距安全採收期還差 ${f.dilemma.days_short} 天（${f.dilemma.chemical}）</div>
+         <div class="dt">現在收＝不可上市（走加工）；不收＝恐泡水滅田。</div></div>` : "";
+    const why=(f.reasons&&f.reasons[0])?`<div class="why">${f.reasons[0]}</div>`:"";
+    el.innerHTML=`<div class="ctop"><span class="cid">${f.field_id} <small>${f.crop}</small></span>
+      <span class="pill dec-${c}">${t}</span></div>
+      <div class="riskword">滅田風險：<b class="${rc}">${rw}</b>（${f.risk_score}/100）</div>
+      ${count}${dil}${why}`;
+    if(tgt) hTimers.push({i,target:tgt});
     wrap.appendChild(el);
   });
-
-  renderSchedule(payload.schedule);
+  hTick();
 }
-
-/* 全區搶收排程（v4） */
 function renderSchedule(sch){
-  const sec=document.getElementById("hSchedSec"), box=document.getElementById("hSchedule");
-  if(!sch || !Array.isArray(sch.items) || !sch.items.length){
-    sec.style.display="none"; box.style.display="none"; return;
-  }
-  sec.style.display=""; box.style.display="";
+  const wrap=document.getElementById("hSchedWrap"), box=document.getElementById("hSchedule");
+  if(!sch||!Array.isArray(sch.items)||!sch.items.length){wrap.style.display="none";return;}
+  wrap.style.display="";
   const hm=iso=>{const d=new Date(iso);return pad(d.getHours())+":"+pad(d.getMinutes());};
-  const rows=sch.items.map((it,i)=>{
-    if(it.feasible){
-      return `<div class="sched-row">
-        <span class="rk">${i+1}</span>
-        <span class="snm">${it.field_id} <small>${it.crop} · R${it.risk_score}</small></span>
-        <span class="team">第 ${it.team} 隊</span>
-        <span class="tw">${hm(it.start)} → ${hm(it.finish)}</span>
-        <span class="ok">✓ 可完收</span></div>`;
-    }
-    return `<div class="sched-row bad">
-        <span class="rk">${i+1}</span>
-        <span class="snm">${it.field_id} <small>${it.crop} · R${it.risk_score}</small></span>
-        <span class="no">✗ 來不及完收</span>
-        <div class="note">${it.note||"人力/時間不足"}</div></div>`;
-  }).join("");
-  box.innerHTML=`<p class="sched-sum">🗂 ${sch.summary}</p><div class="sched-list">${rows}</div>`;
+  const rows=sch.items.map((it,i)=> it.feasible
+    ? `<div class="srow"><span class="rk">${i+1}</span>
+        <span class="snm">${it.field_id} <small>${it.crop}</small></span>
+        <span class="team">第 ${it.team} 隊</span><span class="tw">${hm(it.start)}→${hm(it.finish)}</span>
+        <span class="ok">✓ 可完收</span></div>`
+    : `<div class="srow bad"><span class="rk">${i+1}</span>
+        <span class="snm">${it.field_id} <small>${it.crop}</small></span>
+        <span class="no">✗ 來不及</span><div class="snote">${it.note||"人力/時間不足"}</div></div>`).join("");
+  box.innerHTML=`<p class="sum">🗂 ${sch.summary||""}</p>${rows}`;
 }
-
 function hTick(){
   const now=Date.now();
-  hTimers.forEach(tm=>{
-    const cd=document.getElementById("hcd"+tm.idx);
-    const cn=document.getElementById("hcn"+tm.idx);
-    if(!cd) return;
-    const box=cd.closest(".count");
-    let s=Math.max(0,Math.floor((tm.target-now)/1000));
-    const h=Math.floor(s/3600); s%=3600;
+  hTimers.forEach(tm=>{const cd=document.getElementById("cd"+tm.i);if(!cd)return;
+    const cn=document.getElementById("cn"+tm.i), box=cd.closest(".count");
+    let s=Math.max(0,Math.floor((tm.target-now)/1000));const h=Math.floor(s/3600);s%=3600;
     cd.textContent=pad(h)+":"+pad(Math.floor(s/60))+":"+pad(s%60);
-    const hoursLeft=(tm.target-now)/H;
-    box.classList.toggle("soon",hoursLeft<12&&hoursLeft>0);
+    const hl=(tm.target-now)/3600e3; box.classList.toggle("soon",hl<12&&hl>0);
     const d=new Date(tm.target);
-    cn.textContent="最晚 "+(d.getMonth()+1)+"/"+d.getDate()+" "+pad(d.getHours())+":"+pad(d.getMinutes())+" 前開始收"
-      +(hoursLeft<12&&hoursLeft>0?"　·　時間緊迫":"");
-  });
+    cn.textContent="最晚 "+(d.getMonth()+1)+"/"+d.getDate()+" "+pad(d.getHours())+":"+pad(d.getMinutes())+" 前開始收";});
 }
 setInterval(hTick,1000);
 
-/* ══════════════════════════════════════════════════════
-   分頁切換
-   ══════════════════════════════════════════════════════ */
-function switchTab(which){
-  const isMarket=which==="market";
-  document.getElementById("tab-market").classList.toggle("on",isMarket);
-  document.getElementById("tab-harvest").classList.toggle("on",!isMarket);
-  document.getElementById("tab-market").setAttribute("aria-selected",isMarket);
-  document.getElementById("tab-harvest").setAttribute("aria-selected",!isMarket);
-  document.getElementById("view-market").classList.toggle("on",isMarket);
-  document.getElementById("view-harvest").classList.toggle("on",!isMarket);
-  if(isMarket){ ensureChart(); setTimeout(()=>chart&&chart.resize(),0); }
+/* ═══════════ 設定 UI ═══════════ */
+function openSettings(){renderSettings();document.getElementById("modal").classList.add("on");}
+function closeSettings(){document.getElementById("modal").classList.remove("on");}
+function renderSettings(){
+  applyFont();
+  // 市場
+  const ms=document.getElementById("mktSelect"); ms.innerHTML="";
+  PRICES.markets.forEach(m=>{const o=document.createElement("option");o.value=m;o.textContent=m;
+    if(m===MARKET)o.selected=true;ms.appendChild(o);});
+  // 我的品項
+  const wl=document.getElementById("watchList"); wl.innerHTML="";
+  const watch=watchCrops();
+  watch.forEach(disp=>{const row=document.createElement("div");row.className="witem";
+    row.innerHTML=`<span class="wn">${disp}</span><button class="rm" data-c="${disp}">移除</button>`;
+    wl.appendChild(row);});
+  wl.querySelectorAll(".rm").forEach(b=>b.onclick=()=>{
+    let w=watchCrops().filter(c=>c!==b.dataset.c); S.setWatch(MARKET,w);
+    renderSettings(); renderBoard(); if(CUR&&!w.includes(CUR)){CUR=null;document.getElementById("detail").innerHTML="";}});
+  // 新增下拉（可加的品項）
+  const addable=availableCrops().filter(c=>!watch.includes(c));
+  const as=document.getElementById("addSelect"); as.innerHTML="";
+  addable.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;as.appendChild(o);});
+  document.getElementById("addBtn").disabled=!addable.length;
+  if(!addable.length){const o=document.createElement("option");o.textContent="（已全部加入）";as.appendChild(o);}
 }
+document.getElementById("fsRow").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;S.fs=b.dataset.v;applyFont();});
+document.getElementById("mktSelect").addEventListener("change",e=>{
+  MARKET=e.target.value;S.market=MARKET;CUR=null;document.getElementById("detail").innerHTML="";
+  renderBoard();renderSettings();});
+document.getElementById("addBtn").addEventListener("click",()=>{
+  const v=document.getElementById("addSelect").value;if(!v)return;
+  const w=watchCrops();if(!w.includes(v)){w.push(v);S.setWatch(MARKET,w);}renderSettings();renderBoard();});
+document.getElementById("gear").addEventListener("click",openSettings);
+document.getElementById("closeSet").addEventListener("click",closeSettings);
+document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeSettings();});
+
+/* ═══════════ 分頁 ═══════════ */
+function switchTab(m){const isM=m==="market";
+  document.getElementById("tab-market").classList.toggle("on",isM);
+  document.getElementById("tab-harvest").classList.toggle("on",!isM);
+  document.getElementById("view-market").classList.toggle("on",isM);
+  document.getElementById("view-harvest").classList.toggle("on",!isM);}
 document.getElementById("tab-market").addEventListener("click",()=>switchTab("market"));
 document.getElementById("tab-harvest").addEventListener("click",()=>switchTab("harvest"));
-window.addEventListener("resize",()=>chart&&chartReady&&chart.resize());
 
-/* ══════════════════════════════════════════════════════
-   啟動
-   ══════════════════════════════════════════════════════ */
+/* ═══════════ 啟動 ═══════════ */
 (async function(){
-  // 行情看板
-  try{
-    const {payload,live}=await loadPrices();
-    PAYLOAD=payload;
-    MARKET=(payload.markets&&payload.markets[0])||"西螺鎮";  // [FIX #1] 動態綁市場，不寫死
-    document.getElementById("updated").textContent="更新："+(payload.updated||"—");
-    const mode=document.getElementById("mode");
-    mode.className="badge "+(live?"live":"demo");
-    mode.textContent=live?"實際資料":"示範資料";
-    ensureChart();
-    select("青江菜");
-  }catch(e){
-    // [FIX #1] 最後保險：任何 render 例外都退回 demo，不留白畫面
-    PAYLOAD=makeDemo(); MARKET=PAYLOAD.markets[0];
-    const mode=document.getElementById("mode");
-    mode.className="badge demo"; mode.textContent="示範資料";
-    ensureChart(); select("青江菜");
-  }
-
-  // 搶收預判
-  try{
-    const {payload}=await loadAdvisory();
-    renderHarvest(payload); hTick();
-  }catch(e){
-    renderHarvest(makeHarvestDemo()); hTick();
-  }
+  applyFont();
+  const {payload,live}=await loadPrices(); PRICES=payload;
+  document.getElementById("updated").textContent="更新："+(payload.updated||"—");
+  const mode=document.getElementById("mode");
+  mode.className="badge "+(live?"live":"demo"); mode.textContent=live?"實際資料":"示範資料";
+  MARKET=(S.market&&payload.markets.includes(S.market))?S.market:payload.markets[0];
+  renderBoard();
+  const list=watchCrops(); if(list.length) selectCrop(list[0]);
+  try{ ADV=await loadAdvisory(); renderHarvest(); }catch(e){ ADV=makeAdvDemo(); renderHarvest(); }
 })();
 </script>
 </body>

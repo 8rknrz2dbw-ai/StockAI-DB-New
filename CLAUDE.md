@@ -26,6 +26,7 @@
 index.html                    行情看板 + 搶收預判（雙分頁單頁），讀 veg_prices.json /
                               harvest_advisory.json / typhoon_status.json，皆可退回 demo
 scripts/
+  fetch_prices.py             抓農業部「農產品交易行情」公開資料（免金鑰）→ veg_prices.json
   fetch_cwa.py                抓 CWA 颱風/路徑潛勢/侵襲機率/雨量 → typhoon_status.json
   build_advisory.py           田區登記表 + 天氣 → 決策模型 → harvest_advisory.json（含 EV、schedule）
   notify.py                   挑急迫田 → LINE Messaging API / webhook 推播（去重；未設則 dry-run）
