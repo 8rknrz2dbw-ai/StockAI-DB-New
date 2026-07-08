@@ -1,0 +1,37 @@
+name: 部署 GitHub Pages
+
+# 合併/推送到 main 就自動把站台發佈上線（含前端與排程產出的 JSON）。
+# configure-pages 的 enablement:true 會在權限允許時自動啟用 Pages，免手動設定。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 設定 Pages（必要時自動啟用）
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: 打包站台
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - name: 部署
+        id: deployment
+        uses: actions/deploy-pages@v4

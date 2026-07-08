@@ -37,6 +37,9 @@ jobs:
           print(f"advisory OK：{len(d['fields'])} 田、排程 {len(d['schedule']['items'])} 項")
           PY
 
+      - name: 通知模組 dry-run（未設管道應只印訊息、exit 0）
+        run: python3 scripts/notify.py --advisory /tmp/adv.json --state /tmp/nstate.json
+
       - name: fetch_cwa 無金鑰安全狀態
         run: |
           python3 scripts/fetch_cwa.py

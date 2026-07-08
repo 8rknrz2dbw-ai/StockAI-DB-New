@@ -55,11 +55,13 @@ index.html（前端）──讀──▶ veg_prices.json / harvest_advisory.json
 
 ## 部署（GitHub Pages）
 
-1. 於 repo Settings → Secrets 新增 `CWA_API_KEY`。
-2. `.github/workflows/update-data.yml` 每 30 分鐘排程：`fetch_cwa.py → build_advisory.py`，
-   把 `typhoon_status.json`、`harvest_advisory.json` 提交到 Pages 服務的分支根。
-3. GitHub Pages 設為服務該分支（root）。前端 `resolveGhBase()` 會自動由 repo 根讀 JSON。
+1. 於 repo Settings → Secrets 新增 `CWA_API_KEY`（颱風/雨量資料）。選配：`LINE_CHANNEL_ACCESS_TOKEN`、`LINE_TO`、`NOTIFY_WEBHOOK_URL`（急迫搶收推播）。
+2. 合併到 `main` → `.github/workflows/pages.yml` 自動部署 GitHub Pages（`configure-pages` 會在權限允許時自動啟用，免手動設定），拿到 `https://<owner>.github.io/StockAI-DB-New/`。
+3. `.github/workflows/update-data.yml` 每 30 分排程：`fetch_cwa → build_advisory → notify`，把 `typhoon_status.json`、`harvest_advisory.json` 提交到站台根；前端 `resolveGhBase()` 自動讀取。
 4. 颱風期間可到 Actions 手動 `workflow_dispatch`，或另建每 10 分的密集排程。
+
+### 急迫搶收通知（讓農民不必盯網頁）
+`notify.py` 會挑出「立即搶收 / deadline 逼近 / PHI 兩難」的田，推播到 **LINE 官方帳號（Messaging API push）** 或**通用 webhook**（Slack/Discord/Telegram）。以 state 檔去重、只在急迫集合變化時再送；未設任何管道則 dry-run 只印訊息。
 
 > 真實田區登記表 `data/fields.json` 含農民個資，已 gitignore；workflow 若找不到會退用 `fields.example.json`。
 
