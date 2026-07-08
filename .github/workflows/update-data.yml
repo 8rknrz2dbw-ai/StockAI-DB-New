@@ -18,7 +18,10 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
+      # 明確操作 main（GitHub Pages 服務的分支），不受預設分支設定影響
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
@@ -65,5 +68,5 @@ jobs:
             echo "資料無變更，略過提交。"
           else
             git commit -m "chore(data): 更新天氣與搶收預判 [skip ci]"
-            git push
+            git push origin HEAD:main
           fi
