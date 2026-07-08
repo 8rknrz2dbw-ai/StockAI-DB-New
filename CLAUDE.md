@@ -48,7 +48,12 @@ data/
 - **C 風險 R**：`100 × P到達機率 × I風雨強度 × W淹水權重 × V作物脆弱`。已實作；
   **歷史類比校準（analog）留 v2 TODO**。
 - **D 時間軸**：`deadline = 暴風到達 − 安全緩衝 − 淹水提前量 − 搶收工時`；工時裝不下 → `partial_pct`。已實作。
-- **E 市場 EV**：早收 vs 賭一把期望值，需接行情 `base_price` 與 lampFor 爆量壓價模型 → **v3 TODO**（目前輸出 `ev:null`）。
+- **E 市場 EV（v3）**：早收落袋 vs 賭災後噴價期望值。接 `veg_prices.json` 取 `base_price`、
+  以全區搶收比例套 lampFor 爆量壓價（`price_early_factor`）、以全區損失率套災後噴價（`spike_factor`）。已實作。
+  （全區日成交量的精確 surge 校準留 TODO，目前用搶收田比例代理。）
+- **F 全區搶收排程（v4）**：人力有限（`--teams` N 隊）下，跨多田以 EDF 貪婪排出搶收順序/時程，
+  標出「來不及完收」的田並建議部分搶收/保田。輸出於 `harvest_advisory.json` 的 `schedule`。已實作。
+  （嚴格最佳化排程／部分搶收價值最大化留 TODO。）
 
 可調參數集中在 `build_advisory.py` 頂部（`GROWTH_DAYS` / `MATURITY_MIN` / `V_CROP` / `FLOOD_ADVANCE_H` 等）。
 

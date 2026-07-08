@@ -170,6 +170,22 @@
     border-top:1px dashed var(--line);padding-top:9px;}
   .meta b{color:var(--muted);font-weight:600;}
 
+  /* 全區搶收排程 (v4) */
+  .sched-sum{font-size:13px;color:var(--paper);margin:0 0 12px;font-weight:600;line-height:1.5;}
+  .sched-sum b{color:var(--leaf);}
+  .sched-list{display:flex;flex-direction:column;gap:8px;}
+  .sched-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--panel2);}
+  .sched-row.bad{border-color:#5a2c1f;background:rgba(228,87,46,.08);}
+  .sched-row .rk{font-family:"JetBrains Mono",monospace;color:var(--muted);width:18px;text-align:center;flex:0 0 auto;}
+  .sched-row .snm{font-weight:700;font-size:14px;}
+  .sched-row .snm small{color:var(--muted);font-weight:400;}
+  .sched-row .team{font-size:11px;font-weight:700;color:var(--bg);background:var(--cool);padding:2px 9px;border-radius:999px;}
+  .sched-row .tw{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--paper);}
+  .sched-row .ok{margin-left:auto;font-size:12px;font-weight:700;color:var(--g);}
+  .sched-row .no{margin-left:auto;font-size:12px;font-weight:700;color:var(--r);}
+  .sched-row .note{flex-basis:100%;font-size:11px;color:#F6C6B4;}
+
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;}
   .flow{display:flex;gap:10px;align-items:stretch;overflow-x:auto;padding-bottom:6px;}
   .flow .stage{flex:0 0 auto;min-width:150px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);padding:11px 12px;}
@@ -257,6 +273,9 @@
         <div class="firstpick" id="hFirstpick"></div>
       </div>
     </section>
+
+    <div class="sec" id="hSchedSec" style="display:none"><span class="ey">PLAN</span><h2>全區搶收排程（人力調度）</h2><span class="ln"></span></div>
+    <div class="panel" id="hSchedule" style="display:none"></div>
 
     <div class="sec"><span class="ey">FIELDS</span><h2>各田搶收預判</h2><span class="ln"></span></div>
     <div class="cards" id="hCards"></div>
@@ -652,7 +671,19 @@ function makeHarvestDemo(){
         maturity:0.70, flood_potential_level:1, harvest_deadline:null,
         dilemma:null, partial_pct:null, ev:null,
         reasons:["田區相對高亢、排水良好（淹水等級 1）","無迫近颱風時窗，風險分數低","按原計畫管理即可"] },
-    ]
+    ],
+    region:{ surge_ratio:1.6, loss_rate:0.5, price_source:"demo" },
+    schedule:{
+      teams:2, saveable_count:3, unsaveable:["YL-A12"],
+      summary:"2 隊人力：可救 <b>3</b> 塊；YL-A12 來不及完收，建議部分搶收/保田。",
+      items:[
+        { field_id:"YL-C03", crop:"芥藍菜", risk_score:71, team:1, start:iso(0.2), finish:iso(6),  dur_h:5.8, feasible:true,  note:"" },
+        { field_id:"YL-B07", crop:"小白菜", risk_score:55, team:2, start:iso(0.2), finish:iso(5),  dur_h:4.8, feasible:true,  note:"" },
+        { field_id:"YL-F14", crop:"奶油白菜", risk_score:52, team:2, start:iso(5),   finish:iso(11), dur_h:6.0, feasible:true,  note:"" },
+        { field_id:"YL-A12", crop:"青江菜", risk_score:64, team:null, start:null, finish:null, dur_h:9.0, feasible:false,
+          note:"人力/時間不足，來不及完收 → 建議部分搶收高價區或加強排水保田" },
+      ]
+    }
   };
 }
 
@@ -752,6 +783,34 @@ function renderHarvest(payload){
     if(t) hTimers.push({idx,target:t});
     wrap.appendChild(el);
   });
+
+  renderSchedule(payload.schedule);
+}
+
+/* 全區搶收排程（v4） */
+function renderSchedule(sch){
+  const sec=document.getElementById("hSchedSec"), box=document.getElementById("hSchedule");
+  if(!sch || !Array.isArray(sch.items) || !sch.items.length){
+    sec.style.display="none"; box.style.display="none"; return;
+  }
+  sec.style.display=""; box.style.display="";
+  const hm=iso=>{const d=new Date(iso);return pad(d.getHours())+":"+pad(d.getMinutes());};
+  const rows=sch.items.map((it,i)=>{
+    if(it.feasible){
+      return `<div class="sched-row">
+        <span class="rk">${i+1}</span>
+        <span class="snm">${it.field_id} <small>${it.crop} · R${it.risk_score}</small></span>
+        <span class="team">第 ${it.team} 隊</span>
+        <span class="tw">${hm(it.start)} → ${hm(it.finish)}</span>
+        <span class="ok">✓ 可完收</span></div>`;
+    }
+    return `<div class="sched-row bad">
+        <span class="rk">${i+1}</span>
+        <span class="snm">${it.field_id} <small>${it.crop} · R${it.risk_score}</small></span>
+        <span class="no">✗ 來不及完收</span>
+        <div class="note">${it.note||"人力/時間不足"}</div></div>`;
+  }).join("");
+  box.innerHTML=`<p class="sched-sum">🗂 ${sch.summary}</p><div class="sched-list">${rows}</div>`;
 }
 
 function hTick(){
