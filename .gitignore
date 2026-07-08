@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+venv/
+
+# 真實田區登記表可能含農民個資 → 不入庫（保留 data/fields.example.json 作範例）
+data/fields.json
+
+# 本機測試輸出
+/adv_test.json

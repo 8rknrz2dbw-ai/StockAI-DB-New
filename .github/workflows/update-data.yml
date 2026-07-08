@@ -1,0 +1,51 @@
+name: 更新天氣與搶收預判資料
+
+# 平時每 30 分鐘跑一次；颱風期間可用 workflow_dispatch 手動加密集觸發，
+# 或另建一支較密集（如每 10 分）的排程（見 README 部署說明）。
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安裝相依
+        run: pip install -r scripts/requirements.txt
+
+      - name: 抓取 CWA 天氣 / 颱風（無金鑰則寫出 active=false 安全狀態）
+        env:
+          CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
+        run: python3 scripts/fetch_cwa.py
+
+      - name: 計算搶收決策
+        run: |
+          FIELDS=data/fields.json
+          [ -f "$FIELDS" ] || FIELDS=data/fields.example.json
+          python3 scripts/build_advisory.py --fields "$FIELDS" --typhoon typhoon_status.json
+
+      - name: 提交更新的 JSON（供前端 index.html 讀取）
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add typhoon_status.json harvest_advisory.json
+          if git diff --staged --quiet; then
+            echo "資料無變更，略過提交。"
+          else
+            git commit -m "chore(data): 更新天氣與搶收預判 [skip ci]"
+            git push
+          fi
