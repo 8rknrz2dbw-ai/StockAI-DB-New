@@ -155,8 +155,13 @@ def eval_typhoon(path_records, now, ref_lat=REF_LAT, ref_lng=REF_LNG):
         # 暴風圈未覆蓋雲林時，僅以距離給極小「接近度」（不足以觸發搶收，僅供顯示）
         if prob == 0.0 and min_dist < 400:
             prob = round(0.12 * (1 - min_dist / 400), 2)
+        # 精簡逐時軌跡（供前端以「田區座標」自算各地侵襲機率）：時間 ISO + 位置 + 暴風圈半徑
+        track_out = [{"t": p["t"].isoformat() if p["t"] else None,
+                      "lat": round(p["lat"], 3), "lng": round(p["lng"], 3),
+                      "r15": round(p["r15"] or 0), "r25": round(p["r25"] or 0),
+                      "gust": p["gust"]} for p in track]
         cand = {"name": name, "min_dist": round(min_dist), "invade_prob": round(prob, 2),
-                "eta_iso": eta_iso, "eta_text": eta_text, "gust": gust}
+                "eta_iso": eta_iso, "eta_text": eta_text, "gust": gust, "track": track_out}
         if best is None or cand["invade_prob"] > best["invade_prob"] or \
                 (cand["invade_prob"] == best["invade_prob"] and cand["min_dist"] < best["min_dist"]):
             best = cand
@@ -371,8 +376,15 @@ def main():
         print(f"[fetch_cwa] debug dump 失敗：{e}", file=sys.stderr)
 
     rain_recs = cwa_get(DATASETS["rainfall"], CountyName=COUNTY)
+
+    def _rp(key):
+        return parse_rain_hours(rain_recs, ["RainfallElement", key, "Precipitation"])
+    rain1 = _rp("Past1hr")
     rain24 = parse_rain_24h(rain_recs)
-    rain1 = parse_rain_hours(rain_recs, ["RainfallElement", "Past1hr", "Precipitation"])   # 瞬間(1hr)雨量
+    # 多時段累積雨量（1/3/6/12/24hr、2/3 日）——比只看 24hr 更準；欄位名以真實 API 校準
+    rain_multi = {"h1": rain1, "h3": _rp("Past3hr"), "h6": _rp("Past6hr"),
+                  "h12": _rp("Past12hr"), "h24": rain24,
+                  "d2": _rp("Past2days"), "d3": _rp("Past3days")}
 
     typ = eval_typhoon(path, now)
     warn_info = parse_warning(warn, now)
@@ -395,14 +407,17 @@ def main():
             "min_dist_km": typ["min_dist"],
             "rain_24h_mm": rain24,
             "rain_1h_mm": rain1,
+            "rain": rain_multi,
             "forecast_gust_ms": typ["gust"],
+            "track": typ["track"],
         }
     else:
         status = {
             "updated": now.strftime("%Y-%m-%d %H:%M"), "source": "CWA opendata",
             "active": False, "tracking": False, "name": None, "warning": None,
             "land_warning": False, "invade_prob": None, "eta_iso": None, "eta_text": None,
-            "min_dist_km": None, "rain_24h_mm": rain24, "rain_1h_mm": rain1, "forecast_gust_ms": None,
+            "min_dist_km": None, "rain_24h_mm": rain24, "rain_1h_mm": rain1, "rain": rain_multi,
+            "forecast_gust_ms": None, "track": None,
         }
 
     with open("typhoon_status.json", "w", encoding="utf-8") as f:
