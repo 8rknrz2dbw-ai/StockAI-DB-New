@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-09 12:09",
+  "updated": "2026-07-09 12:22",
   "typhoon": {
     "name": "巴威",
     "warning": "颱風接近中",
@@ -62,7 +62,7 @@
       "flood_potential_level": 3,
       "harvest_deadline": "2026-07-09T11:00:00+08:00",
       "dilemma": null,
-      "partial_pct": 94,
+      "partial_pct": 93,
       "immature": false,
       "ev": {
         "early": 356789,
@@ -84,7 +84,7 @@
         "雲林暴風圈侵襲機率 65%，預估 24hr 雨量 Nonemm，滅田風險 31/100",
         "淹水潛勢等級 3（偏低），泡水 48hr 起爛根，需提前搶收",
         "中長期作物（60–80 天），颱風曝險期最長",
-        "暴風前可作業時間不足，人手僅能收約 94% 面積 → 依風險先收",
+        "暴風前可作業時間不足，人手僅能收約 93% 面積 → 依風險先收",
         "PHI 已過，可合法上市"
       ]
     },
@@ -94,7 +94,7 @@
       "decision": "WATCH",
       "confidence": 0.9,
       "risk_score": 37,
-      "maturity": 1.1,
+      "maturity": 1.101,
       "flood_potential_level": 3,
       "harvest_deadline": "2026-07-10T00:40:00+08:00",
       "dilemma": null,
@@ -164,14 +164,14 @@
       "decision": "WATCH",
       "confidence": 0.9,
       "risk_score": 29,
-      "maturity": 0.513,
+      "maturity": 0.514,
       "flood_potential_level": 1,
       "harvest_deadline": "2026-07-10T11:36:00+08:00",
       "dilemma": null,
       "partial_pct": null,
       "immature": true,
       "ev": {
-        "early": 62452,
+        "early": 62598,
         "gamble": 293552,
         "p_survive": 0.71,
         "price_early_factor": 0.95,
