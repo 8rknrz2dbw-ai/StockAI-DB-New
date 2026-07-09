@@ -415,8 +415,9 @@ def main():
         return parse_rain_hours(rain_recs, ["RainfallElement", key, "Precipitation"])
     rain1 = _rp("Past1hr")
     rain24 = parse_rain_24h(rain_recs)
-    # 多時段累積雨量（1/3/6/12/24hr、2/3 日）——比只看 24hr 更準；欄位名以真實 API 校準
-    rain_multi = {"h1": rain1, "h3": _rp("Past3hr"), "h6": _rp("Past6hr"),
+    # 多時段累積雨量（1/3/6/12/24hr、2/3 日）——比只看 24hr 更準。
+    # 欄位名已用真實 O-A0002-001 校準：注意 6hr 是 Past6Hr（大寫 H），其餘為小寫 hr。
+    rain_multi = {"h1": rain1, "h3": _rp("Past3hr"), "h6": _rp("Past6Hr"),
                   "h12": _rp("Past12hr"), "h24": rain24,
                   "d2": _rp("Past2days"), "d3": _rp("Past3days")}
 
