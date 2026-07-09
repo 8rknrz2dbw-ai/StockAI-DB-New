@@ -129,11 +129,17 @@ def probe(market):
     j = r.json()
     recs = j if isinstance(j, list) else (j.get("data") or j.get("RS") or j.get("Data") or [])
     crops = sorted({str(g(x, "作物名稱", "CropName") or "") for x in recs})
+    by_code = {}
+    for x in recs:
+        c = str(g(x, "種類代碼", "TcType") or "?")
+        nm = str(g(x, "作物名稱", "CropName") or "")
+        by_code.setdefault(c, [])
+        if nm not in by_code[c] and len(by_code[c]) < 12:
+            by_code[c].append(nm)
     out = {
         "market": market, "count": len(recs),
-        "sample_keys": sorted(recs[0].keys()) if recs else [],   # ← 看有沒有『種類代碼』之類欄位
-        "sample_records": recs[:5],
-        "distinct_crops": crops[:80],
+        "sample_keys": sorted(recs[0].keys()) if recs else [],
+        "by_category_code": by_code,     # ← 種類代碼 → 例作物名，用來解碼分類
         "distinct_crop_count": len(crops),
     }
     with open("prices_probe.json", "w", encoding="utf-8") as f:
