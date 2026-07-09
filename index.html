@@ -161,6 +161,8 @@
   .fieldform input,.fieldform select{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--paper);padding:0.5rem 0.6rem;border-radius:10px;font-size:0.95rem;}
   .fieldform .frow{display:flex;gap:0.5rem;} .fieldform .frow>div{flex:1;}
   .fieldform .save{background:var(--leaf);color:var(--bg);border:0;border-radius:10px;padding:0.6rem;font-weight:800;}
+  .gpsbtn{width:100%;background:var(--panel);border:1px solid var(--leaf-dim);color:var(--leaf);border-radius:10px;padding:0.5rem;font-weight:700;margin-top:0.35rem;}
+  .fieldform a{color:var(--leaf);}
   .hintline{font-size:0.74rem;color:var(--muted);margin-top:0.5rem;line-height:1.6;}
   .ver{color:#5a6146;font-size:0.7rem;text-align:center;margin-top:1.5rem;letter-spacing:.5px;}
   .addbtn{width:100%;background:transparent;border:1px dashed var(--leaf-dim);color:var(--leaf);border-radius:12px;padding:0.6rem;font-weight:800;margin-top:0.3rem;}
@@ -258,6 +260,10 @@
           <div><label>最後施藥日（可空）</label><input type="date" id="ffSpray"></div>
           <div><label>農藥安全期天數(PHI)</label><input type="number" id="ffPhi" min="0" placeholder="例：7"></div>
         </div>
+        <div><label>田區座標（GPS，供淹水潛勢查詢；可空）</label>
+          <div class="frow"><input id="ffLat" placeholder="緯度 lat" inputmode="decimal"><input id="ffLng" placeholder="經度 lng" inputmode="decimal"></div>
+          <button type="button" class="gpsbtn" id="ffGeo">📍 用目前位置（站在田裡按）</button>
+          <p class="hintline">填了座標可到 <a href="https://dmap.ncdr.nat.gov.tw/" target="_blank" rel="noopener">NCDR 災害潛勢地圖</a> 查你這點的淹水潛勢，回來設對應等級。</p></div>
         <button class="save" id="ffSave">儲存這塊田</button>
       </div>
       <p class="hintline">田區存在你手機，隨時增刪、改地勢立即生效。⚠ PHI 請查農藥登記值，勿臆填。</p>
@@ -269,7 +275,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="V0016p00709";
+const VERSION="V0017p00709";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -547,7 +553,7 @@ function renderSettings(){
   const fl=document.getElementById("fieldList");fl.innerHTML="";const fields=getFields();
   fields.forEach(f=>{const row=document.createElement("div");row.className="listrow";
     row.innerHTML=`<span class="wn">${f.name}</span><span class="sp"><button class="ed" data-id="${f.id}">編輯</button><button class="rm" data-id="${f.id}">刪除</button></span>
-      <span class="ws">${f.crop}·播種 ${f.plant}·淹水等級 ${f.flood}${f.spray?"·施藥 "+f.spray+"(PHI"+f.phi+")":""}</span>`;fl.appendChild(row);});
+      <span class="ws">${f.crop}·播種 ${f.plant}·淹水等級 ${f.flood}${f.spray?"·施藥 "+f.spray+"(PHI"+f.phi+")":""}${f.geo?"·📍"+f.geo.lat+","+f.geo.lng:""}</span>`;fl.appendChild(row);});
   fl.querySelectorAll(".rm").forEach(b=>b.onclick=()=>{S.setFields(getFields().filter(x=>x.id!==b.dataset.id));renderSettings();renderHarvest();});
   fl.querySelectorAll(".ed").forEach(b=>b.onclick=()=>openFieldForm(getFields().find(x=>x.id===b.dataset.id)));
   // 作物下拉（田區表單 + 採收預判）
@@ -558,13 +564,22 @@ function openFieldForm(f){editingId=f?f.id:null;const ff=document.getElementById
   document.getElementById("ffName").value=f?f.name:"";document.getElementById("ffCrop").value=f?f.crop:cropList()[0];
   document.getElementById("ffPlant").value=f?f.plant:todayISO();document.getElementById("ffFlood").value=f?f.flood:4;
   document.getElementById("ffSpray").value=f?(f.spray||""):"";document.getElementById("ffPhi").value=f?(f.phi||""):"";
+  document.getElementById("ffLat").value=(f&&f.geo)?f.geo.lat:"";document.getElementById("ffLng").value=(f&&f.geo)?f.geo.lng:"";
   ff.scrollIntoView({behavior:"smooth",block:"nearest"});}
 function saveField(){const name=document.getElementById("ffName").value.trim()||"未命名田";
+  const lat=parseFloat(document.getElementById("ffLat").value),lng=parseFloat(document.getElementById("ffLng").value);
   const rec={id:editingId||("F"+Date.now().toString(36)),name,crop:document.getElementById("ffCrop").value,
     plant:document.getElementById("ffPlant").value||todayISO(),flood:+document.getElementById("ffFlood").value,
-    spray:document.getElementById("ffSpray").value||"",phi:+document.getElementById("ffPhi").value||0};
+    spray:document.getElementById("ffSpray").value||"",phi:+document.getElementById("ffPhi").value||0,
+    geo:(isFinite(lat)&&isFinite(lng))?{lat:+lat.toFixed(5),lng:+lng.toFixed(5)}:null};
   let fields=getFields();const idx=fields.findIndex(x=>x.id===rec.id);if(idx>=0)fields[idx]=rec;else fields.push(rec);
   S.setFields(fields);editingId=null;document.getElementById("fieldForm").classList.remove("on");renderSettings();renderHarvest();}
+document.getElementById("ffGeo").addEventListener("click",()=>{
+  const btn=document.getElementById("ffGeo");if(!navigator.geolocation){btn.textContent="此裝置不支援定位";return;}
+  btn.textContent="定位中…";
+  navigator.geolocation.getCurrentPosition(p=>{document.getElementById("ffLat").value=p.coords.latitude.toFixed(5);
+    document.getElementById("ffLng").value=p.coords.longitude.toFixed(5);btn.textContent="📍 已擷取目前位置";},
+    e=>{btn.textContent="定位失敗（請允許定位權限）";},{enableHighAccuracy:true,timeout:10000});});
 
 document.getElementById("fsRow").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.fs=b.dataset.v;applyFont();});
 document.getElementById("mktSelect").addEventListener("change",async e=>{MARKET=e.target.value;S.market=MARKET;CUR=null;

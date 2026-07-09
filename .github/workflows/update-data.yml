@@ -68,5 +68,14 @@ jobs:
             echo "資料無變更，略過提交。"
           else
             git commit -m "chore(data): 更新天氣與搶收預判 [skip ci]"
-            git push origin HEAD:main
+            # push 前 rebase 重試，避免與其他部署/排程競爭 main 造成非快進被拒
+            ok=0
+            for i in 1 2 3 4 5; do
+              if git push origin HEAD:main; then ok=1; break; fi
+              echo "push 被拒，rebase 後重試（第 $i 次）"
+              git fetch origin main
+              git rebase origin/main || git rebase --abort
+              sleep $((i * 3))
+            done
+            [ "$ok" = 1 ] || { echo "::error::push 連續失敗"; exit 1; }
           fi
