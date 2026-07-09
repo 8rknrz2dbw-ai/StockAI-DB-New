@@ -1,6 +1,6 @@
 {
   "key_set": true,
-  "generated": "2026-07-09T19:45:42.352459+08:00",
+  "generated": "2026-07-09T19:54:35.390781+08:00",
   "W-C0034-001_warning": {
     "info": {
       "__list_len__": 1,
@@ -109,6 +109,186 @@
                 },
                 "Radius70PercentProbability": "str=30"
               }
+            }
+          }
+        }
+      }
+    }
+  },
+  "O-A0002-001_rain": {
+    "Station": {
+      "__list_len__": 1330,
+      "__item__": {
+        "StationName": "str=九份二山",
+        "StationId": "str=C1I230",
+        "Maintainer": "str=中央氣象署",
+        "ObsTime": {
+          "DateTime": "str=2026-07-09T19:40:00+08:00"
+        },
+        "GeoInfo": {
+          "Coordinates": {
+            "__list_len__": 2,
+            "__item__": {
+              "CoordinateName": "str=TWD67",
+              "CoordinateFormat": "str=decimal degrees",
+              "StationLatitude": "str=23.963714",
+              "StationLongitude": "str=120.836856"
+            }
+          },
+          "StationAltitude": "str=837.0",
+          "CountyName": "str=南投縣",
+          "TownName": "str=國姓鄉",
+          "CountyCode": "str=10008",
+          "TownCode": "str=10008100"
+        },
+        "RainfallElement": {
+          "Now": {
+            "Precipitation": "str=0.0"
+          },
+          "Past10Min": {
+            "Precipitation": "str=0.0"
+          },
+          "Past1hr": {
+            "Precipitation": "str=0.0"
+          },
+          "Past3hr": {
+            "Precipitation": "str=0.0"
+          },
+          "Past6Hr": {
+            "Precipitation": "str=0.0"
+          },
+          "Past12hr": {
+            "Precipitation": "str=0.0"
+          },
+          "Past24hr": {
+            "Precipitation": "str=0.0"
+          },
+          "Past2days": {
+            "Precipitation": "str=0.0"
+          },
+          "Past3days": {
+            "Precipitation": "str=6.5"
+          }
+        }
+      }
+    }
+  },
+  "O-A0002-001_rain_yunlin_sample": {
+    "StationName": "麥寮",
+    "StationId": "A0K420",
+    "Maintainer": "中央氣象署",
+    "ObsTime": {
+      "DateTime": "2026-07-09T19:40:00+08:00"
+    },
+    "GeoInfo": {
+      "Coordinates": [
+        {
+          "CoordinateName": "TWD67",
+          "CoordinateFormat": "decimal degrees",
+          "StationLatitude": "23.800517",
+          "StationLongitude": "120.209570"
+        },
+        {
+          "CoordinateName": "WGS84",
+          "CoordinateFormat": "decimal degrees",
+          "StationLatitude": "23.798783",
+          "StationLongitude": "120.217717"
+        }
+      ],
+      "StationAltitude": "22.0",
+      "CountyName": "雲林縣",
+      "TownName": "麥寮鄉",
+      "CountyCode": "10009",
+      "TownCode": "10009130"
+    },
+    "RainfallElement": {
+      "Now": {
+        "Precipitation": "0.0"
+      },
+      "Past10Min": {
+        "Precipitation": "0.0"
+      },
+      "Past1hr": {
+        "Precipitation": "0.0"
+      },
+      "Past3hr": {
+        "Precipitation": "0.0"
+      },
+      "Past6Hr": {
+        "Precipitation": "0.0"
+      },
+      "Past12hr": {
+        "Precipitation": "0.0"
+      },
+      "Past24hr": {
+        "Precipitation": "0.0"
+      },
+      "Past2days": {
+        "Precipitation": "0.0"
+      },
+      "Past3days": {
+        "Precipitation": "0.0"
+      }
+    }
+  },
+  "O-A0001-001_temp_yunlin_sample": {
+    "StationName": "箔子寮",
+    "StationId": "C0K600",
+    "ObsTime": {
+      "DateTime": "2026-07-09T19:00:00+08:00"
+    },
+    "GeoInfo": {
+      "Coordinates": [
+        {
+          "CoordinateName": "TWD67",
+          "CoordinateFormat": "decimal degrees",
+          "StationLatitude": "23.621487",
+          "StationLongitude": "120.131920"
+        },
+        {
+          "CoordinateName": "WGS84",
+          "CoordinateFormat": "decimal degrees",
+          "StationLatitude": "23.619744",
+          "StationLongitude": "120.140036"
+        }
+      ],
+      "StationAltitude": "14.0",
+      "CountyName": "雲林縣",
+      "TownName": "口湖鄉",
+      "CountyCode": "10009",
+      "TownCode": "10009190"
+    },
+    "WeatherElement": {
+      "Weather": "晴",
+      "Now": {
+        "Precipitation": "0.0"
+      },
+      "WindDirection": "358.0",
+      "WindSpeed": "5.6",
+      "AirTemperature": "29.1",
+      "RelativeHumidity": "84",
+      "AirPressure": "1003.1",
+      "GustInfo": {
+        "PeakGustSpeed": "-99",
+        "Occurred_at": {
+          "WindDirection": "-99",
+          "DateTime": "-99"
+        }
+      },
+      "DailyExtreme": {
+        "DailyHigh": {
+          "TemperatureInfo": {
+            "AirTemperature": "31.0",
+            "Occurred_at": {
+              "DateTime": "2026-07-09T15:00:00+08:00"
+            }
+          }
+        },
+        "DailyLow": {
+          "TemperatureInfo": {
+            "AirTemperature": "27.3",
+            "Occurred_at": {
+              "DateTime": "2026-07-09T05:30:00+08:00"
             }
           }
         }
