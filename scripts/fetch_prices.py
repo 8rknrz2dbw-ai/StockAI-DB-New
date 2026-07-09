@@ -62,6 +62,15 @@ def g(rec, *keys):
     return None
 
 
+def _latest_valid(series):
+    """回傳最近一個 avg>0 的日期資料（附 date）；全為 0 時退回最新日。"""
+    for dt in sorted(series, reverse=True):
+        if (series[dt].get("avg") or 0) > 0:
+            return {**series[dt], "date": dt}
+    dt = max(series)
+    return {**series[dt], "date": dt}
+
+
 def fetch(market, crop, start, end):
     params = {"StartDate": roc(start), "EndDate": roc(end), "Market": market, "Crop": crop}
     r = requests.get(API, params=params, headers=UA, timeout=60)
@@ -128,7 +137,9 @@ def main():
             json.dump({"market": mk, "updated": now.strftime("%Y-%m-%d %H:%M"),
                        "crop_map": CROP_MAP, "data": mdata}, f, ensure_ascii=False)
         index_markets.append({"name": mk, "file": fname})
-        latest[mk] = {c: {**s[max(s)], "date": max(s)} for c, s in mdata.items()}
+        # latest 取「最近一個有成交(avg>0)」的日期，避免當日休市/未成交的 0 元把該市場
+        # 從全台跨市場比價中整個隱藏（前端 renderCompare 會濾掉 avg<=0）。
+        latest[mk] = {c: _latest_valid(s) for c, s in mdata.items()}
         total += sum(len(s) for s in mdata.values())
         print(f"[fetch_prices] {mk}：{len(mdata)} 種、{sum(len(s) for s in mdata.values())} 筆 → {fname}")
 
