@@ -1,4 +1,4 @@
-# CLAUDE.md — 二崙葉菜行情室 ＋ 颱風搶收預判系統
+# CLAUDE.md — 豐雨無阻（原「二崙葉菜行情室」）＋ 颱風搶收預判系統
 
 給未來 Claude 工作階段的專案指引。
 
@@ -15,7 +15,8 @@
 ## 架構原則
 
 - **純前端 + 後端排程快取**：`index.html` 不含任何金鑰，只讀後端排程產出的靜態 JSON。
-  抓不到時一律退回示範資料、絕不白畫面（`loadPrices` / `loadAdvisory` 都有 shape 檢查 + try/catch）。
+  抓不到時一律退回示範資料、絕不白畫面（`loadIndex` / `loadMarket` / `loadWeather` /
+  `loadEvents` 都有 shape 檢查 + try/catch，失敗回 demo 或空物件）。
 - **CWA / 水利署 API 需授權金鑰、CORS 不保證** → 金鑰只放後端（`CWA_API_KEY` 環境變數 /
   GitHub Actions Secret），前端永遠不觸碰。
 - **動態 `ghBase`**：`resolveGhBase()` 在 `*.github.io` 下解析出 repo 根，前端由此讀 JSON。
@@ -23,25 +24,37 @@
 ## 檔案結構
 
 ```
-index.html                    行情看板 + 搶收預判（雙分頁單頁），讀 veg_prices.json /
-                              harvest_advisory.json / typhoon_status.json，皆可退回 demo
+index.html                    單頁多分頁：行情看板／田區搶收／採收預判／跨市場比價(compare)。
+                              角色可切「蔬果農／商人」(商人看批發、compare 分頁)。字體 s/m/l/xl。
+                              讀 prices_index.json + prices/NN.json / typhoon_status.json /
+                              weather_events.json / harvest_advisory.json，全部可退回 demo。
 scripts/
-  fetch_prices.py             抓農業部「農產品交易行情」公開資料（免金鑰）→ veg_prices.json
-  fetch_cwa.py                抓 CWA 颱風/路徑潛勢/侵襲機率/雨量 → typhoon_status.json
-  build_advisory.py           田區登記表 + 天氣 → 決策模型 → harvest_advisory.json（含 EV、schedule）
+  fetch_prices.py             抓農業部「農產品交易行情」公開資料（免金鑰，近 2 年）→
+                              prices_index.json（markets/crop_map/latest）+ prices/NN.json（逐市場歷史）。
+                              latest 取「最近一個 avg>0」的日期（_latest_valid），避免休市 0 元隱藏市場。
+  fetch_cwa.py                抓 CWA 颱風/路徑潛勢/侵襲機率/雨量/氣溫 → typhoon_status.json；
+                              並逐日「向前累積」真實天氣事件 → weather_events.json
+                              （颱風/大雨≥80mm/低溫≤10°C，去重、保留 ~2 年，K線標記用）。
+  build_advisory.py           田區登記表 + 天氣 → 決策模型 → harvest_advisory.json（含 EV、schedule）。
+                              註：前端 index.html 另有自帶的 client 版決策，這支為後端/通知用。
   notify.py                   挑急迫田 → LINE Messaging API / webhook 推播（去重；未設則 dry-run）
   requirements.txt            requests
 data/
   fields.example.json         田區登記表範例（真實檔為 data/fields.json，已 gitignore）
 .github/workflows/
-  update-data.yml             每 30 分排程：fetch_cwa → build_advisory → notify → commit JSON
+  update-data.yml             天氣/颱風每 30 分：fetch_cwa → build_advisory → notify → commit
+                              (typhoon_status/weather_events/harvest_advisory/cwa_debug)。輕量、快。
+  update-prices.yml           批發行情每日 08/13/17 時(台灣)：fetch_prices → commit
+                              (prices_index/prices)。抓 2 年較慢(~15 分)，故與天氣拆開、互不阻塞。
   ci.yml                      PR 檢查：py_compile + 決策 demo + notify dry-run + 前端關鍵元素
-  pages.yml                   push main → 自動部署 GitHub Pages（configure-pages 自動啟用）
+  pages.yml                   （未用）Actions 版 Pages；實際採「Deploy from a branch: main」。
 .env.example                  CWA_API_KEY / LINE / webhook 範例
 ```
 
-前端會讀取（不存在時退回 demo）：`veg_prices.json`（既有 miner 產出）、
-`harvest_advisory.json`、`typhoon_status.json`（本專案腳本產出），三者皆置於站台根。
+前端會讀取（不存在時退回 demo）：`prices_index.json` + `prices/NN.json`（行情，逐市場 lazy load）、
+`typhoon_status.json`（颱風現況）、`weather_events.json`（K線天氣事件標記）、
+`harvest_advisory.json`（後端決策），皆置於站台根。兩支排程都 push 到 main（Pages 服務分支），
+push 前都有 fetch+rebase 重試，避免彼此/部署競爭 main 造成非快進被拒。
 
 ## 決策模型 v1（build_advisory.py）
 
@@ -80,4 +93,6 @@ python3 scripts/fetch_cwa.py            # 需 CWA_API_KEY，否則寫 active=fal
 ## 分支慣例
 
 - 開發分支：`claude/vegetable-harvest-weather-system-tjpqnj`
-- 資料 JSON 由 `update-data.yml` 排程提交到 Pages 所服務的分支根（見 README 部署段）。
+- 資料 JSON 由 `update-data.yml`（天氣，30 分）與 `update-prices.yml`（行情，每日數次）
+  兩支排程分別提交到 Pages 所服務的 main 分支根（見 README 部署段）。
+- 版本號在 `index.html` 的 `const VERSION`（頁尾設定顯示，淺灰）；每次前端有感更新時手動遞增。
