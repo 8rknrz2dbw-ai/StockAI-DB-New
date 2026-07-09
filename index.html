@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
-<title>豐雨無阻 · 葉菜行情 · 搶收預判</title>
+<title>豐雨無阻</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%A7%EF%B8%8F%3C/text%3E%3C/svg%3E" />
 <meta name="theme-color" content="#12160E" />
 <style>
@@ -234,7 +234,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>豐雨無阻<span class="dot">.</span></h1>
+    <h1>豐雨無阻</h1>
     <div class="hgroup">
       <span id="updated" class="upd">—</span><span id="mode" class="badge demo">示範資料</span>
       <button class="gear" id="gear" aria-label="設定">⚙️</button>
@@ -262,7 +262,8 @@
   </div>
 
   <div class="view" id="view-compare">
-    <p class="mkt-label">選蔬菜／水果品項，比全台各市場批發價（低→高，適合進貨）</p>
+    <p class="mkt-label">比全台各市場批發價（低→高，適合進貨）</p>
+    <div class="catbar" id="cmpCat"></div>
     <div class="form" style="padding:0.6rem 0.7rem"><select id="cmpCrop"></select></div>
     <div id="cmpResult"></div>
   </div>
@@ -290,7 +291,7 @@
     <div class="setblk"><h4>角色</h4>
       <div class="fsrow rolerow" id="roleRow">
         <button data-r="farmer"><span class="ico">🧑‍🌾</span><span>蔬果農</span></button>
-        <button data-r="merchant"><span class="ico">🧺</span><span>買菜商人</span></button>
+        <button data-r="merchant"><span class="ico">🧺</span><span>商人</span></button>
       </div>
       <p class="hintline" id="roleHint"></p>
     </div>
@@ -339,7 +340,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="V0025p00709";
+const VERSION="V0026p00709";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -847,14 +848,18 @@ function switchTab(m){
   document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x.dataset.t===m));
   ["market","harvest","forecast","compare"].forEach(v=>document.getElementById("view-"+v).classList.toggle("on",v===m));
   if(m==="forecast"){ensureCropList("fcCrop");if(!document.getElementById("fcDate").value)document.getElementById("fcDate").value=todayISO();}
-  if(m==="compare"){populateCompareCrops();renderCompare();}
+  if(m==="compare"){renderCmpCat();populateCompareCrops();renderCompare();}
 }
+let CMPCAT="蔬菜";
+function renderCmpCat(){const bar=document.getElementById("cmpCat");if(!bar)return;
+  const all=Object.keys(cropMap());const present=["蔬菜","水果"].filter(cat=>all.some(c=>cropCat(c)===cat));
+  if(!present.includes(CMPCAT))CMPCAT=present[0]||"蔬菜";
+  bar.innerHTML=present.map(c=>`<button data-c="${c}" class="${c===CMPCAT?'on':''}">${c==='蔬菜'?'🥬 蔬菜':'🍉 水果'}</button>`).join("");
+  bar.querySelectorAll("button").forEach(b=>b.onclick=()=>{CMPCAT=b.dataset.c;renderCmpCat();populateCompareCrops();renderCompare();});}
 function populateCompareCrops(){const sel=document.getElementById("cmpCrop");if(!sel)return;
-  const all=Object.keys(cropMap());if(!all.length)return;const cur=sel.value;
-  const veg=all.filter(c=>cropCat(c)==="蔬菜"),fru=all.filter(c=>cropCat(c)==="水果");let html="";
-  if(veg.length)html+=`<optgroup label="🥬 蔬菜">`+veg.map(c=>`<option value="${c}">${c}</option>`).join("")+`</optgroup>`;
-  if(fru.length)html+=`<optgroup label="🍉 水果">`+fru.map(c=>`<option value="${c}">${c}</option>`).join("")+`</optgroup>`;
-  sel.innerHTML=html;if(cur&&all.includes(cur))sel.value=cur;}
+  const items=Object.keys(cropMap()).filter(c=>cropCat(c)===CMPCAT).sort();const cur=sel.value;
+  sel.innerHTML=items.map(c=>`<option value="${c}">${c}</option>`).join("");
+  if(cur&&items.includes(cur))sel.value=cur;}
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchTab(t.dataset.t)));
 
 function renderCompare(){
@@ -876,11 +881,12 @@ function applyRole(){
   const show={market:true,harvest:r==="farmer",forecast:r==="farmer",compare:r==="merchant"};
   document.querySelectorAll(".tab").forEach(t=>{t.style.display=show[t.dataset.t]?"":"none";});
   const rh=document.getElementById("roleHint");
-  if(rh)rh.textContent=(r==="merchant")?"買菜商人：看批發價＋跨市場比價（找便宜進貨），隱藏田區/採收。":"蔬果農：行情＋田區搶收＋採收預判。";
+  if(rh)rh.textContent=(r==="merchant")?"商人：看批發價＋跨市場比價（找便宜進貨），隱藏田區/採收。":"蔬果農：行情＋田區搶收＋採收預判。";
   const active=document.querySelector(".tab.on");
   if(!active||active.style.display==="none")switchTab("market");
 }
-document.getElementById("roleRow").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.role=b.dataset.r;applyRole();});
+document.getElementById("roleRow").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  S.role=b.dataset.r;applyRole();if(CUR)renderQuote(CUR);});   // #3 角色切換即時更新查價卡買賣價
 
 /* ══════ 啟動 ══════ */
 (async function(){
