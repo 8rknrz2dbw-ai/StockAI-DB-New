@@ -109,6 +109,14 @@
   .anno .al{font-weight:700;} .anno .ap{margin-left:auto;font-weight:900;flex:0 0 auto;}
   .anno .ap.up{color:var(--r);} .anno .ap.dn{color:var(--g);}
   .tag.season{color:#d7e6df;background:#2f4a4a;}
+  /* 壓縮版面：對比常態＋日週月同列（tf 靠右） */
+  .tfline{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;}
+  .tfline .cmp{font-size:0.85rem;color:var(--muted);} .tfline .cmp b{color:var(--paper);}
+  .tfline .tfrow{margin-top:0;}
+  /* 為什麼漲跌：可折疊，省空間 */
+  .annobox{margin-top:0.5rem;} .annobox>summary{cursor:pointer;font-size:0.8rem;color:var(--muted);font-weight:800;list-style:none;padding:0.35rem 0;}
+  .annobox>summary::-webkit-details-marker{display:none;}
+  .annobox>summary::before{content:"▸ ";} .annobox[open]>summary::before{content:"▾ ";}
   /* 我的品項：勾選表（省空間、可勾選增刪） */
   .pickgrp{margin-top:0.4rem;} .pickh{font-size:0.85rem;color:var(--muted);font-weight:800;margin:0.35rem 0 0.25rem;}
   .pickgrid{display:flex;flex-wrap:wrap;gap:0.4rem;}
@@ -312,7 +320,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="V0021p00709";
+const VERSION="V0022p00709";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -445,7 +453,7 @@ function annotate(d){
 }
 function annoHTML(annos){
   if(!annos||!annos.length)return "";
-  return `<div class="annohd">📌 為什麼漲跌（自動標注）</div>`+annos.map(a=>{const cls=a.pct>=0?"up":"dn";const s=a.pct>=0?"漲 +":"跌 ";
+  return annos.map(a=>{const cls=a.pct>=0?"up":"dn";const s=a.pct>=0?"漲 +":"跌 ";
     return `<div class="anno"><span class="ae">${a.g}</span><span class="ad">${a.date.slice(5)}</span><span class="al">${a.label}</span><span class="ap ${cls}">${s}${a.pct.toFixed(0)}%</span></div>`;}).join("");
 }
 
@@ -487,17 +495,20 @@ function renderQuote(disp){
     <div class="price"><span class="v ${cls} mono">${pv.avg.toFixed(1)}</span><span class="u">元/公斤</span>
       <span class="chg ${cls} mono">${arrow} ${chg>=0?"+":""}${chg.toFixed(1)} (${chgP>=0?"+":""}${chgP.toFixed(1)}%)</span></div>
     <div class="ohlc"><span>最高 <b>${hi.toFixed(1)}</b></span><span>最低 <b>${lo.toFixed(1)}</b></span>
-      <span>量 <b>${qty.toLocaleString()}</b> 公斤</span><span>對比常態 <b>${pv.diff>=0?"+":""}${pv.diff.toFixed(0)}%</b>(${pv.say})</span></div>
+      <span>量 <b>${qty.toLocaleString()}</b> 公斤</span></div>
+    <div class="tfline"><span class="cmp">對比常態 <b>${pv.diff>=0?"+":""}${pv.diff.toFixed(0)}%</b>(${pv.say})</span>
+      <div class="tfrow" id="tfrow">${["D","W","M"].map(t=>`<button data-tf="${t}" class="${TF===t?'on':''}">${TF_LABEL[t]}</button>`).join("")}</div></div>
     ${pv.stale>14?`<div class="risk warn" style="margin-top:.5rem">🍂 非當季／近期停售：最後成交 <b>${pv.date}</b>（${pv.stale} 天前），以下為上次產季行情。</div>`:""}
-    <div class="tfrow" id="tfrow">${["D","W","M"].map(t=>`<button data-tf="${t}" class="${TF===t?'on':''}">${TF_LABEL[t]}</button>`).join("")}</div>
     <div class="qchart" id="qchart">${drawChart(es)}
       <div class="axlabel px" id="pxLabel"></div><div class="axlabel dt" id="dtLabel"></div></div>
     <div class="cap" id="qcap"></div>
-    <div class="annos" id="qanno"></div>
+    <details class="annobox" id="annobox"><summary id="annosum">📌 為什麼漲跌</summary><div class="annos" id="qanno"></div></details>
     <div class="qtip" id="qtip">👆 滑動查價：底部標日期、右側標價格</div>
   </div>`;
   const cap=document.getElementById("qcap");if(cap)cap.innerHTML=capFor();
   const qa=document.getElementById("qanno");if(qa)qa.innerHTML=annoHTML(QANNO);
+  const abox=document.getElementById("annobox"),asum=document.getElementById("annosum");
+  if(abox){if(QANNO.length){abox.style.display="";asum.textContent=`📌 為什麼漲跌（${QANNO.length} 件大波動）`;}else abox.style.display="none";}
   document.querySelectorAll("#tfrow button").forEach(b=>b.onclick=()=>{TF=b.dataset.tf;renderQuote(disp);});
   attachCross(box);
 }
