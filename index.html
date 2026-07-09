@@ -117,6 +117,14 @@
   .annobox{margin-top:0.5rem;} .annobox>summary{cursor:pointer;font-size:0.8rem;color:var(--muted);font-weight:800;list-style:none;padding:0.35rem 0;}
   .annobox>summary::-webkit-details-marker{display:none;}
   .annobox>summary::before{content:"▸ ";} .annobox[open]>summary::before{content:"▾ ";}
+  /* 角色買賣價註記 */
+  .rolenote{margin-top:0.4rem;font-size:0.8rem;color:var(--muted);}
+  .rolenote b{color:var(--paper);} .rolenote.farmer b{color:var(--leaf);} .rolenote.merchant b{color:var(--o);}
+  /* 全品種行情（可折疊） */
+  .varbox{margin-top:0.5rem;} .varbox>summary{cursor:pointer;font-size:0.82rem;color:var(--muted);font-weight:800;list-style:none;padding:0.35rem 0;}
+  .varbox>summary::-webkit-details-marker{display:none;} .varbox>summary::before{content:"▸ ";} .varbox[open]>summary::before{content:"▾ ";}
+  .varrow{display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:0.35rem 0.6rem;margin-top:0.3rem;}
+  .varrow .vl{font-weight:700;} .varrow .vp{margin-left:auto;font-weight:900;font-size:1rem;} .varrow .vu{font-size:0.7rem;color:var(--muted);}
   /* 我的品項：勾選表（省空間、可勾選增刪） */
   .pickgrp{margin-top:0.4rem;} .pickh{font-size:0.85rem;color:var(--muted);font-weight:800;margin:0.35rem 0 0.25rem;}
   .pickgrid{display:flex;flex-wrap:wrap;gap:0.4rem;}
@@ -320,7 +328,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="V0023p00709";
+const VERSION="V0024p00709";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -364,7 +372,7 @@ function seedFields(){return [
 function getFields(){let f=S.fields;if(!f){f=seedFields();S.setFields(f);}return f;}
 
 /* ══════ 行情資料 ══════ */
-let INDEX=null,MDATA={},MARKET="",CUR=null,WEATHER=null;
+let INDEX=null,MDATA={},MVAR={},MARKET="",CUR=null,WEATHER=null;
 function marketNames(){return ((INDEX&&INDEX.markets)||[]).map(m=>m.name);}
 function cropMap(){return (INDEX&&INDEX.crop_map)||{};}
 /* 分類：蔬菜/水果（後端 prices_index.categories 提供；缺則用內建水果清單判斷） */
@@ -380,8 +388,8 @@ async function loadMarket(mk){
   const ent=((INDEX&&INDEX.markets)||[]).find(m=>m.name===mk);
   if(INDEX&&INDEX._live&&ent&&ent.file){
     try{const r=await fetch(`${resolveGhBase()}/${ent.file}`,{cache:"no-store"});
-      if(r.ok){const j=await r.json();MDATA[mk]=(j&&j.data)||{};return MDATA[mk];}}catch(e){}}
-  MDATA[mk]=demoMarketData(mk);return MDATA[mk];}
+      if(r.ok){const j=await r.json();MDATA[mk]=(j&&j.data)||{};MVAR[mk]=(j&&j.variants)||{};return MDATA[mk];}}catch(e){}}
+  MDATA[mk]=demoMarketData(mk);MVAR[mk]={};return MDATA[mk];}
 async function loadWeather(){
   try{const r=await fetch(`${resolveGhBase()}/typhoon_status.json`,{cache:"no-store"});if(!r.ok)throw 0;
     const j=await r.json();return (j&&typeof j==="object")?j:{active:false};}catch(e){return {active:false};}}
@@ -490,6 +498,20 @@ function renderBoard(){
     b.onclick=()=>selectCrop(disp);el.appendChild(b);});
 }
 function selectCrop(d){CUR=d;renderBoard();renderQuote(d);}
+/* 角色買賣價註記：批發拍賣是「一個成交價」，農夫扣手續費實得、商人進貨成本＋手續費 */
+const FEE_FARMER=0.06,FEE_MERCHANT=0.06;
+function roleNoteHTML(avg){
+  return S.role==="merchant"
+    ? `<div class="rolenote merchant">🧺 進貨成本約 <b>${(avg*(1+FEE_MERCHANT)).toFixed(1)}</b> 元／公斤（拍賣均價＋承銷手續費估）· 零售自行加價</div>`
+    : `<div class="rolenote farmer">🧑‍🌾 農民實得約 <b>${(avg*(1-FEE_FARMER)).toFixed(1)}</b> 元／公斤（拍賣均價扣手續費估 ~6%）</div>`;
+}
+/* 全品種行情：點進去看該作物各品種最新價（如鳳梨-金鑽/牛奶…） */
+function variantHTML(disp){const w=wholesaleOf(disp);const vs=(MVAR[MARKET]||{})[w];if(!vs)return "";
+  const items=Object.entries(vs).filter(e=>e[1]&&e[1].avg>0).sort((a,b)=>b[1].avg-a[1].avg);
+  if(items.length<2)return "";
+  return `<details class="varbox"><summary>🧺 ${disp} 全品種行情（${items.length} 種，點開）</summary>`+
+    items.map(([lab,v])=>`<div class="varrow"><span class="vl">${lab||"一般"}</span><span class="vp mono">${v.avg.toFixed(1)}</span><span class="vu">元/公斤 · ${(v.date||"").slice(5)}</span></div>`).join("")+`</details>`;
+}
 function renderQuote(disp){
   const box=document.getElementById("quote");const pv=priceView(disp);if(!pv){box.innerHTML="";return;}
   const es=pv.es;const prev=es.length>1?es[es.length-2][1].avg:pv.avg;const chg=pv.avg-prev;const chgP=prev?chg/prev*100:0;
@@ -499,6 +521,7 @@ function renderQuote(disp){
     <h3><span>${disp}</span><span class="mktbadge">${MARKET} 批發</span></h3>
     <div class="price"><span class="v ${cls} mono">${pv.avg.toFixed(1)}</span><span class="u">元/公斤</span>
       <span class="chg ${cls} mono">${arrow} ${chg>=0?"+":""}${chg.toFixed(1)} (${chgP>=0?"+":""}${chgP.toFixed(1)}%)</span></div>
+    ${roleNoteHTML(pv.avg)}
     <div class="ohlc"><span>最高 <b>${hi.toFixed(1)}</b></span><span>最低 <b>${lo.toFixed(1)}</b></span>
       <span>量 <b>${qty.toLocaleString()}</b> 公斤</span></div>
     <div class="tfline"><span class="cmp">對比常態 <b>${pv.diff>=0?"+":""}${pv.diff.toFixed(0)}%</b>(${pv.say})</span>
@@ -508,6 +531,7 @@ function renderQuote(disp){
       <div class="axlabel px" id="pxLabel"></div><div class="axlabel dt" id="dtLabel"></div></div>
     <div class="cap" id="qcap"></div>
     <details class="annobox" id="annobox"><summary id="annosum">📌 為什麼漲跌</summary><div class="annos" id="qanno"></div></details>
+    ${variantHTML(disp)}
     <div class="qtip" id="qtip">👆 滑動查價：底部標日期、右側標價格</div>
   </div>`;
   const cap=document.getElementById("qcap");if(cap)cap.innerHTML=capFor();
