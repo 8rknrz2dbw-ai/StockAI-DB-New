@@ -101,6 +101,20 @@
   .catbar button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--muted);padding:0.65rem;border-radius:12px;font-weight:900;font-size:1.15rem;}
   .catbar button.on{background:var(--leaf);color:var(--bg);border-color:var(--leaf);}
   .mkt-top{position:sticky;top:0;z-index:6;background:var(--bg);padding-top:0.2rem;margin-bottom:0.5rem;border-bottom:1px solid var(--line);}
+  /* 圖表自動事件註記（為什麼暴漲/暴跌） */
+  .annos{margin-top:0.5rem;display:flex;flex-direction:column;gap:0.3rem;}
+  .annohd{font-size:0.75rem;color:var(--muted);font-weight:800;margin-bottom:0.1rem;}
+  .anno{display:flex;align-items:center;gap:0.45rem;font-size:0.82rem;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:0.35rem 0.55rem;}
+  .anno .ae{font-size:1.05rem;flex:0 0 auto;} .anno .ad{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+  .anno .al{font-weight:700;} .anno .ap{margin-left:auto;font-weight:900;flex:0 0 auto;}
+  .anno .ap.up{color:var(--r);} .anno .ap.dn{color:var(--g);}
+  .tag.season{color:#d7e6df;background:#2f4a4a;}
+  /* 我的品項：勾選表（省空間、可勾選增刪） */
+  .pickgrp{margin-top:0.4rem;} .pickh{font-size:0.85rem;color:var(--muted);font-weight:800;margin:0.35rem 0 0.25rem;}
+  .pickgrid{display:flex;flex-wrap:wrap;gap:0.4rem;}
+  .chip{display:inline-flex;align-items:center;gap:0.35rem;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:0.35rem 0.7rem;font-size:0.95rem;cursor:pointer;user-select:none;}
+  .chip.on{background:var(--leaf-dim);color:var(--bg);border-color:var(--leaf-dim);font-weight:800;}
+  .chip input{width:1.05rem;height:1.05rem;accent-color:var(--leaf);margin:0;}
 
   /* 田區搶收 */
   .alert{border:1px solid #5a2c1f;border-radius:var(--radius);
@@ -261,9 +275,8 @@
 
     <div class="setblk"><h4>果菜市場</h4><select class="mkt" id="mktSelect"></select></div>
 
-    <div class="setblk"><h4>我的品項（行情看板顯示哪些）</h4>
-      <div id="watchList"></div>
-      <div class="addrow"><select id="addSelect"></select><button id="addBtn">＋ 新增</button></div>
+    <div class="setblk"><h4>我的品項（勾選＝行情看板要顯示的）</h4>
+      <div class="croppick" id="cropPick"></div>
     </div>
 
     <div class="setblk"><h4>我的田區（搶收/採收用）</h4>
@@ -299,7 +312,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="V0020p00709";
+const VERSION="V0021p00709";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -397,11 +410,12 @@ function seriesFor(d){const w=wholesaleOf(d);return (w&&MDATA[MARKET]&&MDATA[MAR
 function sortedEntries(s){return Object.entries(s).filter(e=>e[1]&&e[1].avg>0).sort((a,b)=>a[0]<b[0]?-1:1);}  /* 濾掉 0/無效價 */
 function availableCrops(){const d=MDATA[MARKET]||{};return Object.keys(cropMap()).filter(disp=>{const w=cropMap()[disp];
   return d[w]&&Object.values(d[w]).some(v=>v&&v.avg>0);});}
-function watchCrops(){let w=S.watch(MARKET);const av=availableCrops();if(!Array.isArray(w))return av.slice();w=w.filter(c=>av.includes(c));return w.length?w:av.slice();}
+function watchCrops(){let w=S.watch(MARKET);const av=availableCrops();if(!Array.isArray(w))return av.slice();return w.filter(c=>av.includes(c));}  /* 勾選表：精確集合，允許清空 */
 function priceView(disp){const es=sortedEntries(seriesFor(disp));if(!es.length)return null;const last=es[es.length-1];
   const base=median(es.slice(-90).map(e=>e[1].avg));const diff=base?((last[1].avg-base)/base*100):0;
   let cls,say;if(diff>10){cls="up";say="偏貴";}else if(diff<-10){cls="dn";say="偏便宜";}else{cls="mid";say="正常";}
-  return {es,last,avg:last[1].avg,date:last[0],diff,cls,say};}
+  const stale=Math.round(daysBetween(last[0],todayISO()));
+  return {es,last,avg:last[1].avg,date:last[0],diff,cls,say,stale};}
 
 /* ══════ 事件（節慶影響菜價；颱風/寒流/大雨事件待接天氣歷史） ══════ */
 const FESTIVALS=[["2025-01-29","春節"],["2025-04-04","清明"],["2025-05-31","端午"],["2025-10-06","中秋"],
@@ -410,8 +424,30 @@ const FEST=Object.fromEntries(FESTIVALS);
 // 真實天氣事件標記樣式（date -> [{type,label}]，由 loadEvents 填入）
 let WEVENTS={};
 const WEV_STYLE={typhoon:{g:"🌀",c:"#B7472A"},rain:{g:"🌧",c:"#3B7DD8"},cold:{g:"❄",c:"#57B0C9"}};
-let QDATA=[],QGEO=null,TF="D",CAT="蔬菜";
+let QDATA=[],QGEO=null,QANNO=[],TF="D",CAT="蔬菜";
 const TF_LABEL={D:"日",W:"週",M:"月"};
+/* 自動事件註記：挑出暴漲/暴跌，並找出「為什麼」（颱風/大雨/低溫/節慶/爆量） */
+function eventCause(day,v,qmed){
+  const win=TF==="D"?4:TF==="W"?11:31;
+  let best=null,bd=1e9;
+  for(const ed in WEVENTS){const dd=Math.abs(daysBetween(ed,day));if(dd<=win&&dd<bd){bd=dd;const a=WEVENTS[ed][0];best={g:(WEV_STYLE[a.type]||{}).g||"⚑",label:a.label||a.type};}}
+  if(best)return best;
+  for(const [fd,name] of FESTIVALS){const dd=Math.abs(daysBetween(fd,day));if(dd<=win)return {g:"🔹",label:name+"前後"};}
+  if(TF==="D"&&qmed&&v.qty>qmed*1.8)return {g:"🔺",label:"爆量壓價"};
+  return null;
+}
+function annotate(d){
+  const qmed=median(d.map(e=>e[1].qty).filter(Boolean))||0;const out=[];
+  for(let i=1;i<d.length;i++){const prev=d[i-1][1].avg,cur=d[i][1].avg;const pct=prev?(cur-prev)/prev*100:0;
+    if(Math.abs(pct)<18)continue;const c=eventCause(d[i][0],d[i][1],qmed);if(!c)continue;
+    out.push({i,date:d[i][0],pct,g:c.g,label:c.label});}
+  out.sort((a,b)=>Math.abs(b.pct)-Math.abs(a.pct));return out.slice(0,3);
+}
+function annoHTML(annos){
+  if(!annos||!annos.length)return "";
+  return `<div class="annohd">📌 為什麼漲跌（自動標注）</div>`+annos.map(a=>{const cls=a.pct>=0?"up":"dn";const s=a.pct>=0?"漲 +":"跌 ";
+    return `<div class="anno"><span class="ae">${a.g}</span><span class="ad">${a.date.slice(5)}</span><span class="al">${a.label}</span><span class="ap ${cls}">${s}${a.pct.toFixed(0)}%</span></div>`;}).join("");
+}
 
 /* ══════ 行情看板 ══════ */
 // 分類切換的顯示依「該市場實際有賣什麼」（availableCrops），葉菜市場只有蔬菜→不顯示切換
@@ -426,20 +462,17 @@ function renderCatbar(){
   bar.querySelectorAll("button").forEach(b=>b.onclick=()=>{CAT=b.dataset.c;renderBoard();
     const bl=boardList();if(bl.length&&(!CUR||cropCat(CUR)!==CAT))selectCrop(bl[0]);});
 }
-function boardList(){
-  if(marketCats().length<=1)return watchCrops();
-  const w=watchCrops().filter(d=>cropCat(d)===CAT);
-  return w.length?w:availableCrops().filter(d=>cropCat(d)===CAT);  // 清單沒這類→顯示市場現有
-}
+function boardList(){const w=watchCrops();return marketCats().length<=1?w:w.filter(d=>cropCat(d)===CAT);}
 function renderBoard(){
   renderCatbar();
   const el=document.getElementById("board");el.innerHTML="";
   const list=boardList();
   if(!list.length){el.innerHTML='<div class="empty">此分類尚無品項。點右上 ⚙️ → 我的品項 → 新增。</div>';return;}
   list.forEach(disp=>{const pv=priceView(disp);const b=document.createElement("button");b.className="prow"+(disp===CUR?" on":"");
-    b.innerHTML=pv?`<span class="dot ${pv.cls}"></span><span class="nm">${disp}</span>
+    const tag=pv?(pv.stale>14?`<span class="tag season">非當季·${pv.date.slice(5)}</span>`:`<span class="tag ${pv.cls}">${pv.say}</span>`):"";
+    b.innerHTML=pv?`<span class="dot ${pv.stale>14?'mid':pv.cls}"></span><span class="nm">${disp}</span>
       <span class="px"><span class="v mono">${pv.avg.toFixed(1)}</span> <span class="u">元/公斤</span></span>
-      <span class="tag ${pv.cls}">${pv.say}</span><span class="chev">›</span>`
+      ${tag}<span class="chev">›</span>`
       :`<span class="dot mid"></span><span class="nm">${disp}</span><span class="px"><span class="u">近期無成交</span></span>`;
     b.onclick=()=>selectCrop(disp);el.appendChild(b);});
 }
@@ -455,18 +488,21 @@ function renderQuote(disp){
       <span class="chg ${cls} mono">${arrow} ${chg>=0?"+":""}${chg.toFixed(1)} (${chgP>=0?"+":""}${chgP.toFixed(1)}%)</span></div>
     <div class="ohlc"><span>最高 <b>${hi.toFixed(1)}</b></span><span>最低 <b>${lo.toFixed(1)}</b></span>
       <span>量 <b>${qty.toLocaleString()}</b> 公斤</span><span>對比常態 <b>${pv.diff>=0?"+":""}${pv.diff.toFixed(0)}%</b>(${pv.say})</span></div>
+    ${pv.stale>14?`<div class="risk warn" style="margin-top:.5rem">🍂 非當季／近期停售：最後成交 <b>${pv.date}</b>（${pv.stale} 天前），以下為上次產季行情。</div>`:""}
     <div class="tfrow" id="tfrow">${["D","W","M"].map(t=>`<button data-tf="${t}" class="${TF===t?'on':''}">${TF_LABEL[t]}</button>`).join("")}</div>
     <div class="qchart" id="qchart">${drawChart(es)}
       <div class="axlabel px" id="pxLabel"></div><div class="axlabel dt" id="dtLabel"></div></div>
     <div class="cap" id="qcap"></div>
+    <div class="annos" id="qanno"></div>
     <div class="qtip" id="qtip">👆 滑動查價：底部標日期、右側標價格</div>
   </div>`;
   const cap=document.getElementById("qcap");if(cap)cap.innerHTML=capFor();
+  const qa=document.getElementById("qanno");if(qa)qa.innerHTML=annoHTML(QANNO);
   document.querySelectorAll("#tfrow button").forEach(b=>b.onclick=()=>{TF=b.dataset.tf;renderQuote(disp);});
   attachCross(box);
 }
 function capFor(){const base=TF==="D"?"近 90 日":TF==="W"?"近 2 年·每週":"近 2 年·每月";
-  return `${base}·紅漲綠跌${TF==="D"?"·🔺爆量 🔹節慶 🌀颱風 🌧大雨 ❄低溫":""}`;}
+  return `${base}·均價折線(紅漲綠跌)·圓點＝重要事件`;}
 /* 依時間刻度彙總（日 90 筆／週·月取近 2 年） */
 function tfSeries(es){
   if(TF==="D")return es.slice(-90);
@@ -490,11 +526,11 @@ function drawChart(es){const d=tfSeries(es);QDATA=d;QGEO=null;if(d.length<2)retu
   const ribbon=`<polygon points="${topPts.concat(botPts).join(" ")}" fill="${col}" opacity="0.10"/>`;
   const area=`<polygon points="${x(0).toFixed(1)},${H-pB} ${avgPts.join(" ")} ${x(d.length-1).toFixed(1)},${H-pB}" fill="url(#qgrad)"/>`;
   const poly=`<polyline points="${avgPts.join(" ")}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
-  let marks="";
-  if(TF==="D")for(let i=0;i<d.length;i++){const e=d[i][1],day=d[i][0],X=x(i);
-    if(qmed&&e.qty>qmed*1.8)marks+=`<polygon points="${(X-3).toFixed(1)},${pT-4} ${(X+3).toFixed(1)},${pT-4} ${X.toFixed(1)},${pT+3}" fill="#E8862E"/>`;
-    if(FEST[day])marks+=`<circle cx="${X.toFixed(1)}" cy="${y(e.avg).toFixed(1)}" r="2.6" fill="#6FB0A6" stroke="#12160E" stroke-width="0.8"/>`;
-    const wv=WEVENTS[day];if(wv&&wv.length){const cc=(WEV_STYLE[wv[0].type]||{}).c||"#888";marks+=`<rect x="${(X-2.5).toFixed(1)}" y="${pT-4}" width="5" height="5" rx="1.2" fill="${cc}"/>`;}}
+  // 自動事件註記標點（日/週/月皆有）：淡導引線 + 均價點，解釋在圖下方清單
+  QANNO=annotate(d);let marks="";
+  QANNO.forEach(a=>{const X=x(a.i),yv=y(d[a.i][1].avg),cc=a.pct>=0?"#E4572E":"#5FB85A";
+    marks+=`<line x1="${X.toFixed(1)}" y1="${pT}" x2="${X.toFixed(1)}" y2="${(H-pB).toFixed(1)}" stroke="${cc}" stroke-width="1" opacity="0.4" stroke-dasharray="2 3"/>`;
+    marks+=`<circle cx="${X.toFixed(1)}" cy="${yv.toFixed(1)}" r="3.4" fill="${cc}" stroke="#12160E" stroke-width="1.1"/>`;});
   const defs=`<defs><linearGradient id="qgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity="0.30"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>`;
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="價格走勢，可滑動查價">${defs}${ribbon}${area}${poly}${marks}<g id="qcross"></g></svg>`;}
 /* 查價線：垂直＝日期(底部標)、水平＝均價(右側標) + 詳細列 */
@@ -512,8 +548,7 @@ function crossDraw(i){
   if(pxL){pxL.style.display="block";pxL.style.top=(Y/G.H*rect.height)+"px";pxL.textContent=v.avg.toFixed(1);}
   if(dtL){dtL.style.display="block";let lx=X/G.W*rect.width;lx=Math.max(26,Math.min(rect.width-26,lx));dtL.style.left=lx+"px";dtL.textContent=day;}
   const tip=document.getElementById("qtip");if(tip){const evs=[];
-    if(TF==="D"){if(G.qmed&&v.qty>G.qmed*1.8)evs.push("🔺爆量");if(FEST[day])evs.push("🔹"+FEST[day]);
-      (WEVENTS[day]||[]).forEach(ev=>evs.push(((WEV_STYLE[ev.type]||{}).g||"⚑")+(ev.label||ev.type)));}
+    const c=eventCause(day,v,G.qmed);if(c)evs.push(c.g+c.label);   // 該點的事件（任一刻度）
     const dl=TF==="W"?day+" 當週":TF==="M"?day.slice(0,7)+" 當月":day;
     tip.innerHTML=`<b>${dl}</b>　高 ${v.high} / 低 ${v.low} / 均 <b>${v.avg}</b>　量 ${v.qty.toLocaleString()}`+(evs.length?`　<span class="ev">${evs.join(" ")}</span>`:"");}
 }
@@ -657,25 +692,41 @@ function renderSettings(){
   applyFont();
   const ms=document.getElementById("mktSelect");ms.innerHTML="";
   marketNames().forEach(m=>{const o=document.createElement("option");o.value=m;o.textContent=m;if(m===MARKET)o.selected=true;ms.appendChild(o);});
-  // 品項
-  const wl=document.getElementById("watchList");wl.innerHTML="";const watch=watchCrops();
-  watch.forEach(d=>{const row=document.createElement("div");row.className="listrow";
-    row.innerHTML=`<span class="wn">${d}</span><span class="sp"><button class="rm" data-c="${d}">移除</button></span>`;wl.appendChild(row);});
-  wl.querySelectorAll(".rm").forEach(b=>b.onclick=()=>{let w=watchCrops().filter(c=>c!==b.dataset.c);S.setWatch(MARKET,w);
-    if(CUR&&!w.includes(CUR)){CUR=null;document.getElementById("quote").innerHTML="";}renderSettings();renderBoard();});
-  const addable=availableCrops().filter(c=>!watch.includes(c));const as=document.getElementById("addSelect");as.innerHTML="";
-  addable.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;as.appendChild(o);});
-  document.getElementById("addBtn").disabled=!addable.length;
+  renderCropPick();
   // 田區
   const fl=document.getElementById("fieldList");fl.innerHTML="";const fields=getFields();
   fields.forEach(f=>{const row=document.createElement("div");row.className="listrow";
     row.innerHTML=`<span class="wn">${f.name}</span><span class="sp"><button class="ed" data-id="${f.id}">編輯</button><button class="rm" data-id="${f.id}">刪除</button></span>
       <span class="ws">${f.crop}·播種 ${f.plant}·淹水等級 ${f.flood}${f.spray?"·施藥 "+f.spray+"(PHI"+f.phi+")":""}${f.geo?"·📍"+fieldArea(f.geo):""}</span>`;fl.appendChild(row);});
-  fl.querySelectorAll(".rm").forEach(b=>b.onclick=()=>{S.setFields(getFields().filter(x=>x.id!==b.dataset.id));renderSettings();renderHarvest();});
+  fl.querySelectorAll(".rm").forEach(b=>b.onclick=()=>{const f=getFields().find(x=>x.id===b.dataset.id);
+    if(!confirm(`確定要刪除田區「${f?f.name:""}」嗎？\n此動作無法復原。`))return;
+    S.setFields(getFields().filter(x=>x.id!==b.dataset.id));renderSettings();renderHarvest();});
   fl.querySelectorAll(".ed").forEach(b=>b.onclick=()=>openFieldForm(getFields().find(x=>x.id===b.dataset.id)));
   // 作物下拉（田區表單 + 採收預判）
   [document.getElementById("ffCrop"),document.getElementById("fcCrop")].forEach(sel=>{if(sel.options.length)return;
     cropList().forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;sel.appendChild(o);});});
+}
+/* 我的品項：勾選表（勾＝顯示；分蔬菜/水果；省空間、可增可刪） */
+function renderCropPick(){
+  const box=document.getElementById("cropPick");if(!box)return;box.innerHTML="";
+  const av=availableCrops(),watch=watchCrops();
+  if(!av.length){box.innerHTML='<p class="hintline">此市場目前無行情資料。</p>';return;}
+  [["蔬菜","🥬"],["水果","🍉"]].forEach(([cat,emoji])=>{
+    const items=av.filter(c=>cropCat(c)===cat);if(!items.length)return;
+    const grp=document.createElement("div");grp.className="pickgrp";
+    grp.innerHTML=`<div class="pickh">${emoji} ${cat}（勾選要看的）</div>`;
+    const grid=document.createElement("div");grid.className="pickgrid";
+    items.forEach(c=>{const on=watch.includes(c);const lab=document.createElement("label");lab.className="chip"+(on?" on":"");
+      lab.innerHTML=`<input type="checkbox" value="${c}"${on?" checked":""}><span>${c}</span>`;grid.appendChild(lab);});
+    grp.appendChild(grid);box.appendChild(grp);
+  });
+  box.querySelectorAll("input[type=checkbox]").forEach(cb=>cb.onchange=()=>{
+    const c=cb.value;let w=watchCrops().slice();
+    if(cb.checked){if(!w.includes(c))w.push(c);}else{w=w.filter(x=>x!==c);}
+    S.setWatch(MARKET,w);cb.closest(".chip").classList.toggle("on",cb.checked);
+    if(!cb.checked&&CUR===c){CUR=null;}
+    renderBoard();const bl=boardList();if((!CUR||!bl.includes(CUR))&&bl.length)selectCrop(bl[0]);else if(!bl.length)document.getElementById("quote").innerHTML="";
+  });
 }
 function openFieldForm(f){editingId=f?f.id:null;const ff=document.getElementById("fieldForm");ff.classList.add("on");
   document.getElementById("ffName").value=f?f.name:"";document.getElementById("ffCrop").value=f?f.crop:cropList()[0];
@@ -707,8 +758,6 @@ document.getElementById("fsRow").addEventListener("click",e=>{const b=e.target.c
 document.getElementById("mktSelect").addEventListener("change",async e=>{MARKET=e.target.value;S.market=MARKET;CUR=null;
   document.getElementById("quote").innerHTML="";await loadMarket(MARKET);renderBoard();renderSettings();
   const l=boardList();if(l.length)selectCrop(l[0]);});
-document.getElementById("addBtn").addEventListener("click",()=>{const v=document.getElementById("addSelect").value;if(!v)return;
-  const w=watchCrops();if(!w.includes(v))w.push(v);S.setWatch(MARKET,w);renderSettings();renderBoard();});
 document.getElementById("fieldAddBtn").addEventListener("click",()=>openFieldForm(null));
 document.getElementById("ffSave").addEventListener("click",saveField);
 document.getElementById("gear").addEventListener("click",openSettings);
