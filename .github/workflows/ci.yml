@@ -52,7 +52,7 @@ jobs:
 
       - name: 前端關鍵元素檢查
         run: |
-          for id in 'id="view-market"' 'id="view-harvest"' 'id="view-forecast"' 'loadPrices' 'loadWeather'; do
+          for id in 'id="view-market"' 'id="view-harvest"' 'id="view-forecast"' 'loadIndex' 'loadWeather'; do
             grep -q "$id" index.html || { echo "index.html 缺少：$id"; exit 1; }
           done
           echo "index.html 關鍵元素 OK"

@@ -155,6 +155,7 @@
   .fieldform .frow{display:flex;gap:0.5rem;} .fieldform .frow>div{flex:1;}
   .fieldform .save{background:var(--leaf);color:var(--bg);border:0;border-radius:10px;padding:0.6rem;font-weight:800;}
   .hintline{font-size:0.74rem;color:var(--muted);margin-top:0.5rem;line-height:1.6;}
+  .ver{color:#5a6146;font-size:0.7rem;text-align:center;margin-top:1.5rem;letter-spacing:.5px;}
   .addbtn{width:100%;background:transparent;border:1px dashed var(--leaf-dim);color:var(--leaf);border-radius:12px;padding:0.6rem;font-weight:800;margin-top:0.3rem;}
 </style>
 </head>
@@ -239,11 +240,14 @@
       </div>
       <p class="hintline">田區存在你手機，隨時增刪、改地勢立即生效。⚠ PHI 請查農藥登記值，勿臆填。</p>
     </div>
+
+    <p class="ver" id="verLabel"></p>
   </div>
 </div>
 
 <script>
 /* ══════ 基礎 ══════ */
+const VERSION="V0016p00709";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -286,11 +290,20 @@ function seedFields(){return [
 function getFields(){let f=S.fields;if(!f){f=seedFields();S.setFields(f);}return f;}
 
 /* ══════ 行情資料 ══════ */
-let PRICES=null,MARKET="",CUR=null,WEATHER=null;
-async function loadPrices(){
-  try{const r=await fetch(`${resolveGhBase()}/veg_prices.json`,{cache:"no-store"});if(!r.ok)throw 0;
-    const j=await r.json();if(!j||!j.data||!Array.isArray(j.markets)||!j.markets.length||!j.crop_map||!j.data[j.markets[0]])throw 0;
-    return {payload:j,live:true};}catch(e){return {payload:makeDemo(),live:false};}}
+let INDEX=null,MDATA={},MARKET="",CUR=null,WEATHER=null;
+function marketNames(){return ((INDEX&&INDEX.markets)||[]).map(m=>m.name);}
+function cropMap(){return (INDEX&&INDEX.crop_map)||{};}
+async function loadIndex(){
+  try{const r=await fetch(`${resolveGhBase()}/prices_index.json`,{cache:"no-store"});if(!r.ok)throw 0;
+    const j=await r.json();if(!j||!j.crop_map||!Array.isArray(j.markets)||!j.markets.length)throw 0;
+    j._live=true;return {index:j,live:true};}catch(e){return {index:demoIndex(),live:false};}}
+async function loadMarket(mk){
+  if(MDATA[mk])return MDATA[mk];
+  const ent=((INDEX&&INDEX.markets)||[]).find(m=>m.name===mk);
+  if(INDEX&&INDEX._live&&ent&&ent.file){
+    try{const r=await fetch(`${resolveGhBase()}/${ent.file}`,{cache:"no-store"});
+      if(r.ok){const j=await r.json();MDATA[mk]=(j&&j.data)||{};return MDATA[mk];}}catch(e){}}
+  MDATA[mk]=demoMarketData(mk);return MDATA[mk];}
 async function loadWeather(){
   try{const r=await fetch(`${resolveGhBase()}/typhoon_status.json`,{cache:"no-store"});if(!r.ok)throw 0;
     const j=await r.json();return (j&&typeof j==="object")?j:{active:false};}catch(e){return {active:false};}}
@@ -307,11 +320,17 @@ function makeDemo(){const rnd=mulberry32(20250704);
   const xl={},tp={};for(const [n,m] of Object.entries(M))xl[n]=ser(m);["青江白菜","小白菜","蕹菜","菠菜"].forEach(n=>tp[n]=ser(M[n]));
   const crop_map={青江菜:"青江白菜",芥藍菜:"芥藍菜",菠菜:"菠菜",小白菜:"小白菜",空心菜:"蕹菜",地瓜葉:"甘藷葉",莧菜:"莧菜",茼蒿:"茼蒿",油菜:"油菜","萵苣(A菜)":"萵苣菜",芥菜:"芥菜"};
   return {updated:new Date().toISOString().slice(0,16).replace("T"," "),markets:["西螺","台北一"],crop_map,data:{西螺:xl,台北一:tp}};}
+let DEMO=null;
+function getDemo(){if(!DEMO)DEMO=makeDemo();return DEMO;}
+function demoIndex(){const d=getDemo();const latest={};
+  for(const mk of d.markets){latest[mk]={};for(const [w,ser] of Object.entries(d.data[mk]||{})){const ks=Object.keys(ser).sort();if(ks.length)latest[mk][w]={...ser[ks[ks.length-1]],date:ks[ks.length-1]};}}
+  return {updated:d.updated,crop_map:d.crop_map,markets:d.markets.map(n=>({name:n})),latest,_live:false};}
+function demoMarketData(mk){return getDemo().data[mk]||{};}
 
-function wholesaleOf(d){return PRICES.crop_map[d];}
-function seriesFor(d){const w=wholesaleOf(d);return (w&&PRICES.data[MARKET]&&PRICES.data[MARKET][w])||{};}
+function wholesaleOf(d){return cropMap()[d];}
+function seriesFor(d){const w=wholesaleOf(d);return (w&&MDATA[MARKET]&&MDATA[MARKET][w])||{};}
 function sortedEntries(s){return Object.entries(s).filter(e=>e[1]&&e[1].avg>0).sort((a,b)=>a[0]<b[0]?-1:1);}  /* 濾掉 0/無效價 */
-function availableCrops(){const d=PRICES.data[MARKET]||{};return Object.keys(PRICES.crop_map).filter(disp=>{const w=PRICES.crop_map[disp];
+function availableCrops(){const d=MDATA[MARKET]||{};return Object.keys(cropMap()).filter(disp=>{const w=cropMap()[disp];
   return d[w]&&Object.values(d[w]).some(v=>v&&v.avg>0);});}
 function watchCrops(){let w=S.watch(MARKET);const av=availableCrops();if(!Array.isArray(w))return av.slice();w=w.filter(c=>av.includes(c));return w.length?w:av.slice();}
 function priceView(disp){const es=sortedEntries(seriesFor(disp));if(!es.length)return null;const last=es[es.length-1];
@@ -491,7 +510,7 @@ function closeSettings(){document.getElementById("modal").classList.remove("on")
 function renderSettings(){
   applyFont();
   const ms=document.getElementById("mktSelect");ms.innerHTML="";
-  PRICES.markets.forEach(m=>{const o=document.createElement("option");o.value=m;o.textContent=m;if(m===MARKET)o.selected=true;ms.appendChild(o);});
+  marketNames().forEach(m=>{const o=document.createElement("option");o.value=m;o.textContent=m;if(m===MARKET)o.selected=true;ms.appendChild(o);});
   // 品項
   const wl=document.getElementById("watchList");wl.innerHTML="";const watch=watchCrops();
   watch.forEach(d=>{const row=document.createElement("div");row.className="listrow";
@@ -525,8 +544,9 @@ function saveField(){const name=document.getElementById("ffName").value.trim()||
   S.setFields(fields);editingId=null;document.getElementById("fieldForm").classList.remove("on");renderSettings();renderHarvest();}
 
 document.getElementById("fsRow").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.fs=b.dataset.v;applyFont();});
-document.getElementById("mktSelect").addEventListener("change",e=>{MARKET=e.target.value;S.market=MARKET;CUR=null;
-  document.getElementById("quote").innerHTML="";renderBoard();renderSettings();});
+document.getElementById("mktSelect").addEventListener("change",async e=>{MARKET=e.target.value;S.market=MARKET;CUR=null;
+  document.getElementById("quote").innerHTML="";await loadMarket(MARKET);renderBoard();renderSettings();
+  const l=watchCrops();if(l.length)selectCrop(l[0]);});
 document.getElementById("addBtn").addEventListener("click",()=>{const v=document.getElementById("addSelect").value;if(!v)return;
   const w=watchCrops();if(!w.includes(v))w.push(v);S.setWatch(MARKET,w);renderSettings();renderBoard();});
 document.getElementById("fieldAddBtn").addEventListener("click",()=>openFieldForm(null));
@@ -546,10 +566,12 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
 /* ══════ 啟動 ══════ */
 (async function(){
   applyFont();
-  const {payload,live}=await loadPrices();PRICES=payload;
-  document.getElementById("updated").textContent="更新："+(payload.updated||"—");
+  const vl=document.getElementById("verLabel");if(vl)vl.textContent=VERSION;
+  const {index,live}=await loadIndex();INDEX=index;
+  document.getElementById("updated").textContent="更新："+(index.updated||"—");
   const mode=document.getElementById("mode");mode.className="badge "+(live?"live":"demo");mode.textContent=live?"實際資料":"示範資料";
-  MARKET=(S.market&&payload.markets.includes(S.market))?S.market:payload.markets[0];
+  const names=marketNames();MARKET=(S.market&&names.includes(S.market))?S.market:names[0];
+  await loadMarket(MARKET);
   renderBoard();const list=watchCrops();if(list.length)selectCrop(list[0]);
   WEATHER=await loadWeather();renderHarvest();
   // 採收預判作物下拉
