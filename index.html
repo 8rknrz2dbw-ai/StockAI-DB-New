@@ -4,8 +4,15 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
 <title>巡田水</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%A7%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+<link rel="icon" type="image/svg+xml" href="icon.svg" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+<link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#12160E" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="巡田水" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <style>
   :root{ font-size:19px; }
   :root[data-fs="s"]{ font-size:16px; } :root[data-fs="m"]{ font-size:19px; }
@@ -353,7 +360,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.0";
+const VERSION="v1.1";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -946,6 +953,10 @@ document.getElementById("roleRow").addEventListener("click",e=>{const b=e.target
   applyRole();   // 依角色顯示/隱藏分頁
   attachQuoteGesture();   // 查價卡往上滑收合手勢
 })();
+/* PWA：註冊 Service Worker（可安裝到主畫面、離線可用）。失敗不影響網頁運作。 */
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});
+}
 </script>
 </body>
 </html>
