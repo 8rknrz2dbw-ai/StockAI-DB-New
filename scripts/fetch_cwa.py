@@ -194,6 +194,15 @@ def parse_warning(warn_records, now, county=COUNTY):
     return {"land_warning": False, "text": None}
 
 
+def _loc_of(o):
+    """站點所屬縣市名。CWA v2 觀測 API（O-A000x）把縣市放在 GeoInfo.CountyName，
+    舊格式則放在頂層 CountyName——兩處都查，避免比對不到而整批漏讀。"""
+    gi = o.get("GeoInfo")
+    return (o.get("CountyName") or o.get("countyName")
+            or (gi.get("CountyName") or gi.get("countyName") if isinstance(gi, dict) else None)
+            or "")
+
+
 def parse_rain_24h(records, county=COUNTY):
     """回傳雲林縣各雨量站中最大 24hr 累積雨量 mm（找不到回 None）。"""
     if not records:
@@ -203,7 +212,7 @@ def parse_rain_24h(records, county=COUNTY):
     def walk(o):
         nonlocal best
         if isinstance(o, dict):
-            loc = o.get("CountyName") or o.get("countyName") or ""
+            loc = _loc_of(o)
             if county in str(loc) or "雲林" in str(loc):
                 # TODO 驗證：24hr 累積常在 RainfallElement.Past24hr.Precipitation
                 r = _dig(o, ["RainfallElement", "Past24hr", "Precipitation"])
@@ -233,7 +242,7 @@ def parse_rain_hours(records, path, county=COUNTY):
     def walk(o):
         nonlocal best
         if isinstance(o, dict):
-            loc = o.get("CountyName") or o.get("countyName") or ""
+            loc = _loc_of(o)
             if county in str(loc) or "雲林" in str(loc):
                 r = _dig(o, path)
                 try:
@@ -261,7 +270,7 @@ def parse_temp_min(records, county=COUNTY):
     def walk(o):
         nonlocal best
         if isinstance(o, dict):
-            loc = o.get("CountyName") or o.get("countyName") or ""
+            loc = _loc_of(o)
             if county in str(loc) or "雲林" in str(loc):
                 t = _dig(o, ["WeatherElement", "AirTemperature"])
                 if t is None:
@@ -356,6 +365,28 @@ def _struct(o, depth=9):
     return f"{type(o).__name__}={s[:60]}"
 
 
+def _first_local_station(records, county=COUNTY):
+    """找出第一筆屬雲林的觀測站原始 dict（供 debug 校準真實雨量/氣溫欄位路徑）。找不到回 None。"""
+    found = [None]
+
+    def walk(o):
+        if found[0] is not None:
+            return
+        if isinstance(o, dict):
+            loc = _loc_of(o)
+            if (county in str(loc) or "雲林" in str(loc)) and (
+                    "RainfallElement" in o or "WeatherElement" in o):
+                found[0] = o
+                return
+            for v in o.values():
+                walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+    walk(records)
+    return found[0]
+
+
 def main():
     now = datetime.now(TZ)
     key_set = bool(os.environ.get("CWA_API_KEY"))
@@ -363,19 +394,22 @@ def main():
     warn = cwa_get(DATASETS["typhoon_warning"])
     inv = cwa_get(DATASETS["invasion_prob"])
     path = cwa_get(DATASETS["path_potential"])
+    rain_recs = cwa_get(DATASETS["rainfall"], CountyName=COUNTY)
+    temp_recs = cwa_get(DATASETS["temp_obs"], CountyName=COUNTY)
 
-    # 除錯：把三個颱風資料集的真實結構寫出，供校準 parse_*（欄位路徑當初標 TODO）
+    # 除錯：把資料集真實結構 + 一筆雲林站原始樣本寫出，供校準 parse_*（雨量/氣溫欄位路徑）
     try:
         with open("cwa_debug.json", "w", encoding="utf-8") as f:
             json.dump({"key_set": key_set, "generated": now.isoformat(),
                        "W-C0034-001_warning": _struct(warn),
                        "W-C0034-003_invasion": _struct(inv),
-                       "W-C0034-005_path": _struct(path)},
+                       "W-C0034-005_path": _struct(path),
+                       "O-A0002-001_rain": _struct(rain_recs),
+                       "O-A0002-001_rain_yunlin_sample": _first_local_station(rain_recs),
+                       "O-A0001-001_temp_yunlin_sample": _first_local_station(temp_recs)},
                       f, ensure_ascii=False, indent=2)
     except Exception as e:
         print(f"[fetch_cwa] debug dump 失敗：{e}", file=sys.stderr)
-
-    rain_recs = cwa_get(DATASETS["rainfall"], CountyName=COUNTY)
 
     def _rp(key):
         return parse_rain_hours(rain_recs, ["RainfallElement", key, "Precipitation"])
@@ -423,8 +457,7 @@ def main():
     with open("typhoon_status.json", "w", encoding="utf-8") as f:
         json.dump(status, f, ensure_ascii=False, indent=2)
 
-    # 累積真實天氣事件（K線標記）：颱風 + 大雨（已有 rain24）+ 低溫（需氣溫觀測）
-    temp_recs = cwa_get(DATASETS["temp_obs"], CountyName=COUNTY)
+    # 累積真實天氣事件（K線標記）：颱風 + 大雨（已有 rain24）+ 低溫（temp_recs 已於上方抓取）
     temp_min = parse_temp_min(temp_recs)
     events, todays = accumulate_events(status, temp_min, now)
 
