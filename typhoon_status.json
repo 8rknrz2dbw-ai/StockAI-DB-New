@@ -1,0 +1,14 @@
+{
+  "updated": "2026-07-09 10:01",
+  "source": "CWA opendata",
+  "active": false,
+  "name": null,
+  "warning": null,
+  "land_warning": false,
+  "invade_prob": null,
+  "eta_iso": null,
+  "eta_text": null,
+  "rain_24h_mm": null,
+  "rain_1h_mm": null,
+  "forecast_gust_ms": null
+}

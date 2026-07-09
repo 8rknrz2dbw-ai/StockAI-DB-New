@@ -1,0 +1,74 @@
+{
+  "key_set": true,
+  "generated": "2026-07-09T10:01:25.944790+08:00",
+  "W-C0034-001_warning": {
+    "info": {
+      "__list_len__": 1,
+      "__item__": {
+        "language": "str=zh-TW",
+        "category": "str=Met",
+        "event": "str=颱風",
+        "urgency": "str=Past",
+        "severity": "str=Minor",
+        "certainty": "str=Observed",
+        "eventCode": {
+          "valueName": "str=profile:CAP-TWP:Event:1.0",
+          "value": "str=typhoon"
+        },
+        "effective": "str=2025-11-12T20:30:00+08:00",
+        "onset": "str=2025-11-12T20:30:00+08:00",
+        "expires": "str=2025-11-12T20:40:00+08:00",
+        "senderName": "str=中央氣象署",
+        "headline": "str=解除颱風警報",
+        "description": {
+          "section": {
+            "__list_len__": 7,
+            "__item__": "…"
+          },
+          "typhoon-info": {
+            "__list_len__": 1,
+            "__item__": "…"
+          }
+        },
+        "web": "str=https://www.cwa.gov.tw/V8/C/P/Warning/FIFOWS.html",
+        "parameter": {
+          "__list_len__": 1,
+          "__item__": {
+            "valueName": "…",
+            "value": "…"
+          }
+        },
+        "area": {
+          "__list_len__": 22,
+          "__item__": {
+            "areaDesc": "…",
+            "geocode": "…"
+          }
+        }
+      }
+    }
+  },
+  "W-C0034-003_invasion": "NoneType=None",
+  "W-C0034-005_path": {
+    "dataid": "str=C0034-005",
+    "note": "str=西北太平洋地區及南海目前所有活動中熱帶氣旋之資訊-熱帶性低氣壓及颱風過去、現在及未來預報之資訊",
+    "TropicalCyclones": {
+      "TropicalCyclone": {
+        "__list_len__": 1,
+        "__item__": {
+          "Year": "str=2026",
+          "TyphoonName": "str=BAVI",
+          "CwaTyphoonName": "str=巴威",
+          "CwaTdNo": "str=10",
+          "CwaTyNo": "str=09",
+          "AnalysisData": {
+            "Fix": "…"
+          },
+          "ForecastData": {
+            "Fix": "…"
+          }
+        }
+      }
+    }
+  }
+}
