@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
-<title>二崙葉菜行情室 · 搶收預判</title>
+<title>豐雨無阻 · 葉菜行情 · 搶收預判</title>
 <style>
   :root{ font-size:19px; }
   :root[data-fs="s"]{ font-size:16px; } :root[data-fs="m"]{ font-size:19px; }
@@ -71,8 +71,11 @@
   .quote .chg.up{color:var(--r);} .quote .chg.dn{color:var(--g);} .quote .chg.mid{color:var(--y);}
   .quote .ohlc{display:flex;flex-wrap:wrap;gap:0.4rem 1.2rem;margin-top:0.6rem;font-size:0.82rem;color:var(--muted);}
   .quote .ohlc b{color:var(--paper);font-weight:800;}
-  .qchart{margin-top:0.7rem;} .qchart svg{width:100%;height:7rem;display:block;}
-  .qchart .cap{font-size:0.72rem;color:var(--muted);margin-top:0.25rem;}
+  .qchart{margin-top:0.7rem;} .qchart svg{width:100%;height:7.5rem;display:block;touch-action:none;}
+  .qchart .cap{font-size:0.7rem;color:var(--muted);margin-top:0.25rem;}
+  .qtip{font-size:0.82rem;color:var(--paper);margin-top:0.45rem;min-height:1.3rem;
+    background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:0.4rem 0.6rem;}
+  .qtip b{color:var(--leaf);} .qtip .ev{color:var(--cool);font-weight:700;}
 
   /* 田區搶收 */
   .alert{border:1px solid #5a2c1f;border-radius:var(--radius);
@@ -155,7 +158,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>二崙葉菜行情室<span class="dot">.</span></h1>
+    <h1>豐雨無阻<span class="dot">.</span></h1>
     <button class="gear" id="gear" aria-label="設定">⚙️</button>
     <div class="subline">
       <span id="updated">—</span><span id="mode" class="badge demo">示範資料</span>
@@ -313,6 +316,12 @@ function priceView(disp){const es=sortedEntries(seriesFor(disp));if(!es.length)r
   let cls,say;if(diff>10){cls="up";say="偏貴";}else if(diff<-10){cls="dn";say="偏便宜";}else{cls="mid";say="正常";}
   return {es,last,avg:last[1].avg,date:last[0],diff,cls,say};}
 
+/* ══════ 事件（節慶影響菜價；颱風/寒流/大雨事件待接天氣歷史） ══════ */
+const FESTIVALS=[["2025-01-29","春節"],["2025-04-04","清明"],["2025-05-31","端午"],["2025-10-06","中秋"],
+  ["2026-02-17","春節"],["2026-04-05","清明"],["2026-06-19","端午"],["2026-09-25","中秋"]];
+const FEST=Object.fromEntries(FESTIVALS);
+let QDATA=[],QGEO=null;
+
 /* ══════ 行情看板 ══════ */
 function renderBoard(){
   document.getElementById("mktName").textContent=MARKET;
@@ -338,18 +347,41 @@ function renderQuote(disp){
       <span class="chg ${cls} mono">${arrow} ${chg>=0?"+":""}${chg.toFixed(1)} (${chgP>=0?"+":""}${chgP.toFixed(1)}%)</span></div>
     <div class="ohlc"><span>最高 <b>${hi.toFixed(1)}</b></span><span>最低 <b>${lo.toFixed(1)}</b></span>
       <span>量 <b>${qty.toLocaleString()}</b> 公斤</span><span>對比常態 <b>${pv.diff>=0?"+":""}${pv.diff.toFixed(0)}%</b>(${pv.say})</span></div>
-    <div class="qchart">${ohlcSVG(es)}<div class="cap">近 45 個交易日：直條＝當日最高↔最低，圓點＝均價（紅漲綠跌）</div></div>
+    <div class="qchart">${ohlcSVG(es)}
+      <div class="cap">近 45 交易日 · 直條＝最高↔最低 · 圓點＝均價（紅漲綠跌）· 🔺爆量 🔹節慶</div>
+      <div class="qtip" id="qtip">👆 點圖上任一天，看日期與當日高/低/均價</div></div>
   </div>`;
+  attachQtip(box);
 }
-/* 股票式 OHLC 高低直條 + 均價點 */
-function ohlcSVG(es){const d=es.slice(-45);if(d.length<2)return"";
-  const W=640,H=150,pad=8;const highs=d.map(e=>e[1].high),lows=d.map(e=>e[1].low);
-  const hi=Math.max(...highs),lo=Math.min(...lows),rng=(hi-lo)||1;
+/* 股票式 OHLC 高低直條 + 均價點 + 事件標記 */
+function ohlcSVG(es){const d=es.slice(-45);QDATA=d;QGEO=null;if(d.length<2)return"";
+  const W=640,H=160,pad=10;const hi=Math.max(...d.map(e=>e[1].high)),lo=Math.min(...d.map(e=>e[1].low)),rng=(hi-lo)||1;
   const x=i=>pad+i*(W-2*pad)/(d.length-1);const y=v=>H-pad-(v-lo)/rng*(H-2*pad);
-  let bars="";for(let i=0;i<d.length;i++){const e=d[i][1];const prev=i?d[i-1][1].avg:e.avg;const c=e.avg>=prev?"#E4572E":"#7CC24A";
-    bars+=`<line x1="${x(i).toFixed(1)}" y1="${y(e.high).toFixed(1)}" x2="${x(i).toFixed(1)}" y2="${y(e.low).toFixed(1)}" stroke="${c}" stroke-width="2" opacity="0.55"/>`;
-    bars+=`<circle cx="${x(i).toFixed(1)}" cy="${y(e.avg).toFixed(1)}" r="2.2" fill="${c}"/>`;}
-  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="高低價走勢">${bars}</svg>`;}
+  const qmed=median(d.map(e=>e[1].qty).filter(Boolean))||0;QGEO={n:d.length,qmed};
+  let bars="",marks="";
+  for(let i=0;i<d.length;i++){const e=d[i][1];const prev=i?d[i-1][1].avg:e.avg;const c=e.avg>=prev?"#E4572E":"#7CC24A";const X=x(i);
+    bars+=`<line x1="${X.toFixed(1)}" y1="${y(e.high).toFixed(1)}" x2="${X.toFixed(1)}" y2="${y(e.low).toFixed(1)}" stroke="${c}" stroke-width="2" opacity="0.5"/>`;
+    bars+=`<circle cx="${X.toFixed(1)}" cy="${y(e.avg).toFixed(1)}" r="2.2" fill="${c}"/>`;
+    if(qmed&&e.qty>qmed*1.8) marks+=`<polygon points="${(X-3).toFixed(1)},4 ${(X+3).toFixed(1)},4 ${X.toFixed(1)},11" fill="#E8862E"/>`;
+    if(FEST[d[i][0]]) marks+=`<polygon points="${(X-3).toFixed(1)},13 ${(X+3).toFixed(1)},13 ${X.toFixed(1)},20" fill="#6FB0A6"/>`;}
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="高低價走勢，可點看當日">${bars}${marks}</svg>`;}
+/* K線點擊：顯示當日日期與高/低/均價 + 事件 */
+function attachQtip(box){
+  const svg=box.querySelector(".qchart svg");const tip=box.querySelector("#qtip");
+  if(!svg||!QGEO||!QDATA.length)return;
+  const upd=ev=>{const r=svg.getBoundingClientRect();
+    const cx=(ev.touches&&ev.touches[0])?ev.touches[0].clientX:ev.clientX;
+    let frac=(cx-r.left)/r.width;frac=Math.max(0,Math.min(1,frac));const i=Math.round(frac*(QGEO.n-1));
+    const e=QDATA[i];if(!e)return;const v=e[1],day=e[0];const evs=[];
+    if(QGEO.qmed&&v.qty>QGEO.qmed*1.8)evs.push("🔺爆量");if(FEST[day])evs.push("🔹"+FEST[day]);
+    tip.innerHTML=`<b>${day}</b>　高 ${v.high} / 低 ${v.low} / 均 <b>${v.avg}</b>　量 ${v.qty.toLocaleString()}`
+      +(evs.length?`　<span class="ev">${evs.join(" ")}</span>`:"");
+    if(ev.cancelable)ev.preventDefault();};
+  svg.addEventListener("pointerdown",upd);
+  svg.addEventListener("pointermove",e=>{if(e.buttons||e.pressure>0)upd(e);});
+  svg.addEventListener("touchstart",upd,{passive:false});
+  svg.addEventListener("touchmove",upd,{passive:false});
+}
 
 /* ══════ 田區搶收（前端即時計算） ══════ */
 const DECC={NOW:"r",ADVISED:"o",WATCH:"y",NORMAL:"g"};const DECT={NOW:"立即搶收",ADVISED:"建議搶收",WATCH:"觀望",NORMAL:"照常"};

@@ -233,7 +233,7 @@ def _parse_cwa_time(s):
     return None
 
 
-def _struct(o, depth=5):
+def _struct(o, depth=9):
     """回傳資料結構摘要（鍵名 + 型別 + 少量樣本），供校準欄位路徑用。"""
     if depth <= 0:
         return "…"
