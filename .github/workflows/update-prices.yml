@@ -5,9 +5,8 @@ name: 更新全台批發行情
 # 需要即時重抓時可用 workflow_dispatch 手動觸發。
 on:
   schedule:
-    - cron: '0 0 * * *'    # 08:00 台灣
-    - cron: '0 5 * * *'    # 13:00 台灣
-    - cron: '0 9 * * *'    # 17:00 台灣
+    - cron: '0 1 * * *'    # 09:00 台灣（早盤後）
+    - cron: '0 6 * * *'    # 14:00 台灣（補抓晚盤/漏抓）
   workflow_dispatch:
 
 permissions:
