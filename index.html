@@ -320,7 +320,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="V0022p00709";
+const VERSION="V0023p00709";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -418,7 +418,12 @@ function seriesFor(d){const w=wholesaleOf(d);return (w&&MDATA[MARKET]&&MDATA[MAR
 function sortedEntries(s){return Object.entries(s).filter(e=>e[1]&&e[1].avg>0).sort((a,b)=>a[0]<b[0]?-1:1);}  /* 濾掉 0/無效價 */
 function availableCrops(){const d=MDATA[MARKET]||{};return Object.keys(cropMap()).filter(disp=>{const w=cropMap()[disp];
   return d[w]&&Object.values(d[w]).some(v=>v&&v.avg>0);});}
-function watchCrops(){let w=S.watch(MARKET);const av=availableCrops();if(!Array.isArray(w))return av.slice();return w.filter(c=>av.includes(c));}  /* 勾選表：精確集合，允許清空 */
+/* 預設看板：各分類挑成交量最大的常用品項（避免大市場一次列上百種）；完整清單在設定勾選 */
+function defaultWatch(){const av=availableCrops();const lat=(INDEX&&INDEX.latest&&INDEX.latest[MARKET])||{};
+  const q=c=>{const w=cropMap()[c];return (lat[w]&&lat[w].qty)||0;};
+  const pick=(cat,n)=>av.filter(c=>cropCat(c)===cat).sort((a,b)=>q(b)-q(a)).slice(0,n);
+  return [...pick("蔬菜",16),...pick("水果",12)];}
+function watchCrops(){let w=S.watch(MARKET);const av=availableCrops();if(!Array.isArray(w))return defaultWatch();return w.filter(c=>av.includes(c));}  /* 未設定→預設常用；設定後為精確集合 */
 function priceView(disp){const es=sortedEntries(seriesFor(disp));if(!es.length)return null;const last=es[es.length-1];
   const base=median(es.slice(-90).map(e=>e[1].avg));const diff=base?((last[1].avg-base)/base*100):0;
   let cls,say;if(diff>10){cls="up";say="偏貴";}else if(diff<-10){cls="dn";say="偏便宜";}else{cls="mid";say="正常";}
