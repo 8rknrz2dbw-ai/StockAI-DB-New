@@ -119,11 +119,38 @@ def fetch(market, crop, start, end):
     return []
 
 
+def probe(market):
+    """探測：不帶作物名，抓一個市場近 14 天的原始回應，dump 欄位與樣本 → prices_probe.json。
+    用來確認 (1) API 支不支援『不帶 Crop』(2) 每筆有沒有『種類/分類』欄位，決定分類走法。"""
+    now = datetime.now(TZ)
+    params = {"StartDate": roc(now - timedelta(days=14)), "EndDate": roc(now), "Market": market}
+    r = requests.get(API, params=params, headers=UA, timeout=60)
+    r.raise_for_status()
+    j = r.json()
+    recs = j if isinstance(j, list) else (j.get("data") or j.get("RS") or j.get("Data") or [])
+    crops = sorted({str(g(x, "作物名稱", "CropName") or "") for x in recs})
+    out = {
+        "market": market, "count": len(recs),
+        "sample_keys": sorted(recs[0].keys()) if recs else [],   # ← 看有沒有『種類代碼』之類欄位
+        "sample_records": recs[:5],
+        "distinct_crops": crops[:80],
+        "distinct_crop_count": len(crops),
+    }
+    with open("prices_probe.json", "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=2)
+    print(f"[probe] {market}：{len(recs)} 筆、{len(crops)} 種作物；欄位={out['sample_keys']}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--days", type=int, default=730)   # 近 2 年，讓採收預判/走勢更穩
     ap.add_argument("--out", default="veg_prices.json")
+    ap.add_argument("--probe", default="", help="探測模式：指定市場短名（如 台北一），dump 原始欄位後結束")
     args = ap.parse_args()
+
+    if args.probe:
+        probe(args.probe)
+        return
 
     now = datetime.now(TZ)
     start = now - timedelta(days=args.days)
