@@ -47,7 +47,8 @@ data/
   update-prices.yml           批發行情每日 08/13/17 時(台灣)：fetch_prices → commit
                               (prices_index/prices)。抓 2 年較慢(~15 分)，故與天氣拆開、互不阻塞。
   ci.yml                      PR 檢查：py_compile + 決策 demo + notify dry-run + 前端關鍵元素
-  pages.yml                   （未用）Actions 版 Pages；實際採「Deploy from a branch: main」。
+（部署）                        採 GitHub 內建「Deploy from a branch: main」(pages-build-deployment
+                              自動觸發)；不用 Actions 版 pages.yml（權限受限會失敗，已移除）。
 .env.example                  CWA_API_KEY / LINE / webhook 範例
 ```
 
