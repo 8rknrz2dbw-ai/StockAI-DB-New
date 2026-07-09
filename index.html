@@ -59,6 +59,13 @@
   .tag{font-size:0.72rem;font-weight:800;padding:0.15rem 0.5rem;border-radius:999px;white-space:nowrap;}
   .tag.up{color:#2a1409;background:var(--r);} .tag.dn{color:#0e1a08;background:var(--g);} .tag.mid{color:#2a2306;background:var(--y);}
   .empty{background:var(--panel);border:1px dashed var(--line);border-radius:var(--radius);padding:1.2rem;text-align:center;color:var(--muted);font-size:0.9rem;}
+  /* 跨市場比價 */
+  .cmprow{display:flex;align-items:center;gap:0.6rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:0.75rem 0.9rem;margin-top:0.5rem;}
+  .cmprow.cheap{border-color:var(--leaf-dim);background:var(--panel2);}
+  .cmprow .rk{width:1.4rem;text-align:center;color:var(--muted);font-weight:800;flex:0 0 auto;}
+  .cmprow .mk{font-weight:800;font-size:1.05rem;} .cmprow .mk small{color:var(--muted);font-weight:400;font-size:.68rem;display:block;}
+  .cmprow .pv{margin-left:auto;font-size:1.35rem;font-weight:900;} .cmprow .pu{font-size:.65rem;color:var(--muted);}
+  .cmprow .best{font-size:.68rem;font-weight:800;color:#0e1a08;background:var(--g);padding:.12rem .5rem;border-radius:999px;flex:0 0 auto;}
 
   /* 股票式查價卡 */
   .quote{margin-top:0.9rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1rem;}
@@ -174,6 +181,7 @@
     <button class="tab on" data-t="market">行情看板</button>
     <button class="tab" data-t="harvest">田區搶收</button>
     <button class="tab" data-t="forecast">採收預判</button>
+    <button class="tab" data-t="compare" style="display:none">跨市場比價</button>
   </nav>
 
   <div class="view on" id="view-market">
@@ -185,6 +193,12 @@
   <div class="view" id="view-harvest">
     <div class="alert" id="hAlert"></div>
     <div class="cards" id="hCards"></div>
+  </div>
+
+  <div class="view" id="view-compare">
+    <p class="mkt-label">選品項，比全台各市場批發價（低→高，適合進貨）</p>
+    <div class="form" style="padding:0.6rem 0.7rem"><select id="cmpCrop"></select></div>
+    <div id="cmpResult"></div>
   </div>
 
   <div class="view" id="view-forecast">
@@ -206,6 +220,14 @@
 <div class="modal" id="modal">
   <div class="sheet" role="dialog" aria-label="設定">
     <h2>設定 <button class="close" id="closeSet" aria-label="關閉">✕</button></h2>
+
+    <div class="setblk"><h4>角色</h4>
+      <div class="fsrow" id="roleRow">
+        <button data-r="farmer">🧑‍🌾 蔬果農</button>
+        <button data-r="merchant">🧺 買菜商人</button>
+      </div>
+      <p class="hintline" id="roleHint"></p>
+    </div>
 
     <div class="setblk"><h4>字體大小</h4>
       <div class="fsrow" id="fsRow">
@@ -274,6 +296,7 @@ function cropList(){return Object.keys(GROWTH);}
 /* ══════ 設定/儲存 ══════ */
 const S={
   get fs(){return localStorage.getItem("vs_fs")||"l";}, set fs(v){localStorage.setItem("vs_fs",v);},
+  get role(){return localStorage.getItem("vs_role")||"farmer";}, set role(v){localStorage.setItem("vs_role",v);},
   get market(){return localStorage.getItem("vs_market")||"";}, set market(v){localStorage.setItem("vs_market",v);},
   watch(mk){try{return JSON.parse(localStorage.getItem("vs_watch_"+mk));}catch(e){return null;}},
   setWatch(mk,a){localStorage.setItem("vs_watch_"+mk,JSON.stringify(a));},
@@ -556,12 +579,41 @@ document.getElementById("closeSet").addEventListener("click",closeSettings);
 document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeSettings();});
 document.getElementById("fcGo").addEventListener("click",renderForecast);
 
-/* ══════ 分頁 ══════ */
-document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
-  const m=t.dataset.t;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===t));
-  ["market","harvest","forecast"].forEach(v=>document.getElementById("view-"+v).classList.toggle("on",v===m));
-  if(m==="forecast"&&!document.getElementById("fcCrop").options.length){cropList().forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;document.getElementById("fcCrop").appendChild(o);});document.getElementById("fcDate").value=todayISO();}
-}));
+/* ══════ 分頁 / 角色 ══════ */
+function ensureCropList(id){const sel=document.getElementById(id);if(sel.options.length)return;
+  cropList().forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;sel.appendChild(o);});}
+function switchTab(m){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x.dataset.t===m));
+  ["market","harvest","forecast","compare"].forEach(v=>document.getElementById("view-"+v).classList.toggle("on",v===m));
+  if(m==="forecast"){ensureCropList("fcCrop");if(!document.getElementById("fcDate").value)document.getElementById("fcDate").value=todayISO();}
+  if(m==="compare"){ensureCropList("cmpCrop");renderCompare();}
+}
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchTab(t.dataset.t)));
+
+function renderCompare(){
+  const crop=document.getElementById("cmpCrop").value;const box=document.getElementById("cmpResult");
+  const w=cropMap()[crop];const latest=(INDEX&&INDEX.latest)||{};const rows=[];
+  for(const mk of marketNames()){const lm=latest[mk];if(lm&&lm[w]&&lm[w].avg>0)rows.push({mk,avg:lm[w].avg,date:lm[w].date||""});}
+  if(!rows.length){box.innerHTML='<div class="empty">此品項目前各市場無行情資料。</div>';return;}
+  rows.sort((a,b)=>a.avg-b.avg);
+  box.innerHTML=rows.map((r,i)=>`<div class="cmprow ${i===0?'cheap':''}">
+    <span class="rk">${i+1}</span><span class="mk">${r.mk}<small>${r.date}</small></span>
+    <span class="pv mono">${r.avg.toFixed(1)}</span><span class="pu">元/公斤</span>
+    ${i===0?'<span class="best">最便宜</span>':''}</div>`).join("");
+}
+document.getElementById("cmpCrop").addEventListener("change",renderCompare);
+
+function applyRole(){
+  const r=S.role;
+  document.querySelectorAll("#roleRow button").forEach(b=>b.classList.toggle("on",b.dataset.r===r));
+  const show={market:true,harvest:r==="farmer",forecast:r==="farmer",compare:r==="merchant"};
+  document.querySelectorAll(".tab").forEach(t=>{t.style.display=show[t.dataset.t]?"":"none";});
+  const rh=document.getElementById("roleHint");
+  if(rh)rh.textContent=(r==="merchant")?"買菜商人：看批發價＋跨市場比價（找便宜進貨），隱藏田區/採收。":"蔬果農：行情＋田區搶收＋採收預判。";
+  const active=document.querySelector(".tab.on");
+  if(!active||active.style.display==="none")switchTab("market");
+}
+document.getElementById("roleRow").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.role=b.dataset.r;applyRole();});
 
 /* ══════ 啟動 ══════ */
 (async function(){
@@ -577,6 +629,7 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
   // 採收預判作物下拉
   const fc=document.getElementById("fcCrop");cropList().forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;fc.appendChild(o);});
   document.getElementById("fcDate").value=todayISO();
+  applyRole();   // 依角色顯示/隱藏分頁
 })();
 </script>
 </body>
