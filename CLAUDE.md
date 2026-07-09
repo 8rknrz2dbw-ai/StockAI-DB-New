@@ -26,6 +26,11 @@
 ```
 index.html                    單頁多分頁：行情看板／田區搶收／採收預判／跨市場比價(compare)。
                               角色可切「蔬果農／商人」(商人看批發、compare 分頁)。字體 s/m/l/xl。
+                              行情看板為「大卡列表→點進去詳細頁」：詳細頁含 K線走勢(日/週/月·2年·查價線)
+                              ＋「農產品交易行情」逐日明細卡(均價/上/中/下價/漲跌/成交量/農曆)，全站可切
+                              公斤/台斤(1台斤=0.6kg，S.unit)。農曆用內建 solar→lunar(2020-2035 表，已對節氣校驗)。
+                              頁首精簡(無大標題，只留更新/實際·示範/⚙️)，App 名巡田水見 PWA/頁尾。
+                              PWA：manifest.json+sw.js+icon，可加到主畫面、離線可用。
                               讀 prices_index.json + prices/NN.json / typhoon_status.json /
                               weather_events.json / harvest_advisory.json，全部可退回 demo。
 scripts/
@@ -35,6 +40,7 @@ scripts/
                               取代逐品項的上千次)。用回應的「種類代碼」自動分蔬菜/水果、濾掉花卉/休市/0 元。
                               作物名以 norm_crop() 收斂到母作物(鳳梨-金鑽→鳳梨)、量加權合併；同時把各品種
                               最新價存到 variants[母作物]={品種:價}供前端「全品種行情」。crop_map 為 identity。
+                              每日 series 存 avg/high(上價)/mid(中價,取 API「中價」量加權)/low(下價)/qty。
                               各市場僅出實際有交易者(葉菜市場只有葉菜、大市場整排水果+品種)。
                               --probe <市場> 可 dump 原始欄位(prices_probe.json)。latest 取最近 avg>0。
   fetch_cwa.py                抓 CWA 颱風/路徑潛勢/侵襲機率/雨量/氣溫 → typhoon_status.json；

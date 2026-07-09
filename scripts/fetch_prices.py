@@ -219,9 +219,10 @@ def main():
             if a <= 0:
                 continue
             hi = float(g(rec, "上價", "Upper_Price") or a)
+            md = float(g(rec, "中價", "Middle_Price") or a)
             lo = float(g(rec, "下價", "Lower_Price") or a)
             qty = float(g(rec, "交易量", "Trans_Quantity") or 0)
-            agg.setdefault(base, {}).setdefault(iso, []).append((a, hi, lo, qty))
+            agg.setdefault(base, {}).setdefault(iso, []).append((a, hi, lo, qty, md))
             cat[base] = c
             vl = varl.setdefault(base, {})
             if full not in vl or iso > vl[full][0]:
@@ -233,8 +234,10 @@ def main():
             for iso, lst in days.items():
                 tq = sum(x[3] for x in lst)
                 avg = (sum(x[0] * x[3] for x in lst) / tq) if tq > 0 else (sum(x[0] for x in lst) / len(lst))
+                # 中價：農業部 API 的「中價」欄位（量加權合併多品種）；無則退回均價
+                mid = (sum(x[4] * x[3] for x in lst) / tq) if tq > 0 else (sum(x[4] for x in lst) / len(lst))
                 series[iso] = {"avg": round(avg, 1), "high": round(max(x[1] for x in lst), 1),
-                               "mid": round(avg, 1), "low": round(min(x[2] for x in lst), 1),
+                               "mid": round(mid, 1), "low": round(min(x[2] for x in lst), 1),
                                "qty": round(tq)}
             mdata[crop] = series
         # 品種明細（≥2 個品種才存；標籤取「-」後的品種名）

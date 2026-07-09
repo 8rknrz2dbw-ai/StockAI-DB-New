@@ -45,6 +45,7 @@
     width:2.4rem;height:2.4rem;border-radius:50%;font-size:1.2rem;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
   .hgroup{margin-left:auto;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;justify-content:flex-end;}
   .upd{font-size:0.72rem;color:var(--muted);white-space:nowrap;}
+  header.slim{gap:0.5rem;padding-top:0.1rem;} header.slim .upd{margin-right:auto;}
   .badge{padding:0.15rem 0.55rem;border-radius:999px;font-size:0.7rem;font-weight:700;border:1px solid var(--line);white-space:nowrap;}
   .badge.demo{color:var(--y);border-color:#5a4d13;background:#231d07;}
   .badge.live{color:var(--leaf);border-color:#2f4a1c;background:#182312;}
@@ -130,6 +131,46 @@
   .anno .al{font-weight:700;} .anno .ap{margin-left:auto;font-weight:900;flex:0 0 auto;}
   .anno .ap.up{color:var(--r);} .anno .ap.dn{color:var(--g);}
   .tag.season{color:#d7e6df;background:#2f4a4a;}
+
+  /* === 行情看板 v1.2：大卡列表 + 點進去的詳細頁 === */
+  .boardtop{position:sticky;top:0;z-index:6;background:var(--bg);padding:0.2rem 0 0.55rem;
+    display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:0.7rem;}
+  .boardtop .catbar{flex:1;margin:0;}
+  .unitbar{margin-left:auto;flex:0 0 auto;}
+  .unitseg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px;flex:0 0 auto;}
+  .unitseg button{background:transparent;border:0;color:var(--muted);padding:0.42rem 0.9rem;border-radius:999px;font-weight:800;font-size:0.9rem;}
+  .unitseg button.on{background:var(--leaf);color:var(--bg);}
+  .mcard{display:flex;flex-direction:column;gap:0.4rem;width:100%;text-align:left;color:var(--paper);
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:0.9rem 1rem;margin-bottom:0.6rem;overflow:hidden;}
+  .mcard:active{background:var(--panel2);}
+  .mc-r1,.mc-r2{display:flex;align-items:center;gap:0.55rem;}
+  .mcard .mc-dot{width:0.8rem;height:0.8rem;border-radius:50%;flex:0 0 auto;}
+  .mcard .mc-dot.up{background:var(--r);} .mcard .mc-dot.dn{background:var(--g);} .mcard .mc-dot.mid{background:var(--y);}
+  .mcard .mc-nm{font-size:1.45rem;font-weight:900;letter-spacing:1px;min-width:0;line-height:1.15;}
+  .mcard .mc-px{margin-left:auto;display:flex;align-items:baseline;gap:0.12rem;white-space:nowrap;flex:0 0 auto;}
+  .mcard .mc-v{font-size:1.7rem;font-weight:900;} .mcard .mc-u{font-size:0.62rem;color:var(--muted);}
+  .mcard .mc-tag{min-width:0;} .mcard .mc-tag .tag{white-space:normal;}
+  .mcard .mc-chg{margin-left:auto;font-size:0.92rem;font-weight:800;white-space:nowrap;flex:0 0 auto;}
+  .mcard .mc-chg.up{color:var(--r);} .mcard .mc-chg.dn{color:var(--g);} .mcard .mc-chg.mid{color:var(--muted);}
+  .mcard .mc-none{color:var(--muted);font-size:0.95rem;margin-left:auto;}
+  .mcard .chev{color:var(--muted);font-size:1.5rem;font-weight:400;flex:0 0 auto;}
+  .dtl-bar{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem;}
+  .backbtn{background:var(--panel2);border:1px solid var(--line);color:var(--paper);font-weight:800;font-size:0.95rem;
+    padding:0.45rem 0.95rem;border-radius:999px;}
+  .dtl-bar .unitseg{margin-left:auto;}
+  .dd-title{font-weight:900;font-size:1.05rem;margin:1.1rem 0 0.65rem;padding-left:0.6rem;border-left:4px solid var(--leaf);}
+  .dcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0.7rem 0.85rem;margin-bottom:0.55rem;}
+  .dc-hd{font-size:0.76rem;color:var(--muted);margin-bottom:0.35rem;}
+  .dc-main{display:flex;align-items:baseline;gap:0.4rem 0.9rem;flex-wrap:wrap;}
+  .dc-main .dc-avg{font-size:0.82rem;color:var(--muted);}
+  .dc-main .dc-avg b{font-size:1.45rem;font-weight:900;margin-left:0.25rem;}
+  .dc-main .dc-avg b.up{color:var(--r);} .dc-main .dc-avg b.dn{color:var(--g);} .dc-main .dc-avg b.mid{color:var(--paper);}
+  .dc-main .dc-chg{font-weight:800;font-size:0.9rem;}
+  .dc-main .dc-chg.up{color:var(--r);} .dc-main .dc-chg.dn{color:var(--g);} .dc-main .dc-chg.mid{color:var(--muted);}
+  .dc-main .dc-qty{margin-left:auto;font-size:0.8rem;color:var(--muted);}
+  .dc-ohlc{display:flex;gap:0.5rem 1.3rem;margin-top:0.45rem;padding-top:0.4rem;border-top:1px dashed var(--line);
+    font-size:0.84rem;color:var(--muted);flex-wrap:wrap;}
+  .dc-ohlc b{color:var(--paper);font-weight:800;}
   /* 壓縮版面：對比常態＋日週月同列（tf 靠右） */
   .tfline{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;}
   .tfline .cmp{font-size:0.85rem;color:var(--muted);} .tfline .cmp b{color:var(--paper);}
@@ -253,12 +294,10 @@
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>巡田水</h1>
-    <div class="hgroup">
-      <span id="updated" class="upd">—</span><span id="mode" class="badge demo">示範資料</span>
-      <button class="gear" id="gear" aria-label="設定">⚙️</button>
-    </div>
+  <header class="slim">
+    <span id="updated" class="upd">—</span>
+    <span id="mode" class="badge demo">示範資料</span>
+    <button class="gear" id="gear" aria-label="設定">⚙️</button>
   </header>
 
   <nav class="tabs">
@@ -269,11 +308,14 @@
   </nav>
 
   <div class="view on" id="view-market">
-    <div class="mkt-top">
-      <div id="quote"></div>
-      <div class="catbar" id="catbar"></div>
+    <div id="mktList">
+      <div class="boardtop">
+        <div class="catbar" id="catbar"></div>
+        <div class="unitbar" id="unitbar"></div>
+      </div>
+      <div class="board" id="board"></div>
     </div>
-    <div class="board" id="board"></div>
+    <div id="mktDetail" style="display:none"></div>
   </div>
 
   <div class="view" id="view-harvest">
@@ -360,7 +402,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.1";
+const VERSION="v1.2";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -389,6 +431,7 @@ const S={
   get fs(){return localStorage.getItem("vs_fs")||"l";}, set fs(v){localStorage.setItem("vs_fs",v);},
   get role(){return localStorage.getItem("vs_role")||"farmer";}, set role(v){localStorage.setItem("vs_role",v);},
   get market(){return localStorage.getItem("vs_market")||"";}, set market(v){localStorage.setItem("vs_market",v);},
+  get unit(){return localStorage.getItem("vs_unit")||"kg";}, set unit(v){localStorage.setItem("vs_unit",v);},
   watch(mk){try{return JSON.parse(localStorage.getItem("vs_watch_"+mk));}catch(e){return null;}},
   setWatch(mk,a){localStorage.setItem("vs_watch_"+mk,JSON.stringify(a));},
   get fields(){try{const f=JSON.parse(localStorage.getItem("vs_fields"));return Array.isArray(f)?f:null;}catch(e){return null;}},
@@ -477,8 +520,37 @@ const FEST=Object.fromEntries(FESTIVALS);
 // 真實天氣事件標記樣式（date -> [{type,label}]，由 loadEvents 填入）
 let WEVENTS={};
 const WEV_STYLE={typhoon:{g:"🌀",c:"#B7472A"},rain:{g:"🌧",c:"#3B7DD8"},cold:{g:"❄",c:"#57B0C9"}};
-let QDATA=[],QGEO=null,QANNO=[],TF="D",CAT="蔬菜",QCOLLAPSED=false;
+let QDATA=[],QGEO=null,QANNO=[],TF="D",CAT="蔬菜";
+let UNIT=S.unit,MKTMODE="list",DETAIL=null;   // 公斤/台斤、列表/詳細、詳細頁作物
 const TF_LABEL={D:"日",W:"週",M:"月"};
+/* ── 單位：1 台斤 = 0.6 公斤 ── */
+function unitF(){return UNIT==="tai"?0.6:1;}
+function unitU(){return UNIT==="tai"?"元/台斤":"元/公斤";}
+function pxU(v){return v*unitF();}
+function unitToggleHTML(id){return `<div class="unitseg" id="${id}">`+
+  ["kg","tai"].map(u=>`<button data-u="${u}" class="${UNIT===u?'on':''}">${u==='kg'?'公斤':'台斤'}</button>`).join("")+`</div>`;}
+function bindUnitToggle(el){if(!el)return;el.querySelectorAll("button").forEach(b=>b.onclick=()=>setUnit(b.dataset.u));}
+function setUnit(u){if(u===UNIT)return;UNIT=u;S.unit=u;
+  if(MKTMODE==="detail"&&DETAIL)renderDetail(DETAIL);else renderBoard();}
+/* ── 農曆（base=2020 正月初一；涵蓋 2020–2035，已對照參考行情/節氣校驗） ── */
+const LUNAR={base:Date.UTC(2020,0,25),y0:2020,info:[
+  0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
+  0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0]};
+function _lInfo(y){return LUNAR.info[y-LUNAR.y0];}
+function _leapMonth(y){return _lInfo(y)&0xf;}
+function _leapDays(y){return _leapMonth(y)?((_lInfo(y)&0x10000)?30:29):0;}
+function _monthDays(y,m){return (_lInfo(y)&(0x10000>>m))?30:29;}
+function _yearDays(y){let s=348;for(let i=0x8000;i>0x8;i>>=1)s+=(_lInfo(y)&i)?1:0;return s+_leapDays(y);}
+function toLunar(iso){const p=String(iso).split("-").map(Number);if(p.length<3)return null;
+  let off=Math.round((Date.UTC(p[0],p[1]-1,p[2])-LUNAR.base)/86400000);
+  if(off<0||p[0]<LUNAR.y0||p[0]>=LUNAR.y0+LUNAR.info.length)return null;
+  let y=LUNAR.y0,t=0;while(y<LUNAR.y0+LUNAR.info.length){t=_yearDays(y);if(off<t)break;off-=t;y++;}
+  const leap=_leapMonth(y);let isLeap=false,m=1,dm=0;
+  for(m=1;m<13;m++){if(leap>0&&m===leap+1&&!isLeap){isLeap=true;m--;dm=_leapDays(y);}else dm=_monthDays(y,m);
+    if(off<dm)break;off-=dm;if(isLeap&&m===leap+1)isLeap=false;}
+  return {label:(isLeap?"閏":"")+m+"/"+(off+1)};}
+const WEEKDAY=["日","一","二","三","四","五","六"];
+function weekdayCh(iso){return WEEKDAY[new Date(iso+"T00:00:00Z").getUTCDay()];}
 /* 自動事件註記：挑出暴漲/暴跌，並找出「為什麼」（颱風/大雨/低溫/節慶/爆量） */
 function eventCause(day,v,qmed){
   const win=TF==="D"?4:TF==="W"?11:31;
@@ -512,90 +584,114 @@ function renderCatbar(){
   if(!present.includes(CAT))CAT=present[0];
   bar.style.display="flex";
   bar.innerHTML=present.map(c=>`<button data-c="${c}" class="${c===CAT?'on':''}">${c==='蔬菜'?'🥬 蔬菜':'🍉 水果'}</button>`).join("");
-  bar.querySelectorAll("button").forEach(b=>b.onclick=()=>{CAT=b.dataset.c;renderBoard();
-    const bl=boardList();if(bl.length&&(!CUR||cropCat(CUR)!==CAT))selectCrop(bl[0]);});
+  bar.querySelectorAll("button").forEach(b=>b.onclick=()=>{CAT=b.dataset.c;renderBoard();});
 }
 function boardList(){const w=watchCrops();return marketCats().length<=1?w:w.filter(d=>cropCat(d)===CAT);}
 function renderBoard(){
+  // 顯示列表、隱藏詳細（若剛從詳細返回）
+  const ld=document.getElementById("mktDetail");if(ld)ld.style.display="none";
+  const ll=document.getElementById("mktList");if(ll)ll.style.display="";
   renderCatbar();
+  const ub=document.getElementById("unitbar");if(ub){ub.innerHTML=unitToggleHTML("ubSeg");bindUnitToggle(ub);}
   const el=document.getElementById("board");el.innerHTML="";
   const list=boardList();
   if(!list.length){el.innerHTML='<div class="empty">此分類尚無品項。點右上 ⚙️ → 我的品項 → 新增。</div>';return;}
-  list.forEach(disp=>{const pv=priceView(disp);const b=document.createElement("button");b.className="prow"+(disp===CUR?" on":"");
-    const tag=pv?(pv.stale>14?`<span class="tag season">非當季·${pv.date.slice(5)}</span>`:`<span class="tag ${pv.cls}">${pv.say}</span>`):"";
-    b.innerHTML=pv?`<span class="dot ${pv.stale>14?'mid':pv.cls}"></span><span class="nm">${disp}</span>
-      <span class="px"><span class="v mono">${pv.avg.toFixed(1)}</span> <span class="u">元/公斤</span></span>
-      ${tag}<span class="chev">›</span>`
-      :`<span class="dot mid"></span><span class="nm">${disp}</span><span class="px"><span class="u">近期無成交</span></span>`;
-    b.onclick=()=>selectCrop(disp);el.appendChild(b);});
+  list.forEach(disp=>{const pv=priceView(disp);const card=document.createElement("button");card.className="mcard";
+    if(!pv){card.innerHTML=`<div class="mc-r1"><span class="mc-dot mid"></span><span class="mc-nm">${disp}</span>
+      <span class="mc-none">近期無成交</span><span class="chev">›</span></div>`;
+      card.onclick=()=>openDetail(disp);el.appendChild(card);return;}
+    const es=pv.es;const prev=es.length>1?es[es.length-2][1].avg:pv.avg;const chg=pv.avg-prev;const chgP=prev?chg/prev*100:0;
+    const dcls=chg>0.01?"up":chg<-0.01?"dn":"mid";const arr=chg>0.01?"▲":chg<-0.01?"▼":"＝";
+    const tag=pv.stale>14?`<span class="tag season">非當季·最後成交 ${pv.date.slice(5)}</span>`:`<span class="tag ${pv.cls}">${pv.say}</span>`;
+    card.innerHTML=`<div class="mc-r1">
+        <span class="mc-dot ${pv.stale>14?'mid':pv.cls}"></span>
+        <span class="mc-nm">${disp}</span>
+        <span class="mc-px"><span class="mc-v mono">${pxU(pv.avg).toFixed(1)}</span><span class="mc-u">${unitU()}</span></span>
+      </div>
+      <div class="mc-r2">
+        <span class="mc-tag">${tag}</span>
+        <span class="mc-chg ${dcls} mono">${arr}${chgP>=0?"+":""}${chgP.toFixed(1)}%</span>
+        <span class="chev">›</span>
+      </div>`;
+    card.onclick=()=>openDetail(disp);el.appendChild(card);});
 }
-function selectCrop(d){QCOLLAPSED=false;CUR=d;renderBoard();renderQuote(d);}
+function selectCrop(d){openDetail(d);}   // 相容舊呼叫
 /* 角色買賣價註記：批發拍賣是「一個成交價」，農夫扣手續費實得、商人進貨成本＋手續費 */
 const FEE_FARMER=0.06,FEE_MERCHANT=0.06;
-function roleNoteHTML(avg){
+function roleNoteHTML(avg){const u=unitU();
   return S.role==="merchant"
-    ? `<div class="rolenote merchant">🧺 進貨成本約 <b>${(avg*(1+FEE_MERCHANT)).toFixed(1)}</b> 元／公斤（拍賣均價＋承銷手續費估）· 零售自行加價</div>`
-    : `<div class="rolenote farmer">🧑‍🌾 農民實得約 <b>${(avg*(1-FEE_FARMER)).toFixed(1)}</b> 元／公斤（拍賣均價扣手續費估 ~6%）</div>`;
+    ? `<div class="rolenote merchant">🧺 進貨成本約 <b>${pxU(avg*(1+FEE_MERCHANT)).toFixed(1)}</b> ${u}（拍賣均價＋承銷手續費估）· 零售自行加價</div>`
+    : `<div class="rolenote farmer">🧑‍🌾 農民實得約 <b>${pxU(avg*(1-FEE_FARMER)).toFixed(1)}</b> ${u}（拍賣均價扣手續費估 ~6%）</div>`;
 }
 /* 全品種行情：點進去看該作物各品種最新價（如鳳梨-金鑽/牛奶…） */
 function variantHTML(disp){const w=wholesaleOf(disp);const vs=(MVAR[MARKET]||{})[w];if(!vs)return "";
   const items=Object.entries(vs).filter(e=>e[1]&&e[1].avg>0&&e[0]!=="其他"&&e[0]!==disp).sort((a,b)=>b[1].avg-a[1].avg);
   if(items.length<2)return "";
   return `<details class="varbox"><summary>🧺 ${disp} 全品種行情（${items.length} 種，點開）</summary>`+
-    items.map(([lab,v])=>`<div class="varrow"><span class="vl">${lab||"一般"}</span><span class="vp mono">${v.avg.toFixed(1)}</span><span class="vu">元/公斤 · ${(v.date||"").slice(5)}</span></div>`).join("")+`</details>`;
+    items.map(([lab,v])=>`<div class="varrow"><span class="vl">${lab||"一般"}</span><span class="vp mono">${pxU(v.avg).toFixed(1)}</span><span class="vu">${unitU()} · ${(v.date||"").slice(5)}</span></div>`).join("")+`</details>`;
 }
-function renderQuote(disp){
-  const box=document.getElementById("quote");const pv=priceView(disp);if(!pv){box.innerHTML="";return;}
+/* ── 點作物 → 詳細頁（K線走勢 + 農產品交易行情逐日明細）；‹返回 回列表 ── */
+function openDetail(disp){MKTMODE="detail";DETAIL=disp;CUR=disp;
+  const l=document.getElementById("mktList");if(l)l.style.display="none";
+  const d=document.getElementById("mktDetail");if(d)d.style.display="";
+  renderDetail(disp);window.scrollTo(0,0);}
+function closeDetail(){MKTMODE="list";DETAIL=null;
+  const d=document.getElementById("mktDetail");if(d)d.style.display="none";
+  const l=document.getElementById("mktList");if(l)l.style.display="";
+  renderBoard();window.scrollTo(0,0);}
+function renderDetail(disp){
+  const box=document.getElementById("mktDetail");const pv=priceView(disp);
+  if(!pv){box.innerHTML=`<div class="dtl-bar"><button class="backbtn" id="dtlBack">‹ 返回</button></div>
+    <div class="empty">「${disp}」近期無成交資料。</div>`;document.getElementById("dtlBack").onclick=closeDetail;return;}
   const es=pv.es;const prev=es.length>1?es[es.length-2][1].avg:pv.avg;const chg=pv.avg-prev;const chgP=prev?chg/prev*100:0;
   const cls=chg>0.01?"up":chg<-0.01?"dn":"mid";const arrow=chg>0.01?"▲":chg<-0.01?"▼":"＝";
-  const hi=pv.last[1].high,lo=pv.last[1].low,qty=pv.last[1].qty;
-  if(QCOLLAPSED){box.innerHTML=`<div class="qmini" id="qmini">
-    <span class="mnm">${disp}</span><span class="mpx ${cls} mono">${pv.avg.toFixed(1)}</span><span class="mu">元</span>
-    <span class="mchg ${cls} mono">${arrow}${chgP>=0?"+":""}${chgP.toFixed(1)}%</span>
-    <span class="mhint">▾ 點開</span></div>`;return;}
-  box.innerHTML=`<div class="quote">
-    <div class="grab"></div>
-    <h3><span>${disp}</span><span class="mktbadge">${MARKET} 批發</span></h3>
-    <div class="price"><span class="v ${cls} mono">${pv.avg.toFixed(1)}</span><span class="u">元/公斤</span>
-      <span class="chg ${cls} mono">${arrow} ${chg>=0?"+":""}${chg.toFixed(1)} (${chgP>=0?"+":""}${chgP.toFixed(1)}%)</span></div>
-    ${roleNoteHTML(pv.avg)}
-    <div class="ohlc"><span>最高 <b>${hi.toFixed(1)}</b></span><span>最低 <b>${lo.toFixed(1)}</b></span>
-      <span>量 <b>${qty.toLocaleString()}</b> 公斤</span></div>
-    <div class="tfline"><span class="cmp">對比常態 <b>${pv.diff>=0?"+":""}${pv.diff.toFixed(0)}%</b>(${pv.say})</span>
-      <div class="tfrow" id="tfrow">${["D","W","M"].map(t=>`<button data-tf="${t}" class="${TF===t?'on':''}">${TF_LABEL[t]}</button>`).join("")}</div></div>
-    ${pv.stale>14?`<div class="risk warn" style="margin-top:.5rem">🍂 非當季／近期停售：最後成交 <b>${pv.date}</b>（${pv.stale} 天前），以下為上次產季行情。</div>`:""}
-    <div class="qchart" id="qchart">${drawChart(es)}
-      <div class="axlabel px" id="pxLabel"></div><div class="axlabel dt" id="dtLabel"></div></div>
-    <div class="cap" id="qcap"></div>
-    <details class="annobox" id="annobox"><summary id="annosum">📌 為什麼漲跌</summary><div class="annos" id="qanno"></div></details>
+  const hi=pv.last[1].high,lo=pv.last[1].low,qty=pv.last[1].qty;const u=unitU();
+  box.innerHTML=`<div class="dtl-bar"><button class="backbtn" id="dtlBack">‹ 返回</button>${unitToggleHTML("dtlUnit")}</div>
+    <div class="quote">
+      <h3><span>${disp}</span><span class="mktbadge">${MARKET} 批發</span></h3>
+      <div class="price"><span class="v ${cls} mono">${pxU(pv.avg).toFixed(1)}</span><span class="u">${u}</span>
+        <span class="chg ${cls} mono">${arrow} ${chg>=0?"+":""}${pxU(chg).toFixed(1)} (${chgP>=0?"+":""}${chgP.toFixed(1)}%)</span></div>
+      ${roleNoteHTML(pv.avg)}
+      <div class="ohlc"><span>最高 <b>${pxU(hi).toFixed(1)}</b></span><span>最低 <b>${pxU(lo).toFixed(1)}</b></span>
+        <span>量 <b>${qty.toLocaleString()}</b> 公斤</span></div>
+      <div class="tfline"><span class="cmp">對比常態 <b>${pv.diff>=0?"+":""}${pv.diff.toFixed(0)}%</b>(${pv.say})</span>
+        <div class="tfrow" id="tfrow">${["D","W","M"].map(t=>`<button data-tf="${t}" class="${TF===t?'on':''}">${TF_LABEL[t]}</button>`).join("")}</div></div>
+      ${pv.stale>14?`<div class="risk warn" style="margin-top:.5rem">🍂 非當季／近期停售：最後成交 <b>${pv.date}</b>（${pv.stale} 天前），以下為上次產季行情。</div>`:""}
+      <div class="qchart" id="qchart">${drawChart(es)}
+        <div class="axlabel px" id="pxLabel"></div><div class="axlabel dt" id="dtLabel"></div></div>
+      <div class="cap" id="qcap"></div>
+      <details class="annobox" id="annobox"><summary id="annosum">📌 為什麼漲跌</summary><div class="annos" id="qanno"></div></details>
+      <div class="qtip" id="qtip">👆 橫滑查價（底部日期・右側價格）</div>
+    </div>
     ${variantHTML(disp)}
-    <div class="qtip" id="qtip">👆 橫滑查價（底部日期・右側價格）· ☝ 往上滑可收合卡片、騰出下方清單</div>
-  </div>`;
+    <div class="dd-title">📋 農產品交易行情 · 逐日明細</div>
+    ${dailyCardsHTML(es)}`;
   const cap=document.getElementById("qcap");if(cap)cap.innerHTML=capFor();
   const qa=document.getElementById("qanno");if(qa)qa.innerHTML=annoHTML(QANNO);
   const abox=document.getElementById("annobox"),asum=document.getElementById("annosum");
   if(abox){if(QANNO.length){abox.style.display="";asum.textContent=`📌 為什麼漲跌（${QANNO.length} 件大波動）`;}else abox.style.display="none";}
-  document.querySelectorAll("#tfrow button").forEach(b=>b.onclick=()=>{TF=b.dataset.tf;renderQuote(disp);});
+  document.getElementById("dtlBack").onclick=closeDetail;
+  bindUnitToggle(document.getElementById("dtlUnit"));
+  document.querySelectorAll("#tfrow button").forEach(b=>b.onclick=()=>{TF=b.dataset.tf;renderDetail(disp);});
   attachCross(box);
 }
-function collapseQuote(){if(QCOLLAPSED||!CUR)return;QCOLLAPSED=true;renderQuote(CUR);}
-function expandQuote(){if(!QCOLLAPSED||!CUR)return;QCOLLAPSED=false;renderQuote(CUR);}
-/* 查價卡手勢：往上滑掉→收合成迷你條(回彈)、點迷你條→展開；水平滑動仍是查價線 */
-function attachQuoteGesture(){
-  const box=document.getElementById("quote");if(!box)return;
-  let sy=0,sx=0,axis=null,dy=0,card=null,moved=false;
-  box.addEventListener("touchstart",e=>{const t=e.touches[0];sy=t.clientY;sx=t.clientX;axis=null;dy=0;moved=false;
-    card=box.querySelector(".quote,.qmini");if(card)card.style.transition="none";},{passive:true});
-  box.addEventListener("touchmove",e=>{if(!card)return;const t=e.touches[0];const ddy=t.clientY-sy,ddx=t.clientX-sx;
-    if(Math.abs(ddx)>6||Math.abs(ddy)>6)moved=true;
-    if(axis===null&&(Math.abs(ddy)>10||Math.abs(ddx)>10))axis=Math.abs(ddy)>Math.abs(ddx)*1.3?"v":"h";
-    if(axis==="v"&&!QCOLLAPSED&&ddy<0){dy=ddy;card.style.transform=`translateY(${Math.max(ddy*0.55,-170)}px)`;
-      card.style.opacity=String(Math.max(.25,1+ddy/260));e.preventDefault();e.stopPropagation();}},{capture:true,passive:false});
-  box.addEventListener("touchend",()=>{if(!card)return;const c=card;card=null;c.style.transition="";
-    if(QCOLLAPSED){return;}                                   // 迷你條靠 click 展開
-    if(axis==="v"&&dy<-55){c.style.transform="translateY(-135%)";c.style.opacity="0";setTimeout(collapseQuote,170);}
-    else{c.style.transform="";c.style.opacity="";}});          // 未達門檻→回彈
-  box.addEventListener("click",()=>{if(QCOLLAPSED)expandQuote();});
+/* 農產品交易行情逐日明細：近 12 個交易日，每日一卡（上/中/下/均價・漲跌・成交量・農曆） */
+function dailyCardsHTML(es){
+  const n=12;const s=es.slice(-(n+1));const rows=[];
+  for(let i=s.length-1;i>=1;i--){const [iso,v]=s[i];const prev=s[i-1][1].avg;
+    rows.push({iso,v,chg:v.avg-prev,chgP:prev?(v.avg-prev)/prev*100:0});}
+  if(!rows.length&&es.length){const [iso,v]=es[es.length-1];rows.push({iso,v,chg:0,chgP:0});}
+  return rows.map(r=>{const v=r.v;const cls=r.chg>0.01?"up":r.chg<-0.01?"dn":"mid";const arr=r.chg>0.01?"▲":r.chg<-0.01?"▼":"＝";
+    const p=r.iso.split("-");const lu=toLunar(r.iso);const mid=(v.mid!=null?v.mid:v.avg);
+    return `<div class="dcard">
+      <div class="dc-hd">${MARKET} · ${p[0]}/${+p[1]}/${+p[2]}（${weekdayCh(r.iso)}）${lu?` · 農曆 ${lu.label}`:""} · 單位：${UNIT==='tai'?'台斤':'公斤'}</div>
+      <div class="dc-main"><span class="dc-avg">均價 <b class="mono ${cls}">${pxU(v.avg).toFixed(1)}</b></span>
+        <span class="dc-chg ${cls} mono">${arr}${r.chg>=0?"+":""}${pxU(r.chg).toFixed(1)} (${r.chgP>=0?"+":""}${r.chgP.toFixed(0)}%)</span>
+        <span class="dc-qty">量 ${v.qty.toLocaleString()} 公斤</span></div>
+      <div class="dc-ohlc"><span>上價 <b class="mono">${pxU(v.high).toFixed(1)}</b></span>
+        <span>中價 <b class="mono">${pxU(mid).toFixed(1)}</b></span>
+        <span>下價 <b class="mono">${pxU(v.low).toFixed(1)}</b></span></div>
+    </div>`;}).join("");
 }
 function capFor(){const base=TF==="D"?"近 90 日":TF==="W"?"近 2 年·每週":"近 2 年·每月";
   return `${base}·均價折線(紅漲綠跌)·圓點＝重要事件`;}
@@ -848,7 +944,7 @@ function renderCropPick(){
     if(cb.checked){if(!w.includes(c))w.push(c);}else{w=w.filter(x=>x!==c);}
     S.setWatch(MARKET,w);cb.closest(".chip").classList.toggle("on",cb.checked);
     if(!cb.checked&&CUR===c){CUR=null;}
-    renderBoard();const bl=boardList();if((!CUR||!bl.includes(CUR))&&bl.length)selectCrop(bl[0]);else if(!bl.length)document.getElementById("quote").innerHTML="";
+    MKTMODE="list";DETAIL=null;renderBoard();   // 改看板清單後回列表
   });
 }
 function openFieldForm(f){editingId=f?f.id:null;const ff=document.getElementById("fieldForm");ff.classList.add("on");
@@ -878,9 +974,8 @@ document.getElementById("ffGeo").addEventListener("click",()=>{
 ["ffLat","ffLng"].forEach(id=>document.getElementById(id).addEventListener("input",updateFfArea));
 
 document.getElementById("fsRow").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.fs=b.dataset.v;applyFont();});
-document.getElementById("mktSelect").addEventListener("change",async e=>{MARKET=e.target.value;S.market=MARKET;CUR=null;
-  document.getElementById("quote").innerHTML="";await loadMarket(MARKET);renderBoard();renderSettings();
-  const l=boardList();if(l.length)selectCrop(l[0]);});
+document.getElementById("mktSelect").addEventListener("change",async e=>{MARKET=e.target.value;S.market=MARKET;
+  CUR=null;DETAIL=null;MKTMODE="list";await loadMarket(MARKET);renderBoard();renderSettings();});
 document.getElementById("fieldAddBtn").addEventListener("click",()=>openFieldForm(null));
 document.getElementById("ffSave").addEventListener("click",saveField);
 document.getElementById("gear").addEventListener("click",openSettings);
@@ -933,7 +1028,7 @@ function applyRole(){
   if(!active||active.style.display==="none")switchTab("market");
 }
 document.getElementById("roleRow").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
-  S.role=b.dataset.r;applyRole();if(CUR)renderQuote(CUR);});   // #3 角色切換即時更新查價卡買賣價
+  S.role=b.dataset.r;applyRole();if(MKTMODE==="detail"&&DETAIL)renderDetail(DETAIL);});   // 角色切換即時更新詳細頁買賣價
 
 /* ══════ 啟動 ══════ */
 (async function(){
@@ -945,13 +1040,12 @@ document.getElementById("roleRow").addEventListener("click",e=>{const b=e.target
   const names=marketNames();MARKET=(S.market&&names.includes(S.market))?S.market:names[0];
   await loadMarket(MARKET);
   WEVENTS=await loadEvents();
-  renderBoard();const bl=boardList();if(bl.length)selectCrop(bl[0]);
+  renderBoard();   // 預設進看板清單；點一項才進詳細頁（K線+逐日明細）
   WEATHER=await loadWeather();renderHarvest();
   // 採收預判作物下拉
   const fc=document.getElementById("fcCrop");cropList().forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;fc.appendChild(o);});
   document.getElementById("fcDate").value=todayISO();
   applyRole();   // 依角色顯示/隱藏分頁
-  attachQuoteGesture();   // 查價卡往上滑收合手勢
 })();
 /* PWA：註冊 Service Worker（可安裝到主畫面、離線可用）。失敗不影響網頁運作。 */
 if("serviceWorker" in navigator){
