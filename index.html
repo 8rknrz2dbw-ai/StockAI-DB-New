@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
-<title>豐雨無阻</title>
+<title>巡田水</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%A7%EF%B8%8F%3C/text%3E%3C/svg%3E" />
 <meta name="theme-color" content="#12160E" />
 <style>
@@ -247,7 +247,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>豐雨無阻</h1>
+    <h1>巡田水</h1>
     <div class="hgroup">
       <span id="updated" class="upd">—</span><span id="mode" class="badge demo">示範資料</span>
       <button class="gear" id="gear" aria-label="設定">⚙️</button>
@@ -353,7 +353,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="V0027p00709";
+const VERSION="v1.0";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -931,7 +931,7 @@ document.getElementById("roleRow").addEventListener("click",e=>{const b=e.target
 /* ══════ 啟動 ══════ */
 (async function(){
   applyFont();
-  const vl=document.getElementById("verLabel");if(vl)vl.textContent=VERSION;
+  const vl=document.getElementById("verLabel");if(vl)vl.textContent="巡田水 "+VERSION;
   const {index,live}=await loadIndex();INDEX=index;
   document.getElementById("updated").textContent="更新："+(index.updated||"—");
   const mode=document.getElementById("mode");mode.className="badge "+(live?"live":"demo");mode.textContent=live?"實際資料":"示範資料";

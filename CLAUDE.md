@@ -1,4 +1,4 @@
-# CLAUDE.md — 豐雨無阻（原「二崙葉菜行情室」）＋ 颱風搶收預判系統
+# CLAUDE.md — 巡田水（原「豐雨無阻」／「二崙葉菜行情室」）＋ 颱風搶收預判系統
 
 給未來 Claude 工作階段的專案指引。
 
@@ -104,4 +104,6 @@ python3 scripts/fetch_cwa.py            # 需 CWA_API_KEY，否則寫 active=fal
 - 開發分支：`claude/vegetable-harvest-weather-system-tjpqnj`
 - 資料 JSON 由 `update-data.yml`（天氣，30 分）與 `update-prices.yml`（行情，每日數次）
   兩支排程分別提交到 Pages 所服務的 main 分支根（見 README 部署段）。
-- 版本號在 `index.html` 的 `const VERSION`（頁尾設定顯示，淺灰）；每次前端有感更新時手動遞增。
+- 版本號在 `index.html` 的 `const VERSION`（頁尾顯示「巡田水 vX.Y」，淺灰置中）。
+  採語意化版號 SemVer-lite：`v1.0` 為巡田水改名後的重啟基準，每次前端有感更新遞增次版號
+  （v1.0→v1.1→…），大改版時進位主版號。刻意不用日期式版號，以免和右上「更新：<資料時間>」混淆。
