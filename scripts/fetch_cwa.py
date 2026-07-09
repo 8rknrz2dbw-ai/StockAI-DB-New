@@ -71,90 +71,114 @@ def haversine_km(lat1, lng1, lat2, lng2):
     return 2 * R * math.asin(math.sqrt(a))
 
 
-# ─────────────── 各資料集解析（best-effort；TODO 標註待驗證欄位路徑） ───────────────
-def parse_typhoon_warning(records):
-    """回傳 (active, name, warning_text, land_warning:bool)。"""
-    if not records:
-        return False, None, None, False
-    # TODO 驗證：實際結構常為 records.typhoon[] 或 records.tropicalCyclones.tropicalCyclone[]
-    tcs = (records.get("typhoon") or records.get("tropicalCyclones", {}).get("tropicalCyclone")
-           or records.get("record") or [])
+# ─────────────── 颱風解析（W-C0034-005 路徑潛勢；已用巴威真實回應校準） ───────────────
+def _num(x):
+    try:
+        return float(x)
+    except (TypeError, ValueError):
+        return None
+
+
+def _cyclone_list(path_records):
+    """取出所有活動中熱帶氣旋（records.TropicalCyclones.TropicalCyclone[]）。"""
+    if not isinstance(path_records, dict):
+        return []
+    cont = path_records.get("TropicalCyclones") or path_records.get("tropicalCyclones") or {}
+    tcs = (cont.get("TropicalCyclone") or cont.get("tropicalCyclone")) if isinstance(cont, dict) else None
     if isinstance(tcs, dict):
         tcs = [tcs]
-    if not tcs:
-        return False, None, None, False
-    tc = tcs[0]
-    name = tc.get("typhoonName") or tc.get("cwaTyphoonName") or tc.get("cwaTdNo") or "颱風"
-    # 警報種類文字（海上／海上陸上）——欄位名依實際回應調整
-    wtxt = (tc.get("warningType") or tc.get("cwaWarningType")
-            or tc.get("warning") or "颱風警報")
-    land = "陸上" in str(wtxt)
-    return True, name, wtxt, land
+    return tcs or []
 
 
-def parse_invasion_prob(records, county=COUNTY):
-    """回傳雲林一帶 72hr 暴風圈侵襲機率 0..1（找不到回 None）。"""
-    if not records:
-        return None
-    # TODO 驗證：常見於 records...['area'|'locations'] 內 {locationName, probability}
-    def walk(o):
-        found = []
-        if isinstance(o, dict):
-            ln = o.get("locationName") or o.get("countyName") or o.get("areaName")
-            pr = o.get("probability") or o.get("value") or o.get("percent")
-            if ln and pr is not None and (county in str(ln) or "雲林" in str(ln)):
-                try:
-                    found.append(float(str(pr).replace("%", "")))
-                except ValueError:
-                    pass
-            for v in o.values():
-                found += walk(v)
-        elif isinstance(o, list):
-            for v in o:
-                found += walk(v)
-        return found
-    vals = walk(records)
-    if not vals:
-        return None
-    p = max(vals)
-    return round(p / 100 if p > 1 else p, 2)
+def _forecast_track(tc):
+    """未來逐時預報點：InitialTime+ForecastHour 為時間，Circle15ms.Radius 為 7 級暴風圈半徑。"""
+    fd = tc.get("ForecastData") or tc.get("forecastData") or {}
+    fixes = (fd.get("Fix") or fd.get("fix")) if isinstance(fd, dict) else None
+    if isinstance(fixes, dict):
+        fixes = [fixes]
+    out = []
+    for fx in fixes or []:
+        lat = _num(fx.get("CoordinateLatitude"))
+        lng = _num(fx.get("CoordinateLongitude"))
+        if lat is None or lng is None:
+            continue
+        dt = _parse_cwa_time(str(fx.get("InitialTime") or ""))
+        fh = _num(fx.get("ForecastHour"))
+        t = dt + timedelta(hours=fh) if (dt and fh is not None) else dt
+        c15 = fx.get("Circle15ms") or {}
+        c25 = fx.get("Circle25ms") or {}
+        out.append({"t": t, "lat": lat, "lng": lng,
+                    "r15": _num(c15.get("Radius")) or 0.0 if isinstance(c15, dict) else 0.0,
+                    "r25": _num(c25.get("Radius")) or 0.0 if isinstance(c25, dict) else 0.0,
+                    "gust": _num(fx.get("MaxGustSpeed"))})
+    return out
 
 
-def parse_path_eta(records, ref_lat=REF_LAT, ref_lng=REF_LNG):
-    """由路徑潛勢逐時中心 + 暴風半徑，估暴風圈到達參考點的時間。
-    回傳 (eta_iso, eta_text)。TODO：欄位路徑需以真實回應校準。"""
-    if not records:
-        return None, None
-    # 嘗試抓出一串 {時間, 緯度, 經度, 七級暴風半徑km}
-    fixes = []
+def eval_typhoon(path_records, now, ref_lat=REF_LAT, ref_lng=REF_LNG):
+    """用逐時預報位置 + 暴風圈半徑，算對雲林的侵襲機率/到達時間。回傳最具威脅的颱風 dict 或 None。"""
+    best = None
+    for tc in _cyclone_list(path_records):
+        name = tc.get("CwaTyphoonName") or tc.get("TyphoonName") or "颱風"
+        track = _forecast_track(tc)
+        if not track:
+            continue
+        min_dist = 1e9
+        eta_iso = eta_text = gust = None
+        prob = 0.0
+        for p in track:
+            d = haversine_km(ref_lat, ref_lng, p["lat"], p["lng"])
+            min_dist = min(min_dist, d)
+            r15 = p["r15"]
+            if r15 and d <= r15 and eta_iso is None and p["t"] and p["t"] > now:
+                eta_iso = p["t"].isoformat()
+                eta_text = f"約 {round((p['t'] - now).total_seconds() / 3600)} 小時後"
+                gust = p["gust"]
+            if p["r25"] and d <= p["r25"]:
+                pr = 0.9
+            elif r15 and d <= r15:
+                pr = 0.65
+            elif r15 and d <= r15 + 100:
+                pr = 0.35
+            elif r15 and d <= r15 + 300:
+                pr = 0.12
+            else:
+                pr = 0.0
+            prob = max(prob, pr)
+        # 暴風圈未覆蓋雲林時，僅以距離給極小「接近度」（不足以觸發搶收，僅供顯示）
+        if prob == 0.0 and min_dist < 400:
+            prob = round(0.12 * (1 - min_dist / 400), 2)
+        cand = {"name": name, "min_dist": round(min_dist), "invade_prob": round(prob, 2),
+                "eta_iso": eta_iso, "eta_text": eta_text, "gust": gust}
+        if best is None or cand["invade_prob"] > best["invade_prob"] or \
+                (cand["invade_prob"] == best["invade_prob"] and cand["min_dist"] < best["min_dist"]):
+            best = cand
+    return best
 
-    def walk(o):
-        if isinstance(o, dict):
-            lat = o.get("latitude") or o.get("lat")
-            lng = o.get("longitude") or o.get("lon") or o.get("lng")
-            t = (o.get("fixTime") or o.get("dateTime") or o.get("validTime")
-                 or o.get("time"))
-            rad = (o.get("radiusOf70PercentProbability")
-                   or o.get("circleOfProbability") or o.get("radius"))
-            if lat and lng and t:
-                try:
-                    fixes.append((str(t), float(lat), float(lng),
-                                  float(rad) if rad else 250.0))
-                except (TypeError, ValueError):
-                    pass
-            for v in o.values():
-                walk(v)
-        elif isinstance(o, list):
-            for v in o:
-                walk(v)
-    walk(records)
-    for tstr, lat, lng, rad in sorted(fixes, key=lambda x: x[0]):
-        if haversine_km(ref_lat, ref_lng, lat, lng) <= rad:
-            dt = _parse_cwa_time(tstr)
-            if dt:
-                hrs = round((dt - datetime.now(TZ)).total_seconds() / 3600)
-                return dt.isoformat(), f"約 {hrs} 小時後"
-    return None, None
+
+def parse_warning(warn_records, now, county=COUNTY):
+    """W-C0034-001：是否有生效中、涵蓋雲林的颱風警報（排除『解除』與過期）。"""
+    if not isinstance(warn_records, dict):
+        return {"land_warning": False, "text": None}
+    infos = warn_records.get("info")
+    if isinstance(infos, dict):
+        infos = [infos]
+    for info in infos or []:
+        hl = str(info.get("headline") or "")
+        if "解除" in hl:
+            continue
+        exp = _parse_cwa_time(str(info.get("expires") or ""))
+        if exp and exp < now:
+            continue
+        areas = info.get("area")
+        if isinstance(areas, list):
+            covers = any(county in str(a.get("areaDesc", "")) or "雲林" in str(a) for a in areas)
+        elif isinstance(areas, dict):
+            covers = county in str(areas.get("areaDesc", ""))
+        else:
+            covers = True
+        if covers:
+            return {"land_warning": True, "text": hl or "颱風警報"}
+    return {"land_warning": False, "text": None}
 
 
 def parse_rain_24h(records, county=COUNTY):
@@ -264,38 +288,49 @@ def main():
     except Exception as e:
         print(f"[fetch_cwa] debug dump 失敗：{e}", file=sys.stderr)
 
-    active, name, wtxt, land = parse_typhoon_warning(warn)
-
-    invade_prob = eta_iso = eta_text = None
-    if active:
-        invade_prob = parse_invasion_prob(inv)
-        eta_iso, eta_text = parse_path_eta(path)
     rain_recs = cwa_get(DATASETS["rainfall"], CountyName=COUNTY)
     rain24 = parse_rain_24h(rain_recs)
     rain1 = parse_rain_hours(rain_recs, ["RainfallElement", "Past1hr", "Precipitation"])   # 瞬間(1hr)雨量
 
-    status = {
-        "updated": now.strftime("%Y-%m-%d %H:%M"),
-        "source": "CWA opendata",
-        "active": bool(active),
-        "name": name,
-        "warning": wtxt,
-        "land_warning": land,
-        "invade_prob": invade_prob,
-        "eta_iso": eta_iso,
-        "eta_text": eta_text or ("警報中" if active else None),
-        "rain_24h_mm": rain24,
-        "rain_1h_mm": rain1,       # 瞬間(1hr)雨量：短延時強降雨→局部淹水指標
-        "forecast_gust_ms": None,  # TODO v2：接 F-C0034-005 風力預測
-    }
+    typ = eval_typhoon(path, now)
+    warn_info = parse_warning(warn, now)
+
+    if typ:
+        # 對雲林有威脅（發布警報 或 侵襲機率≥10%）才進「搶收模式」；否則只「追蹤中」
+        threatening = warn_info["land_warning"] or (typ["invade_prob"] or 0) >= 0.10
+        status = {
+            "updated": now.strftime("%Y-%m-%d %H:%M"),
+            "source": "CWA opendata (W-C0034-005 路徑潛勢)",
+            "active": bool(threatening),
+            "tracking": (not threatening),
+            "name": typ["name"],
+            "warning": (warn_info["text"] if warn_info["land_warning"]
+                        else ("颱風接近中" if threatening else "追蹤中，對雲林暫無直接威脅")),
+            "land_warning": warn_info["land_warning"],
+            "invade_prob": typ["invade_prob"],
+            "eta_iso": typ["eta_iso"],
+            "eta_text": typ["eta_text"] or "追蹤中",
+            "min_dist_km": typ["min_dist"],
+            "rain_24h_mm": rain24,
+            "rain_1h_mm": rain1,
+            "forecast_gust_ms": typ["gust"],
+        }
+    else:
+        status = {
+            "updated": now.strftime("%Y-%m-%d %H:%M"), "source": "CWA opendata",
+            "active": False, "tracking": False, "name": None, "warning": None,
+            "land_warning": False, "invade_prob": None, "eta_iso": None, "eta_text": None,
+            "min_dist_km": None, "rain_24h_mm": rain24, "rain_1h_mm": rain1, "forecast_gust_ms": None,
+        }
+
     with open("typhoon_status.json", "w", encoding="utf-8") as f:
         json.dump(status, f, ensure_ascii=False, indent=2)
 
-    print(f"[fetch_cwa] typhoon_status.json：active={status['active']} "
-          f"name={name} invade={invade_prob} eta={eta_text} rain24={rain24}")
-    if not os.environ.get("CWA_API_KEY"):
-        print("[fetch_cwa] 未設 CWA_API_KEY → 寫出 active=false 安全狀態（管線可繼續跑 demo）。",
-              file=sys.stderr)
+    print(f"[fetch_cwa] key_set={key_set} typhoon={status['name']} active={status['active']} "
+          f"tracking={status.get('tracking')} invade={status['invade_prob']} eta={status['eta_text']} "
+          f"dist={status.get('min_dist_km')}km rain24={rain24} rain1={rain1}")
+    if not key_set:
+        print("[fetch_cwa] 未設 CWA_API_KEY → active=false 安全狀態。", file=sys.stderr)
 
 
 if __name__ == "__main__":
