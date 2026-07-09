@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
 <title>二崙葉菜行情室 · 搶收預判</title>
 <style>
   :root{ font-size:19px; }
@@ -23,7 +23,8 @@
   input,select{font-family:inherit;}
   :focus-visible{outline:3px solid var(--leaf);outline-offset:2px;}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
-  .wrap{max-width:760px;margin:0 auto;padding:0.9rem 0.8rem 3rem;}
+  .wrap{max-width:760px;margin:0 auto;
+    padding:calc(0.9rem + env(safe-area-inset-top)) calc(0.8rem + env(safe-area-inset-right)) 3rem calc(0.8rem + env(safe-area-inset-left));}
 
   header{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;padding-bottom:0.7rem;border-bottom:1px solid var(--line);}
   header h1{font-size:1.35rem;font-weight:900;margin:0;letter-spacing:.5px;line-height:1.2;}
@@ -422,23 +423,24 @@ setInterval(hTick,1000);
 
 /* ══════ 採收價預判 ══════ */
 function renderForecast(){
-  const es=(function(disp){return sortedEntries(seriesFor(disp));});
   const crop=document.getElementById("fcCrop").value;const plant=document.getElementById("fcDate").value||todayISO();
   const box=document.getElementById("fcResult");
   const T=growthDays(crop,plant);const harvestISO=addDaysISO(plant,T);const hw=weekOf(harvestISO);
   const series=sortedEntries(seriesFor(crop));
-  const near=series.filter(e=>{const w=weekOf(e[0]);return Math.abs(w-hw)<=1||Math.abs(w-hw)>=51;}).map(e=>e[1].avg);
   const month=+harvestISO.split("-")[1];const typ=month>=6&&month<=10;
-  if(near.length<3){
-    box.innerHTML=`<div class="fcresult"><h3>${crop}｜預計採收 ${harvestISO}</h3>
-      <div class="row">生育期約 <b>${T}</b> 天。此作物在 ${MARKET} 近一年<b>同期資料不足</b>，暫無法可靠推估價格。</div>
-      <div class="risk ${typ?"warn":"ok"}">${typ?"⚠ 採收落在颱風季（6–10月），行情波動大：災前搶收壓價、災後可能大漲，但泡水風險高。":"採收在非颱風季，價格相對穩定。"}</div></div>`;
-    return;}
-  const med=median(near),lo=pctile(near,.25),hi=pctile(near,.75);
-  box.innerHTML=`<div class="fcresult"><h3>${crop}｜預計採收 ${harvestISO}</h3>
-    <div class="band mono">${lo.toFixed(0)}–${hi.toFixed(0)} <span class="u">元/公斤</span></div>
-    <div class="row">近一年同期中位價約 <b>${med.toFixed(1)}</b> 元/公斤（生育期約 ${T} 天）</div>
-    <div class="risk ${typ?"warn":"ok"}">${typ?"⚠ 採收落在颱風季（6–10月）：災前大家搶收會壓價，災後若減產則可能大漲——地勢高、能撐住的田較有機會賣好價。":"✓ 採收在非颱風季，價格相對穩定，可安心規劃。"}</div></div>`;
+  const riskHtml=`<div class="risk ${typ?"warn":"ok"}">${typ?"⚠ 採收落在颱風季（6–10月）：災前大家搶收會壓價，災後若減產則可能大漲——地勢高、能撐住的田較有機會賣好價。":"✓ 採收在非颱風季，價格相對穩定，可安心規劃。"}</div>`;
+  const head=`<h3>${crop}｜預計採收 ${harvestISO}</h3>`;
+  if(!series.length){box.innerHTML=`<div class="fcresult">${head}<div class="row">此作物在 ${MARKET} 目前<b>沒有行情資料</b>，無法推估。</div>${riskHtml}</div>`;return;}
+  const near=series.filter(e=>{const d=Math.abs(weekOf(e[0])-hw);return d<=2||d>=50;}).map(e=>e[1].avg);
+  let band,note;
+  if(near.length>=5){const med=median(near),lo=pctile(near,.25),hi=pctile(near,.75);
+    band=`${lo.toFixed(0)}–${hi.toFixed(0)}`;note=`近兩年<b>同期</b>中位價約 <b>${med.toFixed(1)}</b> 元/公斤（同期樣本 ${near.length} 天，生育期約 ${T} 天）`;}
+  else{const recent=series.slice(-90).map(e=>e[1].avg);
+    if(recent.length>=5){const med=median(recent),lo=pctile(recent,.25),hi=pctile(recent,.75);
+      band=`${lo.toFixed(0)}–${hi.toFixed(0)}`;note=`⚠ 同期資料少（僅 ${near.length} 天，此作物在此季少見），改用<b>近三個月</b>行情粗估：中位約 <b>${med.toFixed(1)}</b> 元/公斤`;}
+    else{box.innerHTML=`<div class="fcresult">${head}<div class="row">生育期約 <b>${T}</b> 天。此作物在 ${MARKET} <b>資料太少</b>，暫無法推估。</div>${riskHtml}</div>`;return;}}
+  box.innerHTML=`<div class="fcresult">${head}<div class="band mono">${band} <span class="u">元/公斤</span></div>
+    <div class="row">${note}</div>${riskHtml}</div>`;
 }
 
 /* ══════ 設定 UI ══════ */

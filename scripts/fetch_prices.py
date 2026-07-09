@@ -77,7 +77,7 @@ def fetch(market, crop, start, end):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--days", type=int, default=365)
+    ap.add_argument("--days", type=int, default=730)   # 近 2 年，讓採收預判/走勢更穩
     ap.add_argument("--out", default="veg_prices.json")
     args = ap.parse_args()
 

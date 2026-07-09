@@ -233,16 +233,43 @@ def _parse_cwa_time(s):
     return None
 
 
+def _struct(o, depth=5):
+    """回傳資料結構摘要（鍵名 + 型別 + 少量樣本），供校準欄位路徑用。"""
+    if depth <= 0:
+        return "…"
+    if isinstance(o, dict):
+        return {k: _struct(v, depth - 1) for k, v in list(o.items())[:25]}
+    if isinstance(o, list):
+        return {"__list_len__": len(o), "__item__": _struct(o[0], depth - 1)} if o else "[]"
+    s = str(o)
+    return f"{type(o).__name__}={s[:60]}"
+
+
 def main():
     now = datetime.now(TZ)
+    key_set = bool(os.environ.get("CWA_API_KEY"))
 
     warn = cwa_get(DATASETS["typhoon_warning"])
+    inv = cwa_get(DATASETS["invasion_prob"])
+    path = cwa_get(DATASETS["path_potential"])
+
+    # 除錯：把三個颱風資料集的真實結構寫出，供校準 parse_*（欄位路徑當初標 TODO）
+    try:
+        with open("cwa_debug.json", "w", encoding="utf-8") as f:
+            json.dump({"key_set": key_set, "generated": now.isoformat(),
+                       "W-C0034-001_warning": _struct(warn),
+                       "W-C0034-003_invasion": _struct(inv),
+                       "W-C0034-005_path": _struct(path)},
+                      f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"[fetch_cwa] debug dump 失敗：{e}", file=sys.stderr)
+
     active, name, wtxt, land = parse_typhoon_warning(warn)
 
     invade_prob = eta_iso = eta_text = None
     if active:
-        invade_prob = parse_invasion_prob(cwa_get(DATASETS["invasion_prob"]))
-        eta_iso, eta_text = parse_path_eta(cwa_get(DATASETS["path_potential"]))
+        invade_prob = parse_invasion_prob(inv)
+        eta_iso, eta_text = parse_path_eta(path)
     rain_recs = cwa_get(DATASETS["rainfall"], CountyName=COUNTY)
     rain24 = parse_rain_24h(rain_recs)
     rain1 = parse_rain_hours(rain_recs, ["RainfallElement", "Past1hr", "Precipitation"])   # 瞬間(1hr)雨量
