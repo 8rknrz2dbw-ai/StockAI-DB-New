@@ -1,14 +1,16 @@
 {
-  "updated": "2026-07-09 10:41",
-  "source": "CWA opendata",
-  "active": false,
-  "name": null,
-  "warning": null,
+  "updated": "2026-07-09 11:13",
+  "source": "CWA opendata (W-C0034-005 路徑潛勢)",
+  "active": true,
+  "tracking": false,
+  "name": "巴威",
+  "warning": "颱風接近中",
   "land_warning": false,
-  "invade_prob": null,
-  "eta_iso": null,
-  "eta_text": null,
+  "invade_prob": 0.65,
+  "eta_iso": "2026-07-11T08:00:00+08:00",
+  "eta_text": "約 45 小時後",
+  "min_dist_km": 317,
   "rain_24h_mm": null,
   "rain_1h_mm": null,
-  "forecast_gust_ms": null
+  "forecast_gust_ms": 58.0
 }
