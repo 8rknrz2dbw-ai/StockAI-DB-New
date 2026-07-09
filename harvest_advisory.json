@@ -1,10 +1,10 @@
 {
-  "updated": "2026-07-09 11:13",
+  "updated": "2026-07-09 12:09",
   "typhoon": {
     "name": "巴威",
     "warning": "颱風接近中",
     "invade_prob": 0.65,
-    "eta_text": "約 45 小時後",
+    "eta_text": "約 44 小時後",
     "rain_24h_mm": null,
     "active": true
   },
@@ -21,7 +21,7 @@
       "decision": "WATCH",
       "confidence": 0.9,
       "risk_score": 40,
-      "maturity": 0.644,
+      "maturity": 0.645,
       "flood_potential_level": 4,
       "harvest_deadline": "2026-07-09T17:00:00+08:00",
       "dilemma": {
@@ -31,7 +31,7 @@
       "partial_pct": null,
       "immature": true,
       "ev": {
-        "early": 8582,
+        "early": 8612,
         "gamble": 210960,
         "p_survive": 0.6,
         "price_early_factor": 0.95,
@@ -58,14 +58,14 @@
       "decision": "WATCH",
       "confidence": 0.9,
       "risk_score": 31,
-      "maturity": 0.921,
+      "maturity": 0.922,
       "flood_potential_level": 3,
       "harvest_deadline": "2026-07-09T11:00:00+08:00",
       "dilemma": null,
-      "partial_pct": 99,
+      "partial_pct": 94,
       "immature": false,
       "ev": {
-        "early": 356378,
+        "early": 356789,
         "gamble": 395712,
         "p_survive": 0.69,
         "price_early_factor": 0.95,
@@ -84,7 +84,7 @@
         "雲林暴風圈侵襲機率 65%，預估 24hr 雨量 Nonemm，滅田風險 31/100",
         "淹水潛勢等級 3（偏低），泡水 48hr 起爛根，需提前搶收",
         "中長期作物（60–80 天），颱風曝險期最長",
-        "暴風前可作業時間不足，人手僅能收約 99% 面積 → 依風險先收",
+        "暴風前可作業時間不足，人手僅能收約 94% 面積 → 依風險先收",
         "PHI 已過，可合法上市"
       ]
     },
@@ -94,7 +94,7 @@
       "decision": "WATCH",
       "confidence": 0.9,
       "risk_score": 37,
-      "maturity": 1.099,
+      "maturity": 1.1,
       "flood_potential_level": 3,
       "harvest_deadline": "2026-07-10T00:40:00+08:00",
       "dilemma": null,
@@ -128,7 +128,7 @@
       "decision": "WATCH",
       "confidence": 0.9,
       "risk_score": 30,
-      "maturity": 0.309,
+      "maturity": 0.31,
       "flood_potential_level": 2,
       "harvest_deadline": "2026-07-10T10:50:00+08:00",
       "dilemma": {
@@ -138,7 +138,7 @@
       "partial_pct": null,
       "immature": true,
       "ev": {
-        "early": -3716,
+        "early": -3699,
         "gamble": 226200,
         "p_survive": 0.7,
         "price_early_factor": 0.95,
@@ -164,14 +164,14 @@
       "decision": "WATCH",
       "confidence": 0.9,
       "risk_score": 29,
-      "maturity": 0.512,
+      "maturity": 0.513,
       "flood_potential_level": 1,
       "harvest_deadline": "2026-07-10T11:36:00+08:00",
       "dilemma": null,
       "partial_pct": null,
       "immature": true,
       "ev": {
-        "early": 62306,
+        "early": 62452,
         "gamble": 293552,
         "p_survive": 0.71,
         "price_early_factor": 0.95,

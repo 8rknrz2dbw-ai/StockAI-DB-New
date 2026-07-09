@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-09 11:13",
+  "updated": "2026-07-09 12:09",
   "source": "CWA opendata (W-C0034-005 路徑潛勢)",
   "active": true,
   "tracking": false,
@@ -8,7 +8,7 @@
   "land_warning": false,
   "invade_prob": 0.65,
   "eta_iso": "2026-07-11T08:00:00+08:00",
-  "eta_text": "約 45 小時後",
+  "eta_text": "約 44 小時後",
   "min_dist_km": 317,
   "rain_24h_mm": null,
   "rain_1h_mm": null,
