@@ -198,12 +198,14 @@ def main():
     for mk in MARKETS:
         recs = fetch_market_all(mk, start, now)
         # 母作物 → 日 → 同日多品種明細；用種類代碼自動分類、跳過花卉/休市/0 元
-        agg, cat = {}, {}
+        # varl：同時保留「每個品種」的最新價（供前端點進去看全系列品種）
+        agg, cat, varl = {}, {}, {}
         for rec in recs:
             c = CAT_BY_CODE.get(str(g(rec, "種類代碼", "TcType") or ""))
             if not c:
                 continue
-            base = norm_crop(str(g(rec, "作物名稱", "CropName") or ""))
+            full = str(g(rec, "作物名稱", "CropName") or "")
+            base = norm_crop(full)
             if not base or base in SKIP_BASE or base.startswith("其他"):
                 continue
             iso = iso_from_roc(str(g(rec, "交易日期", "TransDate") or ""))
@@ -221,6 +223,9 @@ def main():
             qty = float(g(rec, "交易量", "Trans_Quantity") or 0)
             agg.setdefault(base, {}).setdefault(iso, []).append((a, hi, lo, qty))
             cat[base] = c
+            vl = varl.setdefault(base, {})
+            if full not in vl or iso > vl[full][0]:
+                vl[full] = (iso, {"avg": round(a, 1), "high": round(hi, 1), "low": round(lo, 1), "qty": round(qty)})
         # 收斂：同日多品種 → 量加權均價、量加總、上價取 max、下價取 min
         mdata = {}
         for crop, days in agg.items():
@@ -232,12 +237,23 @@ def main():
                                "mid": round(avg, 1), "low": round(min(x[2] for x in lst), 1),
                                "qty": round(tq)}
             mdata[crop] = series
+        # 品種明細（≥2 個品種才存；標籤取「-」後的品種名）
+        variants = {}
+        for crop, vl in varl.items():
+            if len(vl) < 2:
+                continue
+            vv = {}
+            for full, (iso, px) in vl.items():
+                label = full.split("-", 1)[1].strip() if "-" in full else full
+                vv[label] = {**px, "date": iso}
+            variants[crop] = vv
         if not mdata:
             print(f"[fetch_prices] {mk}：無資料，略過。", file=sys.stderr)
             continue
         fname = f"prices/{len(index_markets) + 1:02d}.json"
         with open(fname, "w", encoding="utf-8") as f:
-            json.dump({"market": mk, "updated": now.strftime("%Y-%m-%d %H:%M"), "data": mdata}, f, ensure_ascii=False)
+            json.dump({"market": mk, "updated": now.strftime("%Y-%m-%d %H:%M"),
+                       "data": mdata, "variants": variants}, f, ensure_ascii=False)
         index_markets.append({"name": mk, "file": fname})
         latest[mk] = {c: _latest_valid(s) for c, s in mdata.items()}
         categories.update(cat)
