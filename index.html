@@ -275,7 +275,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="V0017p00709";
+const VERSION="V0018p00709";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -336,6 +336,11 @@ async function loadMarket(mk){
 async function loadWeather(){
   try{const r=await fetch(`${resolveGhBase()}/typhoon_status.json`,{cache:"no-store"});if(!r.ok)throw 0;
     const j=await r.json();return (j&&typeof j==="object")?j:{active:false};}catch(e){return {active:false};}}
+async function loadEvents(){
+  // 真實天氣事件（颱風/大雨/低溫），由後端 fetch_cwa.py 逐日累積；抓不到就空、K線只顯示節慶/爆量
+  try{const r=await fetch(`${resolveGhBase()}/weather_events.json`,{cache:"no-store"});if(!r.ok)throw 0;
+    const j=await r.json();const arr=Array.isArray(j)?j:(j&&j.events);if(!Array.isArray(arr))throw 0;
+    const m={};arr.forEach(e=>{if(e&&e.date&&e.type){(m[e.date]=m[e.date]||[]).push(e);}});return m;}catch(e){return {};}}
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function makeDemo(){const rnd=mulberry32(20250704);
   const M={青江白菜:{b:22,a:5,pk:20,v:1500,sp:[7,8,9]},芥藍菜:{b:30,a:6,pk:15,v:900,sp:[8,9]},菠菜:{b:34,a:18,pk:200,v:800,hole:.6,sp:[]},
@@ -371,6 +376,9 @@ function priceView(disp){const es=sortedEntries(seriesFor(disp));if(!es.length)r
 const FESTIVALS=[["2025-01-29","春節"],["2025-04-04","清明"],["2025-05-31","端午"],["2025-10-06","中秋"],
   ["2026-02-17","春節"],["2026-04-05","清明"],["2026-06-19","端午"],["2026-09-25","中秋"]];
 const FEST=Object.fromEntries(FESTIVALS);
+// 真實天氣事件標記樣式（date -> [{type,label}]，由 loadEvents 填入）
+let WEVENTS={};
+const WEV_STYLE={typhoon:{g:"🌀",c:"#B7472A"},rain:{g:"🌧",c:"#3B7DD8"},cold:{g:"❄",c:"#57B0C9"}};
 let QDATA=[],QGEO=null;
 
 /* ══════ 行情看板 ══════ */
@@ -399,7 +407,7 @@ function renderQuote(disp){
     <div class="ohlc"><span>最高 <b>${hi.toFixed(1)}</b></span><span>最低 <b>${lo.toFixed(1)}</b></span>
       <span>量 <b>${qty.toLocaleString()}</b> 公斤</span><span>對比常態 <b>${pv.diff>=0?"+":""}${pv.diff.toFixed(0)}%</b>(${pv.say})</span></div>
     <div class="qchart">${ohlcSVG(es)}
-      <div class="cap">近 45 交易日 · 直條＝最高↔最低 · 圓點＝均價（紅漲綠跌）· 🔺爆量 🔹節慶</div>
+      <div class="cap">近 45 交易日 · 直條＝最高↔最低 · 圓點＝均價（紅漲綠跌）· 🔺爆量 🔹節慶 🌀颱風 🌧大雨 ❄低溫</div>
       <div class="qtip" id="qtip">👆 點圖上任一天，看日期與當日高/低/均價</div></div>
   </div>`;
   attachQtip(box);
@@ -414,7 +422,8 @@ function ohlcSVG(es){const d=es.slice(-45);QDATA=d;QGEO=null;if(d.length<2)retur
     bars+=`<line x1="${X.toFixed(1)}" y1="${y(e.high).toFixed(1)}" x2="${X.toFixed(1)}" y2="${y(e.low).toFixed(1)}" stroke="${c}" stroke-width="2" opacity="0.5"/>`;
     bars+=`<circle cx="${X.toFixed(1)}" cy="${y(e.avg).toFixed(1)}" r="2.2" fill="${c}"/>`;
     if(qmed&&e.qty>qmed*1.8) marks+=`<polygon points="${(X-3).toFixed(1)},4 ${(X+3).toFixed(1)},4 ${X.toFixed(1)},11" fill="#E8862E"/>`;
-    if(FEST[d[i][0]]) marks+=`<polygon points="${(X-3).toFixed(1)},13 ${(X+3).toFixed(1)},13 ${X.toFixed(1)},20" fill="#6FB0A6"/>`;}
+    if(FEST[d[i][0]]) marks+=`<polygon points="${(X-3).toFixed(1)},13 ${(X+3).toFixed(1)},13 ${X.toFixed(1)},20" fill="#6FB0A6"/>`;
+    const wv=WEVENTS[d[i][0]];if(wv&&wv.length){const c=(WEV_STYLE[wv[0].type]||{}).c||"#888";marks+=`<rect x="${(X-2.5).toFixed(1)}" y="22" width="5" height="5" rx="1.2" fill="${c}"/>`;}}
   return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="高低價走勢，可點看當日">${bars}${marks}</svg>`;}
 /* K線點擊：顯示當日日期與高/低/均價 + 事件 */
 function attachQtip(box){
@@ -425,6 +434,7 @@ function attachQtip(box){
     let frac=(cx-r.left)/r.width;frac=Math.max(0,Math.min(1,frac));const i=Math.round(frac*(QGEO.n-1));
     const e=QDATA[i];if(!e)return;const v=e[1],day=e[0];const evs=[];
     if(QGEO.qmed&&v.qty>QGEO.qmed*1.8)evs.push("🔺爆量");if(FEST[day])evs.push("🔹"+FEST[day]);
+    (WEVENTS[day]||[]).forEach(e=>evs.push(((WEV_STYLE[e.type]||{}).g||"⚑")+(e.label||e.type)));
     tip.innerHTML=`<b>${day}</b>　高 ${v.high} / 低 ${v.low} / 均 <b>${v.avg}</b>　量 ${v.qty.toLocaleString()}`
       +(evs.length?`　<span class="ev">${evs.join(" ")}</span>`:"");
     if(ev.cancelable)ev.preventDefault();};
@@ -639,6 +649,7 @@ document.getElementById("roleRow").addEventListener("click",e=>{const b=e.target
   const mode=document.getElementById("mode");mode.className="badge "+(live?"live":"demo");mode.textContent=live?"實際資料":"示範資料";
   const names=marketNames();MARKET=(S.market&&names.includes(S.market))?S.market:names[0];
   await loadMarket(MARKET);
+  WEVENTS=await loadEvents();
   renderBoard();const list=watchCrops();if(list.length)selectCrop(list[0]);
   WEATHER=await loadWeather();renderHarvest();
   // 採收預判作物下拉

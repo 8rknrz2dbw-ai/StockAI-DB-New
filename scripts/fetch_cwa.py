@@ -40,8 +40,16 @@ DATASETS = {
     "invasion_prob":   "W-C0034-003",   # 侵襲機率 / 72hr 暴風圈侵襲機率
     "path_potential":  "W-C0034-005",   # 颱風路徑潛勢預報
     "rainfall":        "O-A0002-001",   # 自動雨量站
+    "temp_obs":        "O-A0001-001",   # 自動氣象站（含氣溫，供低溫/寒流事件）
     "township_fcst":   "F-D0047-025",   # 雲林縣未來 3 天天氣預報
 }
+
+# 天氣事件累積檔（K線標記用）；僅逐日「向前累積」真實觀測，不臆造歷史。
+EVENTS_FILE = "weather_events.json"
+EVENTS_KEEP_DAYS = 760          # 與行情約 2 年窗口相符
+RAIN_HEAVY_MM = 80              # CWA 大雨特報：24hr 累積雨量達 80mm
+RAIN_TORRENT_MM = 200          # CWA 豪雨：24hr 累積達 200mm
+COLD_TEMP_C = 10               # 平地氣溫 ≤10°C 視為低溫/寒流量級
 
 
 def cwa_get(dataid, **params):
@@ -238,6 +246,80 @@ def parse_rain_hours(records, path, county=COUNTY):
     return best
 
 
+def parse_temp_min(records, county=COUNTY):
+    """回傳雲林各自動氣象站當前氣溫的最小值（°C），供低溫/寒流事件判定。找不到回 None。
+    ⚠ 欄位路徑（WeatherElement.AirTemperature）需以真實 O-A0001-001 回應校準；-99 等無效值排除。"""
+    if not records:
+        return None
+    best = None
+
+    def walk(o):
+        nonlocal best
+        if isinstance(o, dict):
+            loc = o.get("CountyName") or o.get("countyName") or ""
+            if county in str(loc) or "雲林" in str(loc):
+                t = _dig(o, ["WeatherElement", "AirTemperature"])
+                if t is None:
+                    t = o.get("TEMP") or o.get("AirTemperature")
+                try:
+                    v = float(t)
+                    if v > -90 and (best is None or v < best):
+                        best = v
+                except (TypeError, ValueError):
+                    pass
+            for v in o.values():
+                walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+    walk(records)
+    return best
+
+
+def accumulate_events(status, temp_min, now):
+    """把今天的真實天氣事件（颱風/大雨/低溫）併入 weather_events.json（逐日向前累積，去重、保留 2 年窗口）。
+    回傳 (全部事件 list, 今日新增 list)。不臆造歷史——只記錄當下觀測到的事實。"""
+    today = now.strftime("%Y-%m-%d")
+    old = []
+    try:
+        with open(EVENTS_FILE, encoding="utf-8") as f:
+            j = json.load(f)
+            old = j if isinstance(j, list) else (j.get("events") or [])
+    except Exception:
+        old = []
+
+    ev = {}   # key = "date|type" -> {date,type,label}
+    for e in old:
+        if isinstance(e, dict) and e.get("date") and e.get("type"):
+            ev[f"{e['date']}|{e['type']}"] = {"date": e["date"], "type": e["type"], "label": e.get("label", "")}
+
+    todays = []
+    # ① 颱風：對雲林進入搶收模式或有陸上警報
+    if status.get("active") or status.get("land_warning"):
+        lbl = status.get("name") or "颱風"
+        if status.get("land_warning") and status.get("warning"):
+            lbl = f"{lbl}・{status['warning']}"
+        todays.append({"date": today, "type": "typhoon", "label": lbl})
+    # ② 大雨/豪雨：雲林 24hr 累積雨量達門檻
+    r24 = status.get("rain_24h_mm")
+    if isinstance(r24, (int, float)) and r24 >= RAIN_HEAVY_MM:
+        kind = "豪雨" if r24 >= RAIN_TORRENT_MM else "大雨"
+        todays.append({"date": today, "type": "rain", "label": f"{kind} {round(r24)}mm"})
+    # ③ 低溫/寒流：雲林平地氣溫達門檻
+    if isinstance(temp_min, (int, float)) and temp_min <= COLD_TEMP_C:
+        todays.append({"date": today, "type": "cold", "label": f"低溫 {round(temp_min)}℃"})
+
+    for e in todays:
+        ev[f"{e['date']}|{e['type']}"] = e
+
+    cutoff = (now - timedelta(days=EVENTS_KEEP_DAYS)).strftime("%Y-%m-%d")
+    out = sorted((e for e in ev.values() if e.get("date", "") >= cutoff),
+                 key=lambda e: (e["date"], e["type"]))
+    with open(EVENTS_FILE, "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=1)
+    return out, todays
+
+
 def _dig(o, path):
     for k in path:
         if isinstance(o, dict) and k in o:
@@ -326,9 +408,16 @@ def main():
     with open("typhoon_status.json", "w", encoding="utf-8") as f:
         json.dump(status, f, ensure_ascii=False, indent=2)
 
+    # 累積真實天氣事件（K線標記）：颱風 + 大雨（已有 rain24）+ 低溫（需氣溫觀測）
+    temp_recs = cwa_get(DATASETS["temp_obs"], CountyName=COUNTY)
+    temp_min = parse_temp_min(temp_recs)
+    events, todays = accumulate_events(status, temp_min, now)
+
     print(f"[fetch_cwa] key_set={key_set} typhoon={status['name']} active={status['active']} "
           f"tracking={status.get('tracking')} invade={status['invade_prob']} eta={status['eta_text']} "
-          f"dist={status.get('min_dist_km')}km rain24={rain24} rain1={rain1}")
+          f"dist={status.get('min_dist_km')}km rain24={rain24} rain1={rain1} temp_min={temp_min}")
+    print(f"[fetch_cwa] 天氣事件累積：共 {len(events)} 筆，今日新增 {len(todays)} 筆"
+          + (f"（{'、'.join(e['type'] for e in todays)}）" if todays else ""))
     if not key_set:
         print("[fetch_cwa] 未設 CWA_API_KEY → active=false 安全狀態。", file=sys.stderr)
 
