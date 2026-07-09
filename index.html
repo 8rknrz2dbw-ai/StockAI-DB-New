@@ -72,7 +72,9 @@
 
   /* 股票式查價卡 */
   .quote{margin-top:0.9rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1rem;}
-  .quote h3{margin:0;font-size:1.2rem;}
+  .quote h3{margin:0;font-size:1.3rem;font-weight:900;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;}
+  .quote .mktbadge{margin-left:auto;font-size:1.1rem;font-weight:900;color:var(--bg);background:var(--leaf);
+    padding:0.25rem 0.8rem;border-radius:999px;white-space:nowrap;}
   .quote .price{display:flex;align-items:baseline;gap:0.5rem;margin-top:0.3rem;flex-wrap:wrap;}
   .quote .price .v{font-size:2.4rem;font-weight:900;line-height:1;}
   .quote .price .v.up{color:var(--r);} .quote .price .v.dn{color:var(--g);} .quote .price .v.mid{color:var(--paper);}
@@ -94,10 +96,10 @@
   .qtip{font-size:0.82rem;color:var(--paper);margin-top:0.45rem;min-height:1.3rem;
     background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:0.4rem 0.6rem;}
   .qtip b{color:var(--leaf);} .qtip .ev{color:var(--cool);font-weight:700;}
-  /* 分類（蔬菜/水果）段標 + 行情看板凍結上方、品項可捲動 */
-  .catbar{display:flex;gap:0.4rem;margin:0.1rem 0 0.7rem;}
-  .catbar button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--muted);padding:0.45rem;border-radius:999px;font-weight:800;font-size:0.92rem;}
-  .catbar button.on{background:var(--leaf-dim);color:var(--bg);border-color:var(--leaf-dim);}
+  /* 分類（蔬菜/水果）切換：在品項清單正上方、與凍結查價卡同區 */
+  .catbar{display:flex;gap:0.5rem;margin:0.7rem 0 0.6rem;}
+  .catbar button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--muted);padding:0.65rem;border-radius:12px;font-weight:900;font-size:1.15rem;}
+  .catbar button.on{background:var(--leaf);color:var(--bg);border-color:var(--leaf);}
   .mkt-top{position:sticky;top:0;z-index:6;background:var(--bg);padding-top:0.2rem;margin-bottom:0.5rem;border-bottom:1px solid var(--line);}
 
   /* 田區搶收 */
@@ -161,6 +163,10 @@
   .fsrow button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--paper);padding:0.6rem 0.3rem;border-radius:12px;font-weight:800;}
   .fsrow button[data-v="s"]{font-size:0.85rem;} .fsrow button[data-v="m"]{font-size:1rem;} .fsrow button[data-v="l"]{font-size:1.2rem;} .fsrow button[data-v="xl"]{font-size:1.45rem;}
   .fsrow button.on{background:var(--leaf);color:var(--bg);border-color:var(--leaf);}
+  /* 角色按鈕：放大圖示與文字（年長者易點） */
+  .rolerow{gap:0.6rem;}
+  .rolerow button{display:flex;flex-direction:column;align-items:center;gap:0.2rem;padding:0.9rem 0.4rem;font-size:1.15rem;line-height:1.2;border-radius:14px;}
+  .rolerow button .ico{font-size:2.1rem;line-height:1;}
   select.mkt{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--paper);padding:0.65rem 0.7rem;border-radius:12px;font-size:1rem;}
   .listrow{display:flex;align-items:center;gap:0.6rem;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:0.55rem 0.7rem;margin-bottom:0.45rem;flex-wrap:wrap;}
   .listrow .wn{font-weight:700;font-size:0.98rem;} .listrow .ws{font-size:0.72rem;color:var(--muted);width:100%;}
@@ -203,10 +209,9 @@
 
   <div class="view on" id="view-market">
     <div class="mkt-top">
-      <p class="mkt-label">市場：<b id="mktName">—</b></p>
       <div id="quote"></div>
+      <div class="catbar" id="catbar"></div>
     </div>
-    <div class="catbar" id="catbar"></div>
     <div class="board" id="board"></div>
   </div>
 
@@ -242,9 +247,9 @@
     <h2>設定 <button class="close" id="closeSet" aria-label="關閉">✕</button></h2>
 
     <div class="setblk"><h4>角色</h4>
-      <div class="fsrow" id="roleRow">
-        <button data-r="farmer">🧑‍🌾 蔬果農</button>
-        <button data-r="merchant">🧺 買菜商人</button>
+      <div class="fsrow rolerow" id="roleRow">
+        <button data-r="farmer"><span class="ico">🧑‍🌾</span><span>蔬果農</span></button>
+        <button data-r="merchant"><span class="ico">🧺</span><span>買菜商人</span></button>
       </div>
       <p class="hintline" id="roleHint"></p>
     </div>
@@ -294,7 +299,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="V0019p00709";
+const VERSION="V0020p00709";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -409,19 +414,24 @@ let QDATA=[],QGEO=null,TF="D",CAT="蔬菜";
 const TF_LABEL={D:"日",W:"週",M:"月"};
 
 /* ══════ 行情看板 ══════ */
-function catsPresent(){const set=new Set(watchCrops().map(cropCat));return ["蔬菜","水果"].filter(c=>set.has(c));}
+// 分類切換的顯示依「該市場實際有賣什麼」（availableCrops），葉菜市場只有蔬菜→不顯示切換
+function marketCats(){const set=new Set(availableCrops().map(cropCat));return ["蔬菜","水果"].filter(c=>set.has(c));}
 function renderCatbar(){
   const bar=document.getElementById("catbar");if(!bar)return;
-  const present=catsPresent();
+  const present=marketCats();
   if(present.length<=1){bar.style.display="none";bar.innerHTML="";return;}
   if(!present.includes(CAT))CAT=present[0];
   bar.style.display="flex";
   bar.innerHTML=present.map(c=>`<button data-c="${c}" class="${c===CAT?'on':''}">${c==='蔬菜'?'🥬 蔬菜':'🍉 水果'}</button>`).join("");
-  bar.querySelectorAll("button").forEach(b=>b.onclick=()=>{CAT=b.dataset.c;renderCatbar();renderBoard();});
+  bar.querySelectorAll("button").forEach(b=>b.onclick=()=>{CAT=b.dataset.c;renderBoard();
+    const bl=boardList();if(bl.length&&(!CUR||cropCat(CUR)!==CAT))selectCrop(bl[0]);});
 }
-function boardList(){let list=watchCrops();if(catsPresent().length>1)list=list.filter(d=>cropCat(d)===CAT);return list;}
+function boardList(){
+  if(marketCats().length<=1)return watchCrops();
+  const w=watchCrops().filter(d=>cropCat(d)===CAT);
+  return w.length?w:availableCrops().filter(d=>cropCat(d)===CAT);  // 清單沒這類→顯示市場現有
+}
 function renderBoard(){
-  document.getElementById("mktName").textContent=MARKET;
   renderCatbar();
   const el=document.getElementById("board");el.innerHTML="";
   const list=boardList();
@@ -440,7 +450,7 @@ function renderQuote(disp){
   const cls=chg>0.01?"up":chg<-0.01?"dn":"mid";const arrow=chg>0.01?"▲":chg<-0.01?"▼":"＝";
   const hi=pv.last[1].high,lo=pv.last[1].low,qty=pv.last[1].qty;
   box.innerHTML=`<div class="quote">
-    <h3>${disp} <span style="font-size:.7rem;color:var(--muted)">${MARKET}批發</span></h3>
+    <h3><span>${disp}</span><span class="mktbadge">${MARKET} 批發</span></h3>
     <div class="price"><span class="v ${cls} mono">${pv.avg.toFixed(1)}</span><span class="u">元/公斤</span>
       <span class="chg ${cls} mono">${arrow} ${chg>=0?"+":""}${chg.toFixed(1)} (${chgP>=0?"+":""}${chgP.toFixed(1)}%)</span></div>
     <div class="ohlc"><span>最高 <b>${hi.toFixed(1)}</b></span><span>最低 <b>${lo.toFixed(1)}</b></span>
@@ -467,21 +477,26 @@ function tfSeries(es){
     else{o.high=Math.max(o.high,v.high);o.low=Math.min(o.low,v.low);o.sum+=v.avg;o.n++;o.qty+=v.qty||0;o.date=iso;}}
   return [...g.values()].map(o=>[o.date,{high:o.high,low:o.low,avg:+(o.sum/o.n).toFixed(1),qty:Math.round(o.qty)}]);
 }
-/* 高低直條 + 均價點（日線加事件標記），查價線由 attachCross 疊上 */
+/* 均價折線 + 漸層面積 + 高低區間帶（乾淨好看），查價線由 attachCross 疊上 */
 function drawChart(es){const d=tfSeries(es);QDATA=d;QGEO=null;if(d.length<2)return"";
-  const W=680,H=170,pL=8,pR=44,pT=8,pB=16;
+  const W=680,H=170,pL=8,pR=46,pT=12,pB=16;
   const hi=Math.max(...d.map(e=>e[1].high)),lo=Math.min(...d.map(e=>e[1].low)),rng=(hi-lo)||1;
   const x=i=>pL+i*(W-pL-pR)/(d.length-1);const y=v=>pT+(hi-v)/rng*(H-pT-pB);
   const qmed=median(d.map(e=>e[1].qty).filter(Boolean))||0;QGEO={n:d.length,qmed,W,H,pL,pR,pT,pB,hi,lo,rng};
-  let bars="",marks="";
-  for(let i=0;i<d.length;i++){const e=d[i][1];const prev=i?d[i-1][1].avg:e.avg;const c=e.avg>=prev?"#E4572E":"#7CC24A";const X=x(i);
-    bars+=`<line x1="${X.toFixed(1)}" y1="${y(e.high).toFixed(1)}" x2="${X.toFixed(1)}" y2="${y(e.low).toFixed(1)}" stroke="${c}" stroke-width="2" opacity="0.55"/>`;
-    bars+=`<circle cx="${X.toFixed(1)}" cy="${y(e.avg).toFixed(1)}" r="1.9" fill="${c}"/>`;
-    if(TF==="D"){const day=d[i][0];
-      if(qmed&&e.qty>qmed*1.8) marks+=`<polygon points="${(X-3).toFixed(1)},${pT} ${(X+3).toFixed(1)},${pT} ${X.toFixed(1)},${pT+7}" fill="#E8862E"/>`;
-      if(FEST[day]) marks+=`<polygon points="${(X-3).toFixed(1)},${pT+9} ${(X+3).toFixed(1)},${pT+9} ${X.toFixed(1)},${pT+16}" fill="#6FB0A6"/>`;
-      const wv=WEVENTS[day];if(wv&&wv.length){const cc=(WEV_STYLE[wv[0].type]||{}).c||"#888";marks+=`<rect x="${(X-2.5).toFixed(1)}" y="${pT+18}" width="5" height="5" rx="1.2" fill="${cc}"/>`;}}}
-  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="高低價走勢，可滑動查價">${bars}${marks}<g id="qcross"></g></svg>`;}
+  const up=d[d.length-1][1].avg>=d[0][1].avg;const col=up?"#E4572E":"#5FB85A";   // 紅漲綠跌
+  const avgPts=d.map((e,i)=>`${x(i).toFixed(1)},${y(e[1].avg).toFixed(1)}`);
+  const topPts=d.map((e,i)=>`${x(i).toFixed(1)},${y(e[1].high).toFixed(1)}`);
+  const botPts=d.map((e,i)=>`${x(i).toFixed(1)},${y(e[1].low).toFixed(1)}`).reverse();
+  const ribbon=`<polygon points="${topPts.concat(botPts).join(" ")}" fill="${col}" opacity="0.10"/>`;
+  const area=`<polygon points="${x(0).toFixed(1)},${H-pB} ${avgPts.join(" ")} ${x(d.length-1).toFixed(1)},${H-pB}" fill="url(#qgrad)"/>`;
+  const poly=`<polyline points="${avgPts.join(" ")}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  let marks="";
+  if(TF==="D")for(let i=0;i<d.length;i++){const e=d[i][1],day=d[i][0],X=x(i);
+    if(qmed&&e.qty>qmed*1.8)marks+=`<polygon points="${(X-3).toFixed(1)},${pT-4} ${(X+3).toFixed(1)},${pT-4} ${X.toFixed(1)},${pT+3}" fill="#E8862E"/>`;
+    if(FEST[day])marks+=`<circle cx="${X.toFixed(1)}" cy="${y(e.avg).toFixed(1)}" r="2.6" fill="#6FB0A6" stroke="#12160E" stroke-width="0.8"/>`;
+    const wv=WEVENTS[day];if(wv&&wv.length){const cc=(WEV_STYLE[wv[0].type]||{}).c||"#888";marks+=`<rect x="${(X-2.5).toFixed(1)}" y="${pT-4}" width="5" height="5" rx="1.2" fill="${cc}"/>`;}}
+  const defs=`<defs><linearGradient id="qgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity="0.30"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="價格走勢，可滑動查價">${defs}${ribbon}${area}${poly}${marks}<g id="qcross"></g></svg>`;}
 /* 查價線：垂直＝日期(底部標)、水平＝均價(右側標) + 詳細列 */
 function crossDraw(i){
   if(!QGEO||!QDATA.length)return;i=Math.max(0,Math.min(QDATA.length-1,i));
