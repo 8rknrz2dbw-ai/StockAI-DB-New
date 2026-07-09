@@ -29,8 +29,11 @@
     padding:calc(0.9rem + env(safe-area-inset-top)) calc(0.8rem + env(safe-area-inset-right)) 3rem calc(0.8rem + env(safe-area-inset-left));}
 
   header{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;padding-bottom:0.7rem;border-bottom:1px solid var(--line);}
-  header h1{font-size:1.35rem;font-weight:900;margin:0;letter-spacing:.5px;line-height:1.2;}
-  header h1 .dot{color:var(--leaf);}
+  header h1{font-size:1.6rem;font-weight:900;margin:0;letter-spacing:3px;line-height:1.1;
+    background:linear-gradient(96deg,#6DB33F 0%,#E4F4A8 28%,#7FD0C4 58%,#6DB33F 100%);background-size:220% 100%;
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    filter:drop-shadow(0 1px 6px rgba(124,194,74,.5));animation:hsheen 7s linear infinite;}
+  @keyframes hsheen{to{background-position:220% 0;}}
   .gear{background:var(--panel2);border:1px solid var(--line);color:var(--paper);
     width:2.4rem;height:2.4rem;border-radius:50%;font-size:1.2rem;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
   .hgroup{margin-left:auto;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;justify-content:flex-end;}
@@ -147,14 +150,23 @@
   .alert{border:1px solid #5a2c1f;border-radius:var(--radius);
     background:linear-gradient(90deg,rgba(228,87,46,.18),rgba(228,87,46,.05) 60%,transparent);
     padding:0.9rem 1rem;display:flex;flex-wrap:wrap;align-items:center;gap:0.3rem 1rem;margin-bottom:0.9rem;}
+  .alert .ticon{font-size:2rem;line-height:1;flex:0 0 auto;filter:drop-shadow(0 0 7px rgba(228,87,46,.55));}
+  .alert .ticon.spin{animation:tspin 4.5s linear infinite;} @keyframes tspin{to{transform:rotate(360deg);}}
+  /* 颱風/暴雨警戒：半透明紅閃爍 */
+  .alert.flash{animation:aflash 1.5s ease-in-out infinite;}
+  @keyframes aflash{0%,100%{background:linear-gradient(90deg,rgba(228,87,46,.22),rgba(228,87,46,.06) 60%,transparent);border-color:#7a3320;}
+    50%{background:linear-gradient(90deg,rgba(228,87,46,.46),rgba(228,87,46,.14) 55%,rgba(228,87,46,.03));border-color:#c14e2d;}}
+  .alert.rain.flash{border-color:#26506e;}
+  .alert.rain.flash{animation:rflash 1.6s ease-in-out infinite;}
+  @keyframes rflash{0%,100%{background:linear-gradient(90deg,rgba(59,125,216,.20),rgba(59,125,216,.05) 60%,transparent);border-color:#26506e;}
+    50%{background:linear-gradient(90deg,rgba(59,125,216,.42),rgba(59,125,216,.12) 55%,transparent);border-color:#3f79c9;}}
+  .alert.rain .ticon{filter:drop-shadow(0 0 7px rgba(59,125,216,.6));}
   .alert.calm{border-color:#2f4a1c;background:linear-gradient(90deg,rgba(124,194,74,.14),transparent 60%);}
-  .alert .pulse{width:0.7rem;height:0.7rem;border-radius:50%;background:var(--r);flex:0 0 auto;box-shadow:0 0 0 0 rgba(228,87,46,.6);animation:pulse 1.8s infinite;}
-  .alert.calm .pulse{background:var(--g);animation:none;}
   .alert.track{border-color:#5a4d13;background:linear-gradient(90deg,rgba(242,183,5,.14),transparent 60%);}
-  .alert.track .pulse{background:var(--y);}
+  .alert.track .ticon{filter:drop-shadow(0 0 6px rgba(242,183,5,.5));}
   .alert.track .big b{color:var(--y);}
-  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(228,87,46,.55)}70%{box-shadow:0 0 0 0.6rem rgba(228,87,46,0)}100%{box-shadow:0 0 0 0 rgba(228,87,46,0)}}
-  .alert .big{font-size:1.02rem;font-weight:800;width:100%;} .alert .big b{color:#F6C6B4;} .alert.calm .big b{color:var(--leaf);}
+  .alert .big{font-size:1.02rem;font-weight:800;flex:1 1 60%;} .alert .big b{color:#F6C6B4;} .alert.calm .big b{color:var(--leaf);}
+  .alert.rain .big b{color:#bcd8ff;}
   .alert .k{font-size:0.8rem;color:var(--muted);} .alert .k b{color:var(--paper);}
 
   .cards{display:flex;flex-direction:column;gap:0.7rem;}
@@ -221,8 +233,9 @@
   .fieldform{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:0.7rem;margin-top:0.5rem;display:none;flex-direction:column;gap:0.55rem;}
   .fieldform.on{display:flex;}
   .fieldform label{font-size:0.78rem;color:var(--muted);}
-  .fieldform input,.fieldform select{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--paper);padding:0.5rem 0.6rem;border-radius:10px;font-size:0.95rem;}
-  .fieldform .frow{display:flex;gap:0.5rem;} .fieldform .frow>div{flex:1;}
+  .fieldform input,.fieldform select{width:100%;min-width:0;box-sizing:border-box;background:var(--panel);border:1px solid var(--line);color:var(--paper);padding:0.5rem 0.6rem;border-radius:10px;font-size:0.95rem;}
+  .fieldform input[type=date]{-webkit-appearance:none;appearance:none;}
+  .fieldform .frow{display:flex;gap:0.5rem;} .fieldform .frow>div{flex:1;min-width:0;}
   .fieldform .save{background:var(--leaf);color:var(--bg);border:0;border-radius:10px;padding:0.6rem;font-weight:800;}
   .gpsbtn{width:100%;background:var(--panel);border:1px solid var(--leaf-dim);color:var(--leaf);border-radius:10px;padding:0.5rem;font-weight:700;margin-top:0.35rem;}
   .fieldform a{color:var(--leaf);}
@@ -340,7 +353,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="V0026p00709";
+const VERSION="V0027p00709";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -644,26 +657,46 @@ function attachCross(box){
 /* ══════ 田區搶收（前端即時計算） ══════ */
 const DECC={NOW:"r",ADVISED:"o",WATCH:"y",NORMAL:"g"};const DECT={NOW:"立即搶收",ADVISED:"建議搶收",WATCH:"觀望",NORMAL:"照常"};
 function clamp(x,a,b){return Math.max(a,Math.min(b,x));}
+/* 以「田區座標」算侵襲機率：用 typhoon_status.track（各預報時刻位置＋暴風圈半徑）逐點比對 */
+function haversineKm(la1,lo1,la2,lo2){const R=6371,p1=la1*Math.PI/180,p2=la2*Math.PI/180,dp=(la2-la1)*Math.PI/180,dl=(lo2-lo1)*Math.PI/180;
+  const a=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R*Math.asin(Math.sqrt(a));}
+function invasionAt(lat,lng){
+  const w=WEATHER||{};const track=Array.isArray(w.track)?w.track:null;
+  if(!track||!track.length)return {prob:(w.invade_prob!=null?w.invade_prob:null),eta_iso:w.eta_iso,eta:w.eta_text,dist:w.min_dist_km};
+  let minD=1e9,prob=0,eta_iso=null;const now=Date.now();
+  for(const p of track){const d=haversineKm(lat,lng,+p.lat,+p.lng);if(d<minD)minD=d;
+    const r15=+p.r15||0,r25=+p.r25||0;let pr=0;
+    if(r25&&d<=r25)pr=0.9;else if(r15&&d<=r15)pr=0.65;else if(r15&&d<=r15+100)pr=0.35;else if(r15&&d<=r15+300)pr=0.12;
+    if(pr>prob)prob=pr;
+    if(r15&&d<=r15&&!eta_iso&&p.t&&Date.parse(p.t)>now)eta_iso=p.t;}
+  if(prob===0&&minD<400)prob=+(0.12*(1-minD/400)).toFixed(2);
+  return {prob:+prob.toFixed(2),eta_iso,eta:eta_iso?`約 ${Math.round((Date.parse(eta_iso)-now)/3600e3)} 小時後`:(w.eta_text||"追蹤中"),dist:Math.round(minD)};}
+function shortRegion(nm){return nm?nm.replace("雲林縣","").replace("彰化縣","彰化·").replace("嘉義縣","嘉義·").replace(/[縣市]$/,""):"雲林";}
+function invasionByRegion(){const map={};getFields().forEach(f=>{if(!f.geo)return;const t=whichTownship(f.geo.lat,f.geo.lng);
+  const r=t?shortRegion(t.name):"你的田";const pr=invasionAt(f.geo.lat,f.geo.lng).prob||0;if(map[r]==null||pr>map[r])map[r]=pr;});return map;}
 function computeField(f){
   const now=todayISO();const T=growthDays(f.crop,f.plant);const age=daysBetween(f.plant,now);
   const maturity=clamp(age/T,0,2);const harvestISO=addDaysISO(f.plant,T);const daysToHarvest=Math.round(daysBetween(now,harvestISO));
   const phiOkISO=f.spray?addDaysISO(f.spray,+f.phi||0):null;const phiShort=phiOkISO?Math.ceil(daysBetween(now,phiOkISO)):0;
   const w=WEATHER||{active:false};const active=!!w.active;
+  const inv=f.geo?invasionAt(f.geo.lat,f.geo.lng):{prob:(w.invade_prob!=null?w.invade_prob:0),eta_iso:w.eta_iso,eta:w.eta_text,dist:w.min_dist_km};
+  const region=f.geo?shortRegion((whichTownship(f.geo.lat,f.geo.lng)||{}).name):"雲林";
   let decision="NORMAL",risk=0,deadline=null,dilemma=null,oppo=null,lines=[];
   const matPct=Math.round(maturity*100);
   if(active){
-    const P=+w.invade_prob||0;const rain=+w.rain_24h_mm||0;const burst=+w.rain_1h_mm||0;const gust=+w.forecast_gust_ms||0;
+    const P=+inv.prob||0;const rain=+w.rain_24h_mm||0;const burst=+w.rain_1h_mm||0;const gust=+w.forecast_gust_ms||0;
     // 強度＝風(颱風逼近時雨未到也算) + 24hr雨 + 瞬間雨
     const iNorm=clamp(0.4*clamp(gust/50,0,1)+0.4*clamp(rain/300,0,1)+0.2*clamp(burst/60,0,1),0,1);
     const Wt=clamp(1+0.1*((+f.flood||1)-1),0.5,1.4);const V=V_CROP[f.crop]||.9;
     risk=Math.round(clamp(100*P*iNorm*Wt*V,0,100));
     // 時間軸
-    if(w.eta_iso){const etaMs=Date.parse(w.eta_iso);const safeMs=etaMs-(12+ (FLOOD_ADV[f.flood]||0))*3600e3;deadline=safeMs;}
+    const etaISO=inv.eta_iso||w.eta_iso;
+    if(etaISO){const etaMs=Date.parse(etaISO);const safeMs=etaMs-(12+ (FLOOD_ADV[f.flood]||0))*3600e3;deadline=safeMs;}
     const slackH=deadline?(deadline-Date.now())/3600e3:999;
     if(risk>=65&&slackH<=24)decision="NOW";else if(risk>=50)decision="ADVISED";else if(risk>=25)decision="WATCH";else decision="NORMAL";
     const immature=maturity<(MAT_MIN[f.crop]||.75);
     if(immature&&(decision==="NOW"||decision==="ADVISED")){decision="WATCH";lines.push(`成熟度僅 ${matPct}%，收了殘值低`);}
-    lines.unshift(`雲林侵襲機率 ${Math.round(P*100)}%、24hr雨量 ${rain}mm${burst?`、瞬間雨量 ${burst}mm`:""}`);
+    lines.unshift(`${region} 侵襲機率 ${Math.round(P*100)}%、24hr雨量 ${rain}mm${burst?`、瞬間雨量 ${burst}mm`:""}`);
     // 地勢：低窪→搶收；地勢高→價格機會
     if((+f.flood||1)>=4){lines.push(`地勢低窪（等級 ${f.flood}），泡水 48hr 起爛根，須提前收`);}
     else if((+f.flood||1)<=2&&P>=0.4&&rain>=150){oppo={};}
@@ -672,21 +705,28 @@ function computeField(f){
   }else{
     lines.push(phiShort>0?`農藥安全期還差 ${phiShort} 天才可上市`:(f.spray?"農藥安全期已過，可上市":"目前無颱風，照常管理"));
   }
-  return {f,decision,risk,deadline,dilemma,oppo,lines,maturity,matPct,harvestISO,daysToHarvest,phiShort,active};
+  return {f,decision,risk,deadline,dilemma,oppo,lines,maturity,matPct,harvestISO,daysToHarvest,phiShort,active,inv,region};
 }
 let hTimers=[];
 function renderHarvest(){
   const w=WEATHER||{active:false};const al=document.getElementById("hAlert");
-  if(w.active){al.className="alert";al.innerHTML=`<span class="pulse"></span>
-    <span class="big">颱風 <b>${w.name||"警報中"}</b> · ${w.warning||""}</span>
-    <span class="k">雲林侵襲機率 <b>${w.invade_prob!=null?Math.round(w.invade_prob*100)+"%":"—"}</b></span>
-    <span class="k">暴風圈到達 <b>${w.eta_text||"—"}</b></span>${w.rain_1h_mm?`<span class="k">瞬間雨量 <b>${w.rain_1h_mm}mm</b></span>`:""}`;}
-  else if(w.tracking){al.className="alert track";al.innerHTML=`<span class="pulse"></span>
-    <span class="big">🌀 颱風 <b>${w.name||"—"}</b> 追蹤中</span>
+  const rain24=+w.rain_24h_mm||0;
+  // 各田(依座標)或雲林的侵襲機率；多塊地不同縣市→多列
+  const byR=invasionByRegion();const rk=Object.keys(byR);
+  const invHTML=rk.length?rk.map(r=>`<span class="k">${r} 侵襲機率 <b>${Math.round(byR[r]*100)}%</b></span>`).join("")
+    :`<span class="k">雲林 侵襲機率 <b>${w.invade_prob!=null?Math.round(w.invade_prob*100)+"%":"—"}</b></span>`;
+  if(w.active){al.className="alert flash";al.innerHTML=`<span class="ticon spin">🌀</span>
+    <span class="big">颱風 <b>${w.name||"警報中"}</b> · ${w.warning||"接近中"}</span>
+    ${invHTML}<span class="k">暴風圈到達 <b>${w.eta_text||"—"}</b></span>${rain24?`<span class="k">24hr雨量 <b>${rain24}mm</b></span>`:""}`;}
+  else if(rain24>=80){const heavy=rain24>=200;al.className="alert rain flash";
+    al.innerHTML=`<span class="ticon">${heavy?"⛈️":"🌧️"}</span>
+      <span class="big">${heavy?"豪雨特報":"大雨特報"} · 雲林 24hr 雨量 <b>${rain24}mm</b></span>
+      <span class="k">低窪田注意積水、可提前搶收</span>`;}
+  else if(w.tracking){al.className="alert track";al.innerHTML=`<span class="ticon">🌀</span>
+    <span class="big">颱風 <b>${w.name||"—"}</b> 追蹤中</span>
     <span class="k">${w.warning||"對雲林暫無直接威脅"}</span>
-    ${w.min_dist_km!=null?`<span class="k">最近距離 <b>${w.min_dist_km} km</b></span>`:""}
-    <span class="k">侵襲機率 <b>${w.invade_prob!=null?Math.round(w.invade_prob*100)+"%":"—"}</b></span>`;}
-  else{al.className="alert calm";al.innerHTML=`<span class="pulse"></span><span class="big">目前<b>無颱風警報</b></span><span class="k">下方顯示各田採收進度</span>`;}
+    ${w.min_dist_km!=null?`<span class="k">最近距離 <b>${w.min_dist_km} km</b></span>`:""}${invHTML}`;}
+  else{al.className="alert calm";al.innerHTML=`<span class="ticon">🌿</span><span class="big">目前<b>無颱風警報</b></span><span class="k">下方顯示各田採收進度</span>`;}
   const fields=getFields().map(computeField);
   if(w.active)fields.sort((a,b)=>b.risk-a.risk);
   const wrap=document.getElementById("hCards");wrap.innerHTML="";hTimers=[];
