@@ -71,7 +71,18 @@
   .cmprow .best{font-size:.68rem;font-weight:800;color:#0e1a08;background:var(--g);padding:.12rem .5rem;border-radius:999px;flex:0 0 auto;}
 
   /* 股票式查價卡 */
-  .quote{margin-top:0.9rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1rem;}
+  .quote{margin-top:0.9rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1rem;
+    transition:transform .32s cubic-bezier(.34,1.32,.64,1),opacity .24s;will-change:transform;}
+  .quote .grab{width:2.6rem;height:0.28rem;border-radius:999px;background:var(--line);margin:-0.3rem auto 0.5rem;}
+  /* 收合後的迷你查價條（可點開） */
+  .qmini{margin-top:0.9rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:0.7rem 1rem;display:flex;align-items:baseline;gap:0.35rem 0.5rem;flex-wrap:wrap;cursor:pointer;
+    transition:transform .32s cubic-bezier(.34,1.32,.64,1),opacity .24s;will-change:transform;}
+  .qmini .mnm{font-weight:900;font-size:1.15rem;white-space:nowrap;} .qmini .mpx{font-size:1.5rem;font-weight:900;white-space:nowrap;}
+  .qmini .mpx.up{color:var(--r);} .qmini .mpx.dn{color:var(--g);} .qmini .mpx.mid{color:var(--paper);}
+  .qmini .mu{font-size:0.7rem;color:var(--muted);} .qmini .mchg{font-size:0.85rem;font-weight:800;white-space:nowrap;}
+  .qmini .mchg.up{color:var(--r);} .qmini .mchg.dn{color:var(--g);} .qmini .mchg.mid{color:var(--y);}
+  .qmini .mhint{margin-left:auto;font-size:0.8rem;color:var(--leaf);white-space:nowrap;flex:0 0 auto;}
   .quote h3{margin:0;font-size:1.3rem;font-weight:900;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;}
   .quote .mktbadge{margin-left:auto;font-size:1.1rem;font-weight:900;color:var(--bg);background:var(--leaf);
     padding:0.25rem 0.8rem;border-radius:999px;white-space:nowrap;}
@@ -328,7 +339,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="V0024p00709";
+const VERSION="V0025p00709";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -445,7 +456,7 @@ const FEST=Object.fromEntries(FESTIVALS);
 // 真實天氣事件標記樣式（date -> [{type,label}]，由 loadEvents 填入）
 let WEVENTS={};
 const WEV_STYLE={typhoon:{g:"🌀",c:"#B7472A"},rain:{g:"🌧",c:"#3B7DD8"},cold:{g:"❄",c:"#57B0C9"}};
-let QDATA=[],QGEO=null,QANNO=[],TF="D",CAT="蔬菜";
+let QDATA=[],QGEO=null,QANNO=[],TF="D",CAT="蔬菜",QCOLLAPSED=false;
 const TF_LABEL={D:"日",W:"週",M:"月"};
 /* 自動事件註記：挑出暴漲/暴跌，並找出「為什麼」（颱風/大雨/低溫/節慶/爆量） */
 function eventCause(day,v,qmed){
@@ -497,7 +508,7 @@ function renderBoard(){
       :`<span class="dot mid"></span><span class="nm">${disp}</span><span class="px"><span class="u">近期無成交</span></span>`;
     b.onclick=()=>selectCrop(disp);el.appendChild(b);});
 }
-function selectCrop(d){CUR=d;renderBoard();renderQuote(d);}
+function selectCrop(d){QCOLLAPSED=false;CUR=d;renderBoard();renderQuote(d);}
 /* 角色買賣價註記：批發拍賣是「一個成交價」，農夫扣手續費實得、商人進貨成本＋手續費 */
 const FEE_FARMER=0.06,FEE_MERCHANT=0.06;
 function roleNoteHTML(avg){
@@ -517,7 +528,12 @@ function renderQuote(disp){
   const es=pv.es;const prev=es.length>1?es[es.length-2][1].avg:pv.avg;const chg=pv.avg-prev;const chgP=prev?chg/prev*100:0;
   const cls=chg>0.01?"up":chg<-0.01?"dn":"mid";const arrow=chg>0.01?"▲":chg<-0.01?"▼":"＝";
   const hi=pv.last[1].high,lo=pv.last[1].low,qty=pv.last[1].qty;
+  if(QCOLLAPSED){box.innerHTML=`<div class="qmini" id="qmini">
+    <span class="mnm">${disp}</span><span class="mpx ${cls} mono">${pv.avg.toFixed(1)}</span><span class="mu">元</span>
+    <span class="mchg ${cls} mono">${arrow}${chgP>=0?"+":""}${chgP.toFixed(1)}%</span>
+    <span class="mhint">▾ 點開</span></div>`;return;}
   box.innerHTML=`<div class="quote">
+    <div class="grab"></div>
     <h3><span>${disp}</span><span class="mktbadge">${MARKET} 批發</span></h3>
     <div class="price"><span class="v ${cls} mono">${pv.avg.toFixed(1)}</span><span class="u">元/公斤</span>
       <span class="chg ${cls} mono">${arrow} ${chg>=0?"+":""}${chg.toFixed(1)} (${chgP>=0?"+":""}${chgP.toFixed(1)}%)</span></div>
@@ -532,7 +548,7 @@ function renderQuote(disp){
     <div class="cap" id="qcap"></div>
     <details class="annobox" id="annobox"><summary id="annosum">📌 為什麼漲跌</summary><div class="annos" id="qanno"></div></details>
     ${variantHTML(disp)}
-    <div class="qtip" id="qtip">👆 滑動查價：底部標日期、右側標價格</div>
+    <div class="qtip" id="qtip">👆 橫滑查價（底部日期・右側價格）· ☝ 往上滑可收合卡片、騰出下方清單</div>
   </div>`;
   const cap=document.getElementById("qcap");if(cap)cap.innerHTML=capFor();
   const qa=document.getElementById("qanno");if(qa)qa.innerHTML=annoHTML(QANNO);
@@ -540,6 +556,25 @@ function renderQuote(disp){
   if(abox){if(QANNO.length){abox.style.display="";asum.textContent=`📌 為什麼漲跌（${QANNO.length} 件大波動）`;}else abox.style.display="none";}
   document.querySelectorAll("#tfrow button").forEach(b=>b.onclick=()=>{TF=b.dataset.tf;renderQuote(disp);});
   attachCross(box);
+}
+function collapseQuote(){if(QCOLLAPSED||!CUR)return;QCOLLAPSED=true;renderQuote(CUR);}
+function expandQuote(){if(!QCOLLAPSED||!CUR)return;QCOLLAPSED=false;renderQuote(CUR);}
+/* 查價卡手勢：往上滑掉→收合成迷你條(回彈)、點迷你條→展開；水平滑動仍是查價線 */
+function attachQuoteGesture(){
+  const box=document.getElementById("quote");if(!box)return;
+  let sy=0,sx=0,axis=null,dy=0,card=null,moved=false;
+  box.addEventListener("touchstart",e=>{const t=e.touches[0];sy=t.clientY;sx=t.clientX;axis=null;dy=0;moved=false;
+    card=box.querySelector(".quote,.qmini");if(card)card.style.transition="none";},{passive:true});
+  box.addEventListener("touchmove",e=>{if(!card)return;const t=e.touches[0];const ddy=t.clientY-sy,ddx=t.clientX-sx;
+    if(Math.abs(ddx)>6||Math.abs(ddy)>6)moved=true;
+    if(axis===null&&(Math.abs(ddy)>10||Math.abs(ddx)>10))axis=Math.abs(ddy)>Math.abs(ddx)*1.3?"v":"h";
+    if(axis==="v"&&!QCOLLAPSED&&ddy<0){dy=ddy;card.style.transform=`translateY(${Math.max(ddy*0.55,-170)}px)`;
+      card.style.opacity=String(Math.max(.25,1+ddy/260));e.preventDefault();e.stopPropagation();}},{capture:true,passive:false});
+  box.addEventListener("touchend",()=>{if(!card)return;const c=card;card=null;c.style.transition="";
+    if(QCOLLAPSED){return;}                                   // 迷你條靠 click 展開
+    if(axis==="v"&&dy<-55){c.style.transform="translateY(-135%)";c.style.opacity="0";setTimeout(collapseQuote,170);}
+    else{c.style.transform="";c.style.opacity="";}});          // 未達門檻→回彈
+  box.addEventListener("click",()=>{if(QCOLLAPSED)expandQuote();});
 }
 function capFor(){const base=TF==="D"?"近 90 日":TF==="W"?"近 2 年·每週":"近 2 年·每月";
   return `${base}·均價折線(紅漲綠跌)·圓點＝重要事件`;}
@@ -863,6 +898,7 @@ document.getElementById("roleRow").addEventListener("click",e=>{const b=e.target
   const fc=document.getElementById("fcCrop");cropList().forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;fc.appendChild(o);});
   document.getElementById("fcDate").value=todayISO();
   applyRole();   // 依角色顯示/隱藏分頁
+  attachQuoteGesture();   // 查價卡往上滑收合手勢
 })();
 </script>
 </body>
