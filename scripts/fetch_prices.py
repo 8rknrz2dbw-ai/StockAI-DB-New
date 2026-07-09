@@ -126,6 +126,8 @@ def main():
                     continue
                 try:
                     a = float(avg)
+                    if a <= 0:          # 跳過休市/未成交(0元)——避免整批 0 元假資料塞爆檔案、
+                        continue        # 也讓各市場只保留「真的有交易」的品項（達成各地種類不同）
                     series[iso] = {
                         "avg": round(a, 1),
                         "high": round(float(g(rec, "上價", "Upper_Price") or a), 1),
