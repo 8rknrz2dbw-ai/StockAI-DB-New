@@ -1,7 +1,7 @@
 name: 更新天氣與搶收預判資料
 
-# 平時每 30 分鐘跑一次；颱風期間可用 workflow_dispatch 手動加密集觸發，
-# 或另建一支較密集（如每 10 分）的排程（見 README 部署說明）。
+# 只跑「天氣/颱風/搶收決策」——輕量、每 30 分鐘一次（颱風期間可 workflow_dispatch 加密集）。
+# 批發行情因需抓 2 年歷史、較慢，已拆到 update-prices.yml 每日少量觸發，避免拖慢天氣更新。
 on:
   schedule:
     - cron: '*/30 * * * *'
@@ -29,9 +29,6 @@ jobs:
 
       - name: 安裝相依
         run: pip install -r scripts/requirements.txt
-
-      - name: 抓取批發行情（農業部公開資料，免金鑰）
-        run: python3 scripts/fetch_prices.py --days 730 || echo "行情抓取失敗，前端會退回示範資料"
 
       - name: 抓取 CWA 天氣 / 颱風（無金鑰則寫出 active=false 安全狀態）
         env:
@@ -63,7 +60,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add prices_index.json prices typhoon_status.json harvest_advisory.json cwa_debug.json weather_events.json
+          git add typhoon_status.json harvest_advisory.json cwa_debug.json weather_events.json
           if git diff --staged --quiet; then
             echo "資料無變更，略過提交。"
           else
