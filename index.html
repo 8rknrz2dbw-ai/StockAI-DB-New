@@ -507,7 +507,7 @@ function roleNoteHTML(avg){
 }
 /* 全品種行情：點進去看該作物各品種最新價（如鳳梨-金鑽/牛奶…） */
 function variantHTML(disp){const w=wholesaleOf(disp);const vs=(MVAR[MARKET]||{})[w];if(!vs)return "";
-  const items=Object.entries(vs).filter(e=>e[1]&&e[1].avg>0).sort((a,b)=>b[1].avg-a[1].avg);
+  const items=Object.entries(vs).filter(e=>e[1]&&e[1].avg>0&&e[0]!=="其他"&&e[0]!==disp).sort((a,b)=>b[1].avg-a[1].avg);
   if(items.length<2)return "";
   return `<details class="varbox"><summary>🧺 ${disp} 全品種行情（${items.length} 種，點開）</summary>`+
     items.map(([lab,v])=>`<div class="varrow"><span class="vl">${lab||"一般"}</span><span class="vp mono">${v.avg.toFixed(1)}</span><span class="vu">元/公斤 · ${(v.date||"").slice(5)}</span></div>`).join("")+`</details>`;
