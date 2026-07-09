@@ -1,0 +1,113 @@
+{
+  "updated": "2026-07-09 08:03",
+  "typhoon": {
+    "name": null,
+    "warning": null,
+    "invade_prob": null,
+    "eta_text": null,
+    "rain_24h_mm": null,
+    "active": false
+  },
+  "region": {
+    "surge_ratio": 1.0,
+    "loss_rate": 0.0,
+    "price_source": "veg_prices.json"
+  },
+  "schedule": null,
+  "fields": [
+    {
+      "field_id": "YL-A12",
+      "crop": "青江菜",
+      "decision": "NORMAL",
+      "confidence": 0.8,
+      "risk_score": 0,
+      "maturity": 0.64,
+      "flood_potential_level": 4,
+      "harvest_deadline": null,
+      "dilemma": null,
+      "partial_pct": null,
+      "immature": true,
+      "ev": null,
+      "risk_breakdown": {},
+      "reasons": [
+        "淹水潛勢等級 4（低窪），泡水 48hr 起爛根，需提前搶收",
+        "⚠ 不可上市：距安全採收期還差 4 天（陶斯松）"
+      ]
+    },
+    {
+      "field_id": "YL-C03",
+      "crop": "芥藍菜",
+      "decision": "NORMAL",
+      "confidence": 0.8,
+      "risk_score": 0,
+      "maturity": 0.919,
+      "flood_potential_level": 3,
+      "harvest_deadline": null,
+      "dilemma": null,
+      "partial_pct": null,
+      "immature": false,
+      "ev": null,
+      "risk_breakdown": {},
+      "reasons": [
+        "淹水潛勢等級 3（偏低），泡水 48hr 起爛根，需提前搶收",
+        "中長期作物（60–80 天），颱風曝險期最長",
+        "PHI 已過，可合法上市"
+      ]
+    },
+    {
+      "field_id": "YL-B07",
+      "crop": "小白菜",
+      "decision": "NORMAL",
+      "confidence": 0.8,
+      "risk_score": 0,
+      "maturity": 1.093,
+      "flood_potential_level": 3,
+      "harvest_deadline": null,
+      "dilemma": null,
+      "partial_pct": null,
+      "immature": false,
+      "ev": null,
+      "risk_breakdown": {},
+      "reasons": [
+        "淹水潛勢等級 3（偏低），泡水 48hr 起爛根，需提前搶收",
+        "PHI 已過，可合法上市"
+      ]
+    },
+    {
+      "field_id": "YL-D21",
+      "crop": "菠菜",
+      "decision": "NORMAL",
+      "confidence": 0.8,
+      "risk_score": 0,
+      "maturity": 0.307,
+      "flood_potential_level": 2,
+      "harvest_deadline": null,
+      "dilemma": null,
+      "partial_pct": null,
+      "immature": true,
+      "ev": null,
+      "risk_breakdown": {},
+      "reasons": [
+        "⚠ 不可上市：距安全採收期還差 4 天（免賴得）"
+      ]
+    },
+    {
+      "field_id": "YL-E09",
+      "crop": "青江菜",
+      "decision": "NORMAL",
+      "confidence": 0.8,
+      "risk_score": 0,
+      "maturity": 0.509,
+      "flood_potential_level": 1,
+      "harvest_deadline": null,
+      "dilemma": null,
+      "partial_pct": null,
+      "immature": true,
+      "ev": null,
+      "risk_breakdown": {},
+      "reasons": [
+        "PHI 已過，可合法上市"
+      ]
+    }
+  ]
+}
