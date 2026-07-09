@@ -187,6 +187,33 @@ def parse_rain_24h(records, county=COUNTY):
     return best
 
 
+def parse_rain_hours(records, path, county=COUNTY):
+    """回傳雲林各雨量站中某時段(由 path 指定，如 Past1hr)最大累積雨量 mm。"""
+    if not records:
+        return None
+    best = None
+
+    def walk(o):
+        nonlocal best
+        if isinstance(o, dict):
+            loc = o.get("CountyName") or o.get("countyName") or ""
+            if county in str(loc) or "雲林" in str(loc):
+                r = _dig(o, path)
+                try:
+                    v = float(r)
+                    if best is None or v > best:
+                        best = v
+                except (TypeError, ValueError):
+                    pass
+            for v in o.values():
+                walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+    walk(records)
+    return best
+
+
 def _dig(o, path):
     for k in path:
         if isinstance(o, dict) and k in o:
@@ -212,11 +239,13 @@ def main():
     warn = cwa_get(DATASETS["typhoon_warning"])
     active, name, wtxt, land = parse_typhoon_warning(warn)
 
-    invade_prob = eta_iso = eta_text = rain24 = None
+    invade_prob = eta_iso = eta_text = None
     if active:
         invade_prob = parse_invasion_prob(cwa_get(DATASETS["invasion_prob"]))
         eta_iso, eta_text = parse_path_eta(cwa_get(DATASETS["path_potential"]))
-    rain24 = parse_rain_24h(cwa_get(DATASETS["rainfall"], CountyName=COUNTY))
+    rain_recs = cwa_get(DATASETS["rainfall"], CountyName=COUNTY)
+    rain24 = parse_rain_24h(rain_recs)
+    rain1 = parse_rain_hours(rain_recs, ["RainfallElement", "Past1hr", "Precipitation"])   # 瞬間(1hr)雨量
 
     status = {
         "updated": now.strftime("%Y-%m-%d %H:%M"),
@@ -229,6 +258,7 @@ def main():
         "eta_iso": eta_iso,
         "eta_text": eta_text or ("警報中" if active else None),
         "rain_24h_mm": rain24,
+        "rain_1h_mm": rain1,       # 瞬間(1hr)雨量：短延時強降雨→局部淹水指標
         "forecast_gust_ms": None,  # TODO v2：接 F-C0034-005 風力預測
     }
     with open("typhoon_status.json", "w", encoding="utf-8") as f:
