@@ -134,7 +134,8 @@
   .anno .ae{font-size:1.05rem;flex:0 0 auto;} .anno .ad{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
   .anno .al{font-weight:700;} .anno .ap{margin-left:auto;font-weight:900;flex:0 0 auto;}
   .anno .ap.up{color:var(--r);} .anno .ap.dn{color:var(--g);}
-  .tag.season{color:#8FC7BD;background:rgba(111,176,166,.14);border-color:rgba(111,176,166,.34);}
+  .tag.season{color:#8FC7BD;background:rgba(111,176,166,.14);border-color:rgba(111,176,166,.34);font-size:0.68rem;}
+  .tag.season::before{display:none;}   /* 非當季為描述性標籤、字較長，省去圓點以單行呈現 */
 
   /* === 行情看板 v1.2：大卡列表 + 點進去的詳細頁 === */
   .boardtop{position:sticky;top:0;z-index:6;background:var(--bg);padding:0.2rem 0 0.6rem;
@@ -412,7 +413,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.3";
+const VERSION="v1.4";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
