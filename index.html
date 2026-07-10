@@ -70,8 +70,12 @@
   .prow .px .v{font-size:1.5rem;font-weight:900;}
   .prow .px .u{font-size:0.68rem;color:var(--muted);}
   .prow .chev{color:var(--muted);font-size:1rem;flex:0 0 auto;}
-  .tag{font-size:0.72rem;font-weight:800;padding:0.15rem 0.5rem;border-radius:999px;white-space:nowrap;}
-  .tag.up{color:#2a1409;background:var(--r);} .tag.dn{color:#0e1a08;background:var(--g);} .tag.mid{color:#2a2306;background:var(--y);}
+  .tag{font-size:0.72rem;font-weight:800;padding:0.18rem 0.55rem;border-radius:999px;white-space:nowrap;
+    border:1px solid transparent;display:inline-flex;align-items:center;gap:0.3rem;}
+  .tag::before{content:"";width:0.42rem;height:0.42rem;border-radius:50%;background:currentColor;flex:0 0 auto;}
+  .tag.up{color:#F0906B;background:rgba(228,87,46,.15);border-color:rgba(228,87,46,.38);}
+  .tag.dn{color:#83CE7E;background:rgba(95,184,90,.15);border-color:rgba(95,184,90,.38);}
+  .tag.mid{color:#EBC44E;background:rgba(242,183,5,.14);border-color:rgba(242,183,5,.34);}
   .empty{background:var(--panel);border:1px dashed var(--line);border-radius:var(--radius);padding:1.2rem;text-align:center;color:var(--muted);font-size:0.9rem;}
   /* 跨市場比價 */
   .cmprow{display:flex;align-items:center;gap:0.6rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:0.75rem 0.9rem;margin-top:0.5rem;}
@@ -130,12 +134,15 @@
   .anno .ae{font-size:1.05rem;flex:0 0 auto;} .anno .ad{color:var(--muted);font-variant-numeric:tabular-nums;flex:0 0 auto;}
   .anno .al{font-weight:700;} .anno .ap{margin-left:auto;font-weight:900;flex:0 0 auto;}
   .anno .ap.up{color:var(--r);} .anno .ap.dn{color:var(--g);}
-  .tag.season{color:#d7e6df;background:#2f4a4a;}
+  .tag.season{color:#8FC7BD;background:rgba(111,176,166,.14);border-color:rgba(111,176,166,.34);}
 
   /* === 行情看板 v1.2：大卡列表 + 點進去的詳細頁 === */
-  .boardtop{position:sticky;top:0;z-index:6;background:var(--bg);padding:0.2rem 0 0.55rem;
-    display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:0.7rem;}
-  .boardtop .catbar{flex:1;margin:0;}
+  .boardtop{position:sticky;top:0;z-index:6;background:var(--bg);padding:0.2rem 0 0.6rem;
+    display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.7rem;}
+  .boardtop .catbar{margin:0;}
+  .mktrow{display:flex;align-items:center;gap:0.6rem;}
+  .mktlabel{font-size:0.95rem;color:var(--muted);font-weight:600;white-space:nowrap;}
+  .mktlabel b{color:var(--leaf);font-weight:900;}
   .unitbar{margin-left:auto;flex:0 0 auto;}
   .unitseg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px;flex:0 0 auto;}
   .unitseg button{background:transparent;border:0;color:var(--muted);padding:0.42rem 0.9rem;border-radius:999px;font-weight:800;font-size:0.9rem;}
@@ -311,7 +318,10 @@
     <div id="mktList">
       <div class="boardtop">
         <div class="catbar" id="catbar"></div>
-        <div class="unitbar" id="unitbar"></div>
+        <div class="mktrow">
+          <span class="mktlabel" id="mktLabel"></span>
+          <div class="unitbar" id="unitbar"></div>
+        </div>
       </div>
       <div class="board" id="board"></div>
     </div>
@@ -402,7 +412,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.2";
+const VERSION="v1.3";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -592,19 +602,19 @@ function renderBoard(){
   const ld=document.getElementById("mktDetail");if(ld)ld.style.display="none";
   const ll=document.getElementById("mktList");if(ll)ll.style.display="";
   renderCatbar();
+  const ml=document.getElementById("mktLabel");if(ml)ml.innerHTML=`<b>${MARKET}</b> · 批發`;
   const ub=document.getElementById("unitbar");if(ub){ub.innerHTML=unitToggleHTML("ubSeg");bindUnitToggle(ub);}
   const el=document.getElementById("board");el.innerHTML="";
   const list=boardList();
   if(!list.length){el.innerHTML='<div class="empty">此分類尚無品項。點右上 ⚙️ → 我的品項 → 新增。</div>';return;}
   list.forEach(disp=>{const pv=priceView(disp);const card=document.createElement("button");card.className="mcard";
-    if(!pv){card.innerHTML=`<div class="mc-r1"><span class="mc-dot mid"></span><span class="mc-nm">${disp}</span>
+    if(!pv){card.innerHTML=`<div class="mc-r1"><span class="mc-nm">${disp}</span>
       <span class="mc-none">近期無成交</span><span class="chev">›</span></div>`;
       card.onclick=()=>openDetail(disp);el.appendChild(card);return;}
     const es=pv.es;const prev=es.length>1?es[es.length-2][1].avg:pv.avg;const chg=pv.avg-prev;const chgP=prev?chg/prev*100:0;
     const dcls=chg>0.01?"up":chg<-0.01?"dn":"mid";const arr=chg>0.01?"▲":chg<-0.01?"▼":"＝";
     const tag=pv.stale>14?`<span class="tag season">非當季·最後成交 ${pv.date.slice(5)}</span>`:`<span class="tag ${pv.cls}">${pv.say}</span>`;
     card.innerHTML=`<div class="mc-r1">
-        <span class="mc-dot ${pv.stale>14?'mid':pv.cls}"></span>
         <span class="mc-nm">${disp}</span>
         <span class="mc-px"><span class="mc-v mono">${pxU(pv.avg).toFixed(1)}</span><span class="mc-u">${unitU()}</span></span>
       </div>
@@ -693,8 +703,8 @@ function dailyCardsHTML(es){
         <span>下價 <b class="mono">${pxU(v.low).toFixed(1)}</b></span></div>
     </div>`;}).join("");
 }
-function capFor(){const base=TF==="D"?"近 90 日":TF==="W"?"近 2 年·每週":"近 2 年·每月";
-  return `${base}·均價折線(紅漲綠跌)·圓點＝重要事件`;}
+function capFor(){const base=TF==="D"?"近 90 日":TF==="W"?"近 2 年 · 每週":"近 2 年 · 每月";
+  return `${base} · 均價 · <span style="color:var(--r)">紅漲</span><span style="color:var(--g)">綠跌</span>`;}
 /* 依時間刻度彙總（日 90 筆／週·月取近 2 年） */
 function tfSeries(es){
   if(TF==="D")return es.slice(-90);
@@ -737,12 +747,12 @@ function crossDraw(i){
     +`<circle cx="${X.toFixed(1)}" cy="${Y.toFixed(1)}" r="3" fill="#EFEAD8"/>`;
   const rect=svg.getBoundingClientRect();
   const pxL=document.getElementById("pxLabel"),dtL=document.getElementById("dtLabel");
-  if(pxL){pxL.style.display="block";pxL.style.top=(Y/G.H*rect.height)+"px";pxL.textContent=v.avg.toFixed(1);}
+  if(pxL){pxL.style.display="block";pxL.style.top=(Y/G.H*rect.height)+"px";pxL.textContent=pxU(v.avg).toFixed(1);}
   if(dtL){dtL.style.display="block";let lx=X/G.W*rect.width;lx=Math.max(26,Math.min(rect.width-26,lx));dtL.style.left=lx+"px";dtL.textContent=day;}
   const tip=document.getElementById("qtip");if(tip){const evs=[];
     const c=eventCause(day,v,G.qmed);if(c)evs.push(c.g+c.label);   // 該點的事件（任一刻度）
     const dl=TF==="W"?day+" 當週":TF==="M"?day.slice(0,7)+" 當月":day;
-    tip.innerHTML=`<b>${dl}</b>　高 ${v.high} / 低 ${v.low} / 均 <b>${v.avg}</b>　量 ${v.qty.toLocaleString()}`+(evs.length?`　<span class="ev">${evs.join(" ")}</span>`:"");}
+    tip.innerHTML=`<b>${dl}</b>　高 ${pxU(v.high).toFixed(1)} / 低 ${pxU(v.low).toFixed(1)} / 均 <b>${pxU(v.avg).toFixed(1)}</b> ${unitU()}　量 ${v.qty.toLocaleString()}`+(evs.length?`　<span class="ev">${evs.join(" ")}</span>`:"");}
 }
 function attachCross(box){
   const svg=box.querySelector("#qchart svg");if(!svg||!QGEO||!QDATA.length)return;
