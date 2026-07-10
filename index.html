@@ -46,7 +46,23 @@
   .hgroup{margin-left:auto;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;justify-content:flex-end;}
   .upd{font-size:0.72rem;color:var(--muted);white-space:nowrap;}
   header.slim{gap:0.5rem;padding-top:0.1rem;justify-content:space-between;}
-  .hleft{display:flex;align-items:center;gap:0.5rem;min-width:0;flex-wrap:wrap;}
+  .hright{display:flex;align-items:center;gap:0.5rem;flex:0 0 auto;}
+  /* 首次啟動：身分選擇（獨立介面） */
+  .onboard{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;align-items:center;justify-content:center;
+    padding:calc(1.2rem + env(safe-area-inset-top)) 1.3rem calc(1.2rem + env(safe-area-inset-bottom));}
+  .onboard.on{display:flex;}
+  .onbox{width:100%;max-width:440px;text-align:center;}
+  .onlogo{font-size:2.6rem;font-weight:900;letter-spacing:4px;margin-bottom:0.35rem;line-height:1.1;
+    background:linear-gradient(96deg,#6DB33F 0%,#E4F4A8 28%,#7FD0C4 58%,#6DB33F 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+    filter:drop-shadow(0 1px 6px rgba(124,194,74,.5));}
+  .onsub{color:var(--muted);font-size:0.9rem;margin:0 0 1.5rem;}
+  .oncard{display:flex;flex-direction:column;align-items:center;gap:0.35rem;width:100%;color:var(--paper);
+    background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:1.5rem 1rem;margin-bottom:1rem;}
+  .oncard:active{background:var(--panel2);border-color:var(--leaf-dim);}
+  .oncard .onemoji{font-size:2.7rem;line-height:1;}
+  .oncard .ontitle{font-size:1.45rem;font-weight:900;letter-spacing:2px;}
+  .oncard .ondesc{font-size:0.85rem;color:var(--muted);}
   .badge{padding:0.15rem 0.55rem;border-radius:999px;font-size:0.7rem;font-weight:700;border:1px solid var(--line);white-space:nowrap;}
   .badge.demo{color:var(--y);border-color:#5a4d13;background:#231d07;}
   .badge.live{color:var(--leaf);border-color:#2f4a1c;background:#182312;}
@@ -172,6 +188,15 @@
   .mcard .mc-chg.up{color:var(--r);} .mcard .mc-chg.dn{color:var(--g);} .mcard .mc-chg.mid{color:var(--muted);}
   .mcard .mc-none{color:var(--muted);font-size:0.95rem;margin-left:auto;}
   .mcard .chev{color:var(--muted);font-size:1.5rem;font-weight:400;flex:0 0 auto;}
+  .mc-vhint{font-size:0.66rem;font-weight:700;color:var(--bg);background:var(--cool);border-radius:999px;padding:0.05rem 0.4rem;vertical-align:middle;}
+  /* 品種下拉（點作物展開，選品種進 K線） */
+  .vdrop{margin:-0.3rem 0 0.7rem;padding:0.35rem;background:var(--panel2);border:1px solid var(--line);border-radius:0 0 14px 14px;
+    display:flex;flex-direction:column;gap:0.3rem;}
+  .vopt{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;width:100%;text-align:left;
+    background:var(--panel);border:1px solid var(--line);color:var(--paper);border-radius:10px;padding:0.7rem 0.85rem;font-weight:800;font-size:1.05rem;}
+  .vopt:active{background:var(--panel2);border-color:var(--leaf-dim);}
+  .vopt .vprice{font-size:0.85rem;color:var(--leaf);font-weight:800;}
+  .quote h3 .vtag{font-size:0.9rem;font-weight:800;color:var(--bg);background:var(--cool);border-radius:999px;padding:0.1rem 0.55rem;}
   .dtl-bar{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem;}
   .backbtn{background:var(--panel2);border:1px solid var(--line);color:var(--paper);font-weight:800;font-size:0.95rem;
     padding:0.45rem 0.95rem;border-radius:999px;}
@@ -244,6 +269,10 @@
   #tyBody .tyh{margin:0.9rem 0 0.4rem;font-size:0.95rem;color:var(--muted);}
   .tysvg{width:100%;height:auto;background:var(--panel2);border:1px solid var(--line);border-radius:12px;display:block;}
   .tylegend{display:flex;flex-wrap:wrap;gap:0.3rem 0.8rem;font-size:0.72rem;color:var(--muted);margin-top:0.35rem;}
+  .tyov{display:flex;gap:0.35rem;margin-bottom:0.5rem;flex-wrap:wrap;}
+  .tyov button{flex:1;min-width:3.5rem;background:var(--panel2);border:1px solid var(--line);color:var(--muted);
+    padding:0.4rem 0.5rem;border-radius:10px;font-weight:800;font-size:0.85rem;}
+  .tyov button.on{background:var(--leaf);color:var(--bg);border-color:var(--leaf);}
   .tyframe{position:relative;width:100%;aspect-ratio:4/3;border-radius:12px;overflow:hidden;border:1px solid var(--line);}
   .tyframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
   .tylinks{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem;}
@@ -275,7 +304,8 @@
   /* 採收預判 */
   .form{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1rem;display:flex;flex-direction:column;gap:0.8rem;}
   .form label{font-size:0.85rem;color:var(--muted);display:block;margin-bottom:0.3rem;}
-  .form input,.form select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--paper);padding:0.6rem 0.7rem;border-radius:12px;font-size:1rem;}
+  .form input,.form select{width:100%;box-sizing:border-box;min-width:0;background:var(--panel2);border:1px solid var(--line);color:var(--paper);padding:0.6rem 0.7rem;border-radius:12px;font-size:1rem;}
+  .form input[type=date]{-webkit-appearance:none;appearance:none;}
   .form .go{background:var(--leaf);color:var(--bg);border:0;border-radius:12px;padding:0.7rem;font-size:1.05rem;font-weight:800;}
   .fcresult{margin-top:0.9rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1rem;}
   .fcresult h3{margin:0 0 0.4rem;font-size:1.1rem;}
@@ -330,8 +360,8 @@
 <body>
 <div class="wrap">
   <header class="slim">
-    <div class="hleft"><span id="updated" class="upd">—</span><span id="mode" class="badge demo">示範資料</span></div>
-    <button class="gear" id="gear" aria-label="設定">⚙️</button>
+    <span id="updated" class="upd">—</span>
+    <div class="hright"><span id="mode" class="badge demo">示範資料</span><button class="gear" id="gear" aria-label="設定">⚙️</button></div>
   </header>
 
   <nav class="tabs">
@@ -448,9 +478,22 @@
   </div>
 </div>
 
+<div class="onboard" id="onboard">
+  <div class="onbox">
+    <div class="onlogo">巡田水</div>
+    <p class="onsub">先選你的身分，開始使用（之後可在右上 ⚙️ 更改）</p>
+    <button class="oncard" data-r="farmer">
+      <span class="onemoji">🧑‍🌾</span><span class="ontitle">蔬果農夫</span>
+      <span class="ondesc">看行情＋田區搶收＋採收預判</span></button>
+    <button class="oncard" data-r="merchant">
+      <span class="onemoji">🧺</span><span class="ontitle">商人</span>
+      <span class="ondesc">看批發行情＋跨市場比價找便宜進貨</span></button>
+  </div>
+</div>
+
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.5";
+const VERSION="v1.6";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -480,6 +523,7 @@ const S={
   get role(){return localStorage.getItem("vs_role")||"farmer";}, set role(v){localStorage.setItem("vs_role",v);},
   get market(){return localStorage.getItem("vs_market")||"";}, set market(v){localStorage.setItem("vs_market",v);},
   get unit(){return localStorage.getItem("vs_unit")||"kg";}, set unit(v){localStorage.setItem("vs_unit",v);},
+  get onboarded(){return localStorage.getItem("vs_onboarded")==="1";}, set onboarded(v){localStorage.setItem("vs_onboarded",v?"1":"");},
   watch(mk){try{return JSON.parse(localStorage.getItem("vs_watch_"+mk));}catch(e){return null;}},
   setWatch(mk,a){localStorage.setItem("vs_watch_"+mk,JSON.stringify(a));},
   get fields(){try{const f=JSON.parse(localStorage.getItem("vs_fields"));return Array.isArray(f)?f:null;}catch(e){return null;}},
@@ -561,11 +605,19 @@ function defaultWatch(){const av=availableCrops();const lat=(INDEX&&INDEX.latest
   const fruit=av.filter(c=>cropCat(c)==="水果").sort((a,b)=>q(b)-q(a)).slice(0,12);
   return [...veg,...fruit];}
 function watchCrops(){let w=S.watch(MARKET);const av=availableCrops();if(!Array.isArray(w))return defaultWatch();return w.filter(c=>av.includes(c));}  /* 未設定→預設常用；設定後為精確集合 */
-function priceView(disp){const es=sortedEntries(seriesFor(disp));if(!es.length)return null;const last=es[es.length-1];
+function priceView(disp,variety){const es=sortedEntries(variety?variantSeries(disp,variety):seriesFor(disp));
+  if(!es.length)return null;const last=es[es.length-1];
   const base=median(es.slice(-90).map(e=>e[1].avg));const diff=base?((last[1].avg-base)/base*100):0;
   let cls,say;if(diff>10){cls="up";say="偏貴";}else if(diff<-10){cls="dn";say="偏便宜";}else{cls="mid";say="正常";}
   const stale=Math.round(daysBetween(last[0],todayISO()));
   return {es,last,avg:last[1].avg,date:last[0],diff,cls,say,stale};}
+/* 品種資料：新格式 variants[母]={品種:{iso:{avg..}}} 逐日序列；相容舊格式(單筆最新價) */
+function variantRaw(disp){return (MVAR[MARKET]||{})[wholesaleOf(disp)]||{};}
+function _isSeries(v){if(!v||typeof v!=="object")return false;const k=Object.keys(v)[0];return k&&/^\d{4}-\d{2}-\d{2}$/.test(k);}
+function varietyLabels(disp){const vr=variantRaw(disp);
+  return Object.keys(vr).filter(l=>l!=="其他"&&l!==disp&&vr[l]&&Object.keys(vr[l]).length);}
+function variantSeries(disp,label){const v=variantRaw(disp)[label];if(!v)return {};
+  return _isSeries(v)?v:{[v.date||todayISO()]:{avg:v.avg,high:v.high,mid:(v.mid!=null?v.mid:v.avg),low:v.low,qty:v.qty}};}
 
 /* ══════ 事件（節慶影響菜價；颱風/寒流/大雨事件待接天氣歷史） ══════ */
 const FESTIVALS=[["2025-01-29","春節"],["2025-04-04","清明"],["2025-05-31","端午"],["2025-10-06","中秋"],
@@ -575,7 +627,7 @@ const FEST=Object.fromEntries(FESTIVALS);
 let WEVENTS={};
 const WEV_STYLE={typhoon:{g:"🌀",c:"#B7472A"},rain:{g:"🌧",c:"#3B7DD8"},cold:{g:"❄",c:"#57B0C9"}};
 let QDATA=[],QGEO=null,QANNO=[],TF="D",CAT="蔬菜";
-let UNIT=S.unit,MKTMODE="list",DETAIL=null,SEARCH="";   // 公斤/台斤、列表/詳細、詳細頁作物、搜尋字串
+let UNIT=S.unit,MKTMODE="list",DETAIL=null,SEARCH="",CURVAR=null,PICK=null;   // 公斤/台斤、列表/詳細、詳細頁作物、搜尋、目前品種、展開品種下拉的作物
 const TF_LABEL={D:"日",W:"週",M:"月"};
 /* ── 單位：1 台斤 = 0.6 公斤 ── */
 function unitF(){return UNIT==="tai"?0.6:1;}
@@ -585,7 +637,7 @@ function unitToggleHTML(id){return `<div class="unitseg" id="${id}">`+
   ["kg","tai"].map(u=>`<button data-u="${u}" class="${UNIT===u?'on':''}">${u==='kg'?'公斤':'台斤'}</button>`).join("")+`</div>`;}
 function bindUnitToggle(el){if(!el)return;el.querySelectorAll("button").forEach(b=>b.onclick=()=>setUnit(b.dataset.u));}
 function setUnit(u){if(u===UNIT)return;UNIT=u;S.unit=u;
-  if(MKTMODE==="detail"&&DETAIL)renderDetail(DETAIL);else renderBoard();}
+  if(MKTMODE==="detail"&&DETAIL)renderDetail(DETAIL,CURVAR);else renderBoard();}
 /* ── 農曆（base=2020 正月初一；涵蓋 2020–2035，已對照參考行情/節氣校驗） ── */
 const LUNAR={base:Date.UTC(2020,0,25),y0:2020,info:[
   0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
@@ -663,24 +715,36 @@ function renderBoard(){
   if(searching){const hint=document.createElement("div");hint.className="searchhint";
     hint.textContent=`搜尋結果 ${list.length} 筆（含未在清單的品項）`;el.appendChild(hint);}
   list.forEach(disp=>{const pv=priceView(disp);const card=document.createElement("button");card.className="mcard";
+    const vlabels=varietyLabels(disp);const hasVar=vlabels.length>=2;
+    const tapCrop=()=>{if(hasVar){PICK=(PICK===disp?null:disp);renderBoard();}else openDetail(disp,null);};
+    const chev=hasVar?(PICK===disp?"▴":"▾"):"›";
     if(!pv){card.innerHTML=`<div class="mc-r1"><span class="mc-nm">${disp}</span>
-      <span class="mc-none">近期無成交</span><span class="chev">›</span></div>`;
-      card.onclick=()=>openDetail(disp);el.appendChild(card);return;}
+      <span class="mc-none">近期無成交</span><span class="chev">${chev}</span></div>`;
+      card.onclick=tapCrop;el.appendChild(card);}
+    else{
     const es=pv.es;const prev=es.length>1?es[es.length-2][1].avg:pv.avg;const chg=pv.avg-prev;const chgP=prev?chg/prev*100:0;
     const dcls=chg>0.01?"up":chg<-0.01?"dn":"mid";const arr=chg>0.01?"▲":chg<-0.01?"▼":"＝";
     const tag=pv.stale>14?`<span class="tag season">非當季·最後成交 ${pv.date.slice(5)}</span>`:`<span class="tag ${pv.cls}">${pv.say}</span>`;
     card.innerHTML=`<div class="mc-r1">
-        <span class="mc-nm">${disp}</span>
+        <span class="mc-nm">${disp}${hasVar?` <span class="mc-vhint">${vlabels.length} 品種</span>`:""}</span>
         <span class="mc-px"><span class="mc-v mono">${pxU(pv.avg).toFixed(1)}</span><span class="mc-u">${unitU()}</span></span>
       </div>
       <div class="mc-r2">
         <span class="mc-tag">${tag}</span>
         <span class="mc-chg ${dcls} mono">${arr}${chgP>=0?"+":""}${chgP.toFixed(1)}%</span>
-        <span class="chev">›</span>
+        <span class="chev">${chev}</span>
       </div>`;
-    card.onclick=()=>openDetail(disp);el.appendChild(card);});
+    card.onclick=tapCrop;el.appendChild(card);}
+    // 品種下拉：點作物展開，選「全部」或某品種→進 K 線
+    if(hasVar&&PICK===disp){const dd=document.createElement("div");dd.className="vdrop";
+      dd.innerHTML=`<button class="vopt" data-v="">📊 ${disp}（全部綜合）</button>`+
+        vlabels.map(l=>{const s=variantSeries(disp,l);const ks=Object.keys(s).sort();const last=ks.length?s[ks[ks.length-1]]:null;
+          return `<button class="vopt" data-v="${l}"><span>${l}</span>${last?`<span class="vprice mono">${pxU(last.avg).toFixed(1)} ${unitU()}</span>`:""}</button>`;}).join("");
+      dd.querySelectorAll(".vopt").forEach(o=>o.onclick=(e)=>{e.stopPropagation();openDetail(disp,o.dataset.v||null);});
+      el.appendChild(dd);}
+  });
 }
-function selectCrop(d){openDetail(d);}   // 相容舊呼叫
+function selectCrop(d){openDetail(d,null);}   // 相容舊呼叫
 /* 角色買賣價註記：批發拍賣是「一個成交價」，農夫扣手續費實得、商人進貨成本＋手續費 */
 const FEE_FARMER=0.06,FEE_MERCHANT=0.06;
 function roleNoteHTML(avg){const u=unitU();
@@ -688,32 +752,26 @@ function roleNoteHTML(avg){const u=unitU();
     ? `<div class="rolenote merchant">🧺 進貨成本約 <b>${pxU(avg*(1+FEE_MERCHANT)).toFixed(1)}</b> ${u}（拍賣均價＋承銷手續費估）· 零售自行加價</div>`
     : `<div class="rolenote farmer">🧑‍🌾 農民實得約 <b>${pxU(avg*(1-FEE_FARMER)).toFixed(1)}</b> ${u}（拍賣均價扣手續費估 ~6%）</div>`;
 }
-/* 全品種行情：點進去看該作物各品種最新價（如鳳梨-金鑽/牛奶…） */
-function variantHTML(disp){const w=wholesaleOf(disp);const vs=(MVAR[MARKET]||{})[w];if(!vs)return "";
-  const items=Object.entries(vs).filter(e=>e[1]&&e[1].avg>0&&e[0]!=="其他"&&e[0]!==disp).sort((a,b)=>b[1].avg-a[1].avg);
-  if(items.length<2)return "";
-  return `<details class="varbox"><summary>🧺 ${disp} 全品種行情（${items.length} 種，點開）</summary>`+
-    items.map(([lab,v])=>`<div class="varrow"><span class="vl">${lab||"一般"}</span><span class="vp mono">${pxU(v.avg).toFixed(1)}</span><span class="vu">${unitU()} · ${(v.date||"").slice(5)}</span></div>`).join("")+`</details>`;
-}
-/* ── 點作物 → 詳細頁（K線走勢 + 農產品交易行情逐日明細）；‹返回 回列表 ── */
-function openDetail(disp){MKTMODE="detail";DETAIL=disp;CUR=disp;
+/* ── 點作物 → (有品種先下拉選) → 詳細頁（K線走勢 + 逐日明細）；‹返回 回列表 ── */
+function openDetail(disp,variety){MKTMODE="detail";DETAIL=disp;CUR=disp;CURVAR=variety||null;PICK=null;
   const l=document.getElementById("mktList");if(l)l.style.display="none";
   const d=document.getElementById("mktDetail");if(d)d.style.display="";
-  renderDetail(disp);window.scrollTo(0,0);}
-function closeDetail(){MKTMODE="list";DETAIL=null;
+  renderDetail(disp,CURVAR);window.scrollTo(0,0);}
+function closeDetail(){MKTMODE="list";DETAIL=null;CURVAR=null;
   const d=document.getElementById("mktDetail");if(d)d.style.display="none";
   const l=document.getElementById("mktList");if(l)l.style.display="";
   renderBoard();window.scrollTo(0,0);}
-function renderDetail(disp){
-  const box=document.getElementById("mktDetail");const pv=priceView(disp);
+function renderDetail(disp,variety){
+  const box=document.getElementById("mktDetail");const pv=priceView(disp,variety);
   if(!pv){box.innerHTML=`<div class="dtl-bar"><button class="backbtn" id="dtlBack">‹ 返回</button></div>
-    <div class="empty">「${disp}」近期無成交資料。</div>`;document.getElementById("dtlBack").onclick=closeDetail;return;}
+    <div class="empty">「${disp}${variety?" · "+variety:""}」近期無成交資料。</div>`;document.getElementById("dtlBack").onclick=closeDetail;return;}
   const es=pv.es;const prev=es.length>1?es[es.length-2][1].avg:pv.avg;const chg=pv.avg-prev;const chgP=prev?chg/prev*100:0;
   const cls=chg>0.01?"up":chg<-0.01?"dn":"mid";const arrow=chg>0.01?"▲":chg<-0.01?"▼":"＝";
   const hi=pv.last[1].high,lo=pv.last[1].low,qty=pv.last[1].qty;const u=unitU();
+  const vlabels=varietyLabels(disp);const varTitle=variety?variety:(vlabels.length>=2?"綜合":"");
   box.innerHTML=`<div class="dtl-bar"><button class="backbtn" id="dtlBack">‹ 返回</button>${unitToggleHTML("dtlUnit")}</div>
     <div class="quote">
-      <h3><span>${disp}</span><span class="mktbadge">${MARKET} 批發</span></h3>
+      <h3><span>${disp}${varTitle?` <small class="vtag">${varTitle}</small>`:""}</span><span class="mktbadge">${MARKET} 批發</span></h3>
       <div class="price"><span class="v ${cls} mono">${pxU(pv.avg).toFixed(1)}</span><span class="u">${u}</span>
         <span class="chg ${cls} mono">${arrow} ${chg>=0?"+":""}${pxU(chg).toFixed(1)} (${chgP>=0?"+":""}${chgP.toFixed(1)}%)</span></div>
       ${roleNoteHTML(pv.avg)}
@@ -729,7 +787,6 @@ function renderDetail(disp){
       <details class="annobox" id="annobox"><summary id="annosum">📌 為什麼漲跌</summary><div class="annos" id="qanno"></div></details>
       <div class="qtip" id="qtip">👆 橫滑查價（底部日期・右側價格）</div>
     </div>
-    ${variantHTML(disp)}
     <div class="dd-title">📋 農產品交易行情 · 逐日明細</div>
     ${dailyCardsHTML(es)}`;
   const cap=document.getElementById("qcap");if(cap)cap.innerHTML=capFor();
@@ -741,7 +798,7 @@ function renderDetail(disp){
   if(abox){if(QANNO.length){abox.style.display="";asum.textContent=`📌 為什麼漲跌（${QANNO.length} 件大波動）`;}else abox.style.display="none";}
   document.getElementById("dtlBack").onclick=closeDetail;
   bindUnitToggle(document.getElementById("dtlUnit"));
-  document.querySelectorAll("#tfrow button").forEach(b=>b.onclick=()=>{TF=b.dataset.tf;renderDetail(disp);});
+  document.querySelectorAll("#tfrow button").forEach(b=>b.onclick=()=>{TF=b.dataset.tf;renderDetail(disp,variety);});
   attachCross(box);
 }
 /* 農產品交易行情逐日明細：近 12 個交易日，每日一卡（上/中/下/均價・漲跌・成交量・農曆） */
@@ -880,7 +937,11 @@ function computeField(f){
   return {f,decision,risk,deadline,dilemma,oppo,lines,maturity,matPct,harvestISO,daysToHarvest,phiShort,active,inv,region};
 }
 let hTimers=[];
-/* ══════ 颱風詳情：逐時路徑圖(自氣象署軌跡) + windy 雷達 + 官方連結 ══════ */
+/* ══════ 颱風詳情：地圖式路徑圖(台灣輪廓+氣象署軌跡) + windy 雷達 + 官方連結 ══════ */
+// 台灣海岸線粗略輪廓（lat,lng）——供路徑圖當底圖，輕量離線
+const TAIWAN=[[25.30,121.53],[25.16,121.80],[24.85,121.92],[24.55,121.86],[24.00,121.62],
+  [23.40,121.42],[22.90,121.28],[22.35,120.90],[21.92,120.85],[22.28,120.42],[22.55,120.30],
+  [23.10,120.10],[23.65,120.13],[24.10,120.42],[24.62,120.66],[25.05,121.10],[25.30,121.53]];
 function drawTyphoonTrack(track){
   if(!Array.isArray(track)||!track.length)
     return `<div class="tynote">目前沒有逐時路徑資料（颱風可能剛生成或已遠離）。可用下方連結看官方即時路徑。</div>`;
@@ -888,56 +949,67 @@ function drawTyphoonTrack(track){
   const pts=track.filter(p=>isFinite(+p.lat)&&isFinite(+p.lng))
     .map(p=>({lat:+p.lat,lng:+p.lng,r15:+p.r15||0,r25:+p.r25||0}));
   if(!pts.length)return `<div class="tynote">路徑資料不足。</div>`;
-  const lats=pts.map(p=>p.lat).concat(REF.lat),lngs=pts.map(p=>p.lng).concat(REF.lng);
+  const geo=pts.map(p=>[p.lat,p.lng]).concat([[REF.lat,REF.lng]]).concat(TAIWAN);
+  const lats=geo.map(g=>g[0]),lngs=geo.map(g=>g[1]);
   const midLat=(Math.min(...lats)+Math.max(...lats))/2;
   const kLat=111,kLng=111*Math.cos(midLat*Math.PI/180);
   const minLng=Math.min(...lngs),minLat=Math.min(...lats);
-  const toKm=p=>({x:(p.lng-minLng)*kLng,y:(p.lat-minLat)*kLat});
-  const km=pts.map(toKm),rk=toKm(REF);
-  let maxX=rk.x,maxY=rk.y,minX=0,minY=0;
+  const toKm=(lat,lng)=>({x:(lng-minLng)*kLng,y:(lat-minLat)*kLat});
+  const twKm=TAIWAN.map(g=>toKm(g[0],g[1]));
+  const km=pts.map(p=>toKm(p.lat,p.lng)),rk=toKm(REF.lat,REF.lng);
+  let maxX=Math.max(...twKm.map(k=>k.x),rk.x),maxY=Math.max(...twKm.map(k=>k.y),rk.y);
+  let minX=Math.min(...twKm.map(k=>k.x),rk.x),minY=Math.min(...twKm.map(k=>k.y),rk.y);
   km.forEach((k,i)=>{const r=Math.max(pts[i].r15,pts[i].r25);
     maxX=Math.max(maxX,k.x+r);maxY=Math.max(maxY,k.y+r);minX=Math.min(minX,k.x-r);minY=Math.min(minY,k.y-r);});
   const spanX=(maxX-minX)||1,spanY=(maxY-minY)||1;
-  const W=320,H=300,pad=18,scale=Math.min((W-2*pad)/spanX,(H-2*pad)/spanY);
+  const W=320,H=320,pad=14,scale=Math.min((W-2*pad)/spanX,(H-2*pad)/spanY);
   const X=k=>pad+(k.x-minX)*scale,Y=k=>H-pad-(k.y-minY)*scale;   // 北方朝上
+  const twPoly=twKm.map(k=>`${X(k).toFixed(1)},${Y(k).toFixed(1)}`).join(" ");
+  const land=`<polygon points="${twPoly}" fill="#26361b" stroke="#3f5a28" stroke-width="1.2"/>`;
   const line=km.map(k=>`${X(k).toFixed(1)},${Y(k).toFixed(1)}`).join(" ");
   let circles="",dots="";
   km.forEach((k,i)=>{const cx=X(k),cy=Y(k),last=i===0;
-    if(pts[i].r15)circles+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${(pts[i].r15*scale).toFixed(1)}" fill="rgba(228,87,46,.07)" stroke="rgba(228,87,46,.32)" stroke-width="1"/>`;
+    if(pts[i].r15)circles+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${(pts[i].r15*scale).toFixed(1)}" fill="rgba(228,87,46,.08)" stroke="rgba(228,87,46,.34)" stroke-width="1"/>`;
     dots+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${last?5:3}" fill="${last?'#E4572E':'#F2B705'}" stroke="#12160E" stroke-width="1"/>`;});
   const rx=X(rk),ry=Y(rk);
   const ref=`<circle cx="${rx.toFixed(1)}" cy="${ry.toFixed(1)}" r="5.5" fill="#7CC24A" stroke="#12160E" stroke-width="1.5"/>`+
-    `<text x="${(rx+9).toFixed(1)}" y="${(ry+4).toFixed(1)}" fill="#A6C955" font-size="12" font-weight="800">雲林</text>`;
+    `<text x="${(rx+9).toFixed(1)}" y="${(ry+4).toFixed(1)}" fill="#CDE8A0" font-size="12" font-weight="800">雲林</text>`;
   return `<svg viewBox="0 0 ${W} ${H}" class="tysvg" role="img" aria-label="颱風路徑圖">
-    <polyline points="${line}" fill="none" stroke="#E4572E" stroke-width="2" stroke-dasharray="5 4" opacity="0.85"/>
+    <rect x="0" y="0" width="${W}" height="${H}" fill="#0e1a24"/>${land}
+    <polyline points="${line}" fill="none" stroke="#E4572E" stroke-width="2" stroke-dasharray="5 4" opacity="0.9"/>
     ${circles}${dots}${ref}</svg>
-    <div class="tylegend"><span>🔴 目前</span><span>🟡 預報點</span><span>🟢 你的位置</span><span>淡紅圈＝7級暴風圈</span></div>`;
+    <div class="tylegend"><span>🟩 台灣</span><span>🔴 目前</span><span>🟡 預報點</span><span>🟢 你的位置</span><span>淡紅圈＝7級暴風圈</span></div>`;
 }
+function windyURL(ov){const lat=23.7,lng=120.5;const prod=ov==="radar"?"&product=radar":"";
+  return `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&detailLat=${lat}&detailLon=${lng}&zoom=6&level=surface&overlay=${ov}${prod}&calendar=now&menu=&type=map&location=coordinates&metricWind=default&metricTemp=default&radarRange=-1`;}
+const WINDY_OV=[["radar","雷達"],["rain","雨量"],["wind","風速"],["gust","陣風"]];
 function typhoonBodyHTML(){
   const w=WEATHER||{};const byR=invasionByRegion();const rk=Object.keys(byR);
   const inv=rk.length?rk.map(r=>`<span class="tychip">${r} <b>${Math.round(byR[r]*100)}%</b></span>`).join("")
     :`<span class="tychip">雲林 <b>${w.invade_prob!=null?Math.round(w.invade_prob*100)+"%":"—"}</b></span>`;
-  const lat=23.7,lng=120.5;
-  const windy=`https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&detailLat=${lat}&detailLon=${lng}&zoom=6&level=surface&overlay=radar&menu=&type=map&location=coordinates&metricWind=default&metricTemp=default&radarRange=-1`;
   const ncdr="https://watch.ncdr.nat.gov.tw/watch_page_typhoon_v2";
   const windyFull="https://www.windy.com/23.700/120.500?radar,23.700,120.500,6";
   return `<div class="tysum">
       <div class="tyname">🌀 <b>${w.name||"颱風"}</b> · ${w.warning||(w.active?"接近中":"追蹤中")}</div>
       <div class="tychips">${inv}<span class="tychip">暴風圈到達 <b>${w.eta_text||"—"}</b></span>${w.min_dist_km!=null?`<span class="tychip">最近 <b>${w.min_dist_km} km</b></span>`:""}${w.rain_24h_mm!=null?`<span class="tychip">24hr雨 <b>${w.rain_24h_mm}mm</b></span>`:""}</div>
     </div>
-    <h4 class="tyh">預報路徑（相對你的位置）</h4>
+    <h4 class="tyh">預報路徑（台灣地圖·相對你的位置）</h4>
     ${drawTyphoonTrack(w.track)}
-    <h4 class="tyh">附近雷達 / 風場（windy）</h4>
-    <div class="tyframe"><iframe src="${windy}" loading="lazy" title="windy 雷達" referrerpolicy="no-referrer"></iframe></div>
+    <h4 class="tyh">附近即時影像（windy）</h4>
+    <div class="tyov">${WINDY_OV.map(([o,l],i)=>`<button data-ov="${o}" class="${i===0?'on':''}">${l}</button>`).join("")}</div>
+    <div class="tyframe"><iframe id="tyIframe" src="${windyURL('radar')}" loading="lazy" title="windy 即時影像" referrerpolicy="no-referrer"></iframe></div>
     <div class="tylinks">
       <a class="tybtn" href="${ncdr}" target="_blank" rel="noopener">NCDR 災害示警·颱風 ↗</a>
       <a class="tybtn" href="${windyFull}" target="_blank" rel="noopener">windy 全畫面 ↗</a>
     </div>
-    <p class="tyfoot">路徑圖由中央氣象署「路徑潛勢」逐時預報點繪製；雷達與外部連結需連網。</p>`;
+    <p class="tyfoot">路徑圖由中央氣象署「路徑潛勢」逐時預報點繪製；windy 即時影像與外部連結需連網。</p>`;
 }
 function openTyphoon(){const w=WEATHER||{};if(!(w.active||w.tracking))return;
   document.getElementById("tyTitle").textContent=`颱風 ${w.name||""} 詳情`;
   document.getElementById("tyBody").innerHTML=typhoonBodyHTML();
+  document.querySelectorAll("#tyBody .tyov button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#tyBody .tyov button").forEach(x=>x.classList.toggle("on",x===b));
+    const f=document.getElementById("tyIframe");if(f)f.src=windyURL(b.dataset.ov);});
   document.getElementById("typhoonModal").classList.add("on");}
 function closeTyphoon(){document.getElementById("typhoonModal").classList.remove("on");
   const b=document.getElementById("tyBody");if(b)b.innerHTML="";}   // 卸載 iframe 省資源
@@ -1108,10 +1180,10 @@ document.getElementById("ffGeo").addEventListener("click",()=>{
 
 document.getElementById("fsRow").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.fs=b.dataset.v;applyFont();});
 document.getElementById("mktSelect").addEventListener("change",async e=>{MARKET=e.target.value;S.market=MARKET;
-  CUR=null;DETAIL=null;MKTMODE="list";SEARCH="";const cs=document.getElementById("cropSearch");if(cs)cs.value="";
+  CUR=null;DETAIL=null;CURVAR=null;PICK=null;MKTMODE="list";SEARCH="";const cs=document.getElementById("cropSearch");if(cs)cs.value="";
   await loadMarket(MARKET);renderBoard();renderSettings();});
-document.getElementById("cropSearch").addEventListener("input",e=>{SEARCH=e.target.value;
-  if(MKTMODE==="detail"){MKTMODE="list";DETAIL=null;}renderBoard();});
+document.getElementById("cropSearch").addEventListener("input",e=>{SEARCH=e.target.value;PICK=null;
+  if(MKTMODE==="detail"){MKTMODE="list";DETAIL=null;CURVAR=null;}renderBoard();});
 document.getElementById("fieldAddBtn").addEventListener("click",()=>openFieldForm(null));
 document.getElementById("ffSave").addEventListener("click",saveField);
 document.getElementById("gear").addEventListener("click",openSettings);
@@ -1166,11 +1238,15 @@ function applyRole(){
   if(!active||active.style.display==="none")switchTab("market");
 }
 document.getElementById("roleRow").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
-  S.role=b.dataset.r;applyRole();if(MKTMODE==="detail"&&DETAIL)renderDetail(DETAIL);});   // 角色切換即時更新詳細頁買賣價
+  S.role=b.dataset.r;applyRole();if(MKTMODE==="detail"&&DETAIL)renderDetail(DETAIL,CURVAR);});   // 角色切換即時更新詳細頁買賣價
+/* 首次啟動：身分選擇獨立介面；選完設 vs_onboarded，之後不再出現（設定仍可改角色） */
+document.querySelectorAll("#onboard .oncard").forEach(b=>b.addEventListener("click",()=>{
+  S.role=b.dataset.r;S.onboarded=true;document.getElementById("onboard").classList.remove("on");applyRole();}));
 
 /* ══════ 啟動 ══════ */
 (async function(){
   applyFont();
+  if(!S.onboarded)document.getElementById("onboard").classList.add("on");   // 第一次先選身分
   const vl=document.getElementById("verLabel");if(vl)vl.textContent="巡田水 "+VERSION;
   const {index,live}=await loadIndex();INDEX=index;
   document.getElementById("updated").textContent="更新："+(index.updated||"—");

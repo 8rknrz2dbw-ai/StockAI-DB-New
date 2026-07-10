@@ -198,8 +198,8 @@ def main():
     for mk in MARKETS:
         recs = fetch_market_all(mk, start, now)
         # 母作物 → 日 → 同日多品種明細；用種類代碼自動分類、跳過花卉/休市/0 元
-        # varl：同時保留「每個品種」的最新價（供前端點進去看全系列品種）
-        agg, cat, varl = {}, {}, {}
+        # varser：保留「每個品種」的完整歷史序列（供前端點品種看它自己的 K 線）
+        agg, cat, varser = {}, {}, {}
         for rec in recs:
             c = CAT_BY_CODE.get(str(g(rec, "種類代碼", "TcType") or ""))
             if not c:
@@ -224,31 +224,26 @@ def main():
             qty = float(g(rec, "交易量", "Trans_Quantity") or 0)
             agg.setdefault(base, {}).setdefault(iso, []).append((a, hi, lo, qty, md))
             cat[base] = c
-            vl = varl.setdefault(base, {})
-            if full not in vl or iso > vl[full][0]:
-                vl[full] = (iso, {"avg": round(a, 1), "high": round(hi, 1), "low": round(lo, 1), "qty": round(qty)})
-        # 收斂：同日多品種 → 量加權均價、量加總、上價取 max、下價取 min
-        mdata = {}
-        for crop, days in agg.items():
-            series = {}
-            for iso, lst in days.items():
-                tq = sum(x[3] for x in lst)
-                avg = (sum(x[0] * x[3] for x in lst) / tq) if tq > 0 else (sum(x[0] for x in lst) / len(lst))
-                # 中價：農業部 API 的「中價」欄位（量加權合併多品種）；無則退回均價
-                mid = (sum(x[4] * x[3] for x in lst) / tq) if tq > 0 else (sum(x[4] for x in lst) / len(lst))
-                series[iso] = {"avg": round(avg, 1), "high": round(max(x[1] for x in lst), 1),
-                               "mid": round(mid, 1), "low": round(min(x[2] for x in lst), 1),
-                               "qty": round(tq)}
-            mdata[crop] = series
-        # 品種明細（≥2 個品種才存；標籤取「-」後的品種名）
+            varser.setdefault(base, {}).setdefault(full, {}).setdefault(iso, []).append((a, hi, lo, qty, md))
+
+        def _day(lst):
+            tq = sum(x[3] for x in lst)
+            avg = (sum(x[0] * x[3] for x in lst) / tq) if tq > 0 else (sum(x[0] for x in lst) / len(lst))
+            mid = (sum(x[4] * x[3] for x in lst) / tq) if tq > 0 else (sum(x[4] for x in lst) / len(lst))
+            return {"avg": round(avg, 1), "high": round(max(x[1] for x in lst), 1),
+                    "mid": round(mid, 1), "low": round(min(x[2] for x in lst), 1), "qty": round(tq)}
+
+        # 收斂：同日多品種 → 量加權均/中價、量加總、上價取 max、下價取 min
+        mdata = {crop: {iso: _day(lst) for iso, lst in days.items()} for crop, days in agg.items()}
+        # 品種明細（≥2 個品種才存；標籤取「-」後的品種名）；每品種存完整逐日序列供 K 線
         variants = {}
-        for crop, vl in varl.items():
-            if len(vl) < 2:
+        for crop, fulls in varser.items():
+            if len(fulls) < 2:
                 continue
             vv = {}
-            for full, (iso, px) in vl.items():
-                label = full.split("-", 1)[1].strip() if "-" in full else full
-                vv[label] = {**px, "date": iso}
+            for full, days in fulls.items():
+                label = (full.split("-", 1)[1].strip() if "-" in full else full) or "一般"
+                vv[label] = {iso: _day(lst) for iso, lst in days.items()}
             variants[crop] = vv
         if not mdata:
             print(f"[fetch_prices] {mk}：無資料，略過。", file=sys.stderr)
