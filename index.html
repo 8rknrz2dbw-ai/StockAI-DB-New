@@ -208,6 +208,7 @@
   .cisheet{background:var(--panel);border:1px solid var(--line);border-radius:20px;width:92%;max-width:380px;padding:1.4rem 1.2rem 1.6rem;text-align:center;position:relative;}
   .cisheet .ciclose{position:absolute;top:0.7rem;right:0.8rem;}
   .cibig{font-size:5.5rem;line-height:1.1;}
+  .ciphoto{width:9rem;height:9rem;object-fit:cover;border-radius:16px;border:1px solid var(--line);}
   .ciname{font-size:1.6rem;font-weight:900;letter-spacing:2px;margin:0.3rem 0 1rem;}
   .citip-h{font-weight:900;color:var(--leaf);font-size:0.95rem;margin-bottom:0.4rem;}
   .citip{font-size:1.02rem;line-height:1.7;color:var(--paper);text-align:left;margin:0;}
@@ -521,7 +522,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.7";
+const VERSION="v1.8";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -662,13 +663,38 @@ const CROP_TIP={
   木瓜:"橙黃帶紅、輕壓微軟、蒂頭香氣足；全綠偏生。",
   葡萄:"果粉自然、果粒飽滿不落果、梗青綠；捏起來緊實。",
   蓮霧:"色澤深紅亮、底部開口大、有重量者水分足較甜。"};
-function cropTip(c){return CROP_TIP[c]||(cropCat(c)==="水果"
+/* 品種級挑選/特色敘述（有些細部品項要各自說明）；查不到才退回母作物 */
+const VAR_TIP={
+  // 芒果
+  愛文:"又稱蘋果芒，果皮鮮紅、果肉細緻香甜多汁、纖維少，最受歡迎；挑蒂頭飽滿、輕壓微軟有彈性。",
+  金煌:"果形長大、果肉橙黃、纖維極少、甜度高、單果重；皮轉黃橙即熟，適合切塊。",
+  凱特:"晚熟(約8–9月)、果大、綠皮帶紅暈、口感微酸較不死甜、耐貯運。",
+  玉文:"愛文改良種，果更大、色深紅濃、甜度高香氣足。",
+  夏雪:"晚熟、果肉細緻、香氣濃甜，產期較後段。",
+  西施:"果形較長、皮薄、清甜多汁。",
+  芒果青:"青果脆酸，多用來醃情人果、涼拌，非鮮食甜芒。",
+  土芒果:"果小、纖維較多、香氣濃郁，適合做芒果青或製乾。",
+  // 鳳梨
+  金鑽:"台農17號，最主流；果目淺、纖維細、甜中帶微酸、鑽心可食；挑香氣濃、彈聲『沉』。",
+  金鑽鳳梨:"台農17號，最主流；果目淺、纖維細、甜中帶微酸、鑽心可食；挑香氣濃、彈聲『沉』。",
+  牛奶:"果肉乳白細緻、香甜，產量少較稀有、價位偏高。",
+  牛奶鳳梨:"果肉乳白細緻、香甜，產量少較稀有、價位偏高。",
+  甜蜜蜜:"甜度高、酸度低、果肉金黃，入口即化。",
+  西瓜鳳梨:"果肉偏白、口感脆、清甜爽口。",
+  開英:"纖維較粗、酸度高，早期主力品種，多作加工或煮食。",
+  蘋果鳳梨:"果肉帶淡紅、風味近似蘋果，較特殊。"};
+function cropTip(c,variety){if(variety&&VAR_TIP[variety])return VAR_TIP[variety];
+  return CROP_TIP[c]||(cropCat(c)==="水果"
   ?"選果色勻稱、蒂頭新鮮、無壓傷破損、拿起有重量、有果香者較佳。"
   :"選色澤鮮亮、外觀完整無枯黃腐爛、莖葉挺實、拿起有重量者較新鮮。");}
+/* 縮圖照片：有真實照片時放 imgs/ 下、於此對照(檔名)；沒有就用 emoji。可逐步補齊 */
+const CROP_PHOTO={};   // 例：{ 芒果:"imgs/mango.jpg", 愛文:"imgs/mango-aiwen.jpg" }
+function cropPhoto(crop,variety){return CROP_PHOTO[variety]||CROP_PHOTO[crop]||"";}
 function openCropInfo(crop,label){const nm=label&&label!==crop?`${crop}·${label}`:crop;
-  document.getElementById("ciIcon").textContent=cropIcon(crop);
+  const ic=document.getElementById("ciIcon");const photo=cropPhoto(crop,label);
+  ic.innerHTML=photo?`<img src="${photo}" alt="${nm}" class="ciphoto" onerror="this.parentNode.textContent='${cropIcon(crop)}'">`:cropIcon(crop);
   document.getElementById("ciName").textContent=nm;
-  document.getElementById("ciTip").textContent=cropTip(crop);
+  document.getElementById("ciTip").textContent=cropTip(crop,label);
   document.getElementById("cropInfo").classList.add("on");}
 function closeCropInfo(){document.getElementById("cropInfo").classList.remove("on");}
 function priceView(disp,variety){const es=sortedEntries(variety?variantSeries(disp,variety):seriesFor(disp));
