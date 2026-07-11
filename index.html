@@ -258,7 +258,8 @@
   .pickbtns{display:flex;gap:0.4rem;}
   .pickbtns button{background:var(--panel2);border:1px solid var(--leaf-dim);color:var(--leaf);border-radius:999px;padding:0.3rem 0.8rem;font-size:0.8rem;font-weight:800;}
   .pickbtns button:active{background:var(--leaf-dim);color:var(--bg);}
-  .pickgrp{margin-top:0.4rem;} .pickh{font-size:0.85rem;color:var(--muted);font-weight:800;margin:0.35rem 0 0.25rem;}
+  .pickgrp{margin-top:0.6rem;} .pickh{font-size:0.85rem;color:var(--muted);font-weight:800;margin:0.35rem 0 0.3rem;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;}
+  .pickh small{color:var(--leaf);font-weight:700;}
   .pickgrid{display:flex;flex-wrap:wrap;gap:0.4rem;}
   .chip{display:inline-flex;align-items:center;gap:0.35rem;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:0.35rem 0.7rem;font-size:0.95rem;cursor:pointer;user-select:none;}
   .chip.on{background:var(--leaf-dim);color:var(--bg);border-color:var(--leaf-dim);font-weight:800;}
@@ -592,11 +593,13 @@
         <div><label>作物</label><select id="ffCrop"></select></div>
         <div class="frow">
           <div><label>播種/定植日</label><input type="date" id="ffPlant"></div>
-          <div><label>地勢淹水等級</label><select id="ffFlood">
-            <option value="1">1 高亢·排水好</option><option value="2">2 偏高</option>
-            <option value="3">3 一般</option><option value="4" selected>4 偏低窪</option><option value="5">5 低窪易淹</option>
+          <div><label>地勢淹水等級（海拔參考見下）</label><select id="ffFlood">
+            <option value="1">1 高亢·排水好（比周邊高／坡地）</option><option value="2">2 偏高（略高於周邊）</option>
+            <option value="3">3 一般（與周邊相當·平原農地）</option><option value="4" selected>4 偏低窪（略低於周邊·近溝渠）</option><option value="5">5 低窪易淹（明顯低窪·近河口/沿海）</option>
           </select></div>
         </div>
+        <p class="hintline">📏 海拔參考：用 Google Earth 讀「你這塊田」與「周邊農地/道路」的海拔——比周邊<b>低就偏 4~5 級</b>、
+          差不多是 <b>3 級</b>、明顯高就 <b>1~2 級</b>。淹水看的是「相對低窪」，不是絕對海拔高低。</p>
         <div class="frow">
           <div><label>最後施藥日（可空）</label><input type="date" id="ffSpray"></div>
           <div><label>農藥安全期天數(PHI)</label><input type="number" id="ffPhi" min="0" placeholder="例：7"></div>
@@ -629,6 +632,16 @@
         <button class="save" id="ffSave">儲存這塊田</button>
       </div>
       <p class="hintline">田區存在你手機，隨時增刪、改地勢立即生效。</p>
+    </div>
+
+    <div class="setcat">資料備份／換手機</div>
+    <div class="setblk">
+      <p class="hintline" style="margin-top:0">把田區、設定、關注品項匯出成<b>一個檔案</b>（.json，安卓/iOS 都讀得到）。換手機或備份時再匯入還原。</p>
+      <div class="about">
+        <button class="arow" id="dataExport"><span class="aico">📤</span><span class="alab">匯出備份檔</span><span class="achev">›</span></button>
+        <button class="arow" id="dataImport"><span class="aico">📥</span><span class="alab">從備份檔匯入</span><span class="achev">›</span></button>
+      </div>
+      <input type="file" id="dataFile" accept=".json,application/json,text/plain" style="display:none">
     </div>
 
     <div class="setcat">關於</div>
@@ -692,7 +705,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v3.7";
+const VERSION="v1.0.0";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -889,7 +902,8 @@ function cropSvg(crop,variety){return CROP_SVG[variety]||CROP_SVG[crop]||"";}
 function cropSearchURL(crop,variety){const q=(variety&&variety!==crop)?`${variety} ${crop}`:crop;
   return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(q)}`;}
 const SEARCH_SVG=`<svg viewBox="0 0 96 96"><circle cx="42" cy="42" r="23" fill="rgba(111,184,74,.12)" stroke="#6fb84a" stroke-width="7"/><line x1="59" y1="59" x2="80" y2="80" stroke="#6fb84a" stroke-width="8" stroke-linecap="round"/></svg>`;
-function cropIconHTML(crop,variety){if(cropCat(crop)==="水果")return SEARCH_SVG;return cropSvg(crop,variety)||cropIcon(crop);}
+/* 蔬菜插圖已全面取消 → 蔬菜用 emoji、水果用放大鏡；點圖示都開「說明」彈窗(內含 Google 查圖) */
+function cropIconHTML(crop,variety){return (cropCat(crop)==="水果")?SEARCH_SVG:cropIcon(crop);}
 const CROP_TIP={
   菠菜:"葉片翠綠挺立、根部帶淡紅為佳；葉黃、莖空、有黏液代表不新鮮。",
   青江白菜:"葉色鮮綠、梗白脆、無黃葉爛心；捏起來紮實有重量較新鮮。",
@@ -935,11 +949,12 @@ function cropTip(c,variety){if(variety&&VAR_TIP[variety])return VAR_TIP[variety]
 const CROP_PHOTO={};   // 例：{ 芒果:"imgs/mango.jpg", 愛文:"imgs/mango-aiwen.jpg" }
 function cropPhoto(crop,variety){return CROP_PHOTO[variety]||CROP_PHOTO[crop]||"";}
 function openCropInfo(crop,label){const nm=label&&label!==crop?`${crop}·${label}`:crop;
-  const ic=document.getElementById("ciIcon");const photo=cropPhoto(crop,label);const svg=cropSvg(crop,label);
-  ic.innerHTML=svg?svg:(photo?`<img src="${photo}" alt="${nm}" class="ciphoto" onerror="this.parentNode.textContent='${cropIcon(crop)}'">`:cropIcon(crop));
+  const ic=document.getElementById("ciIcon");
+  ic.innerHTML=(cropCat(crop)==="水果")?SEARCH_SVG:cropIcon(crop);   // 水果→放大鏡、蔬菜→emoji（插圖已取消）
   document.getElementById("ciName").textContent=nm;
   document.getElementById("ciTip").textContent=cropTip(crop,label);
-  const sc=document.getElementById("ciSearch");if(sc)sc.href=cropSearchURL(crop,label);
+  const sc=document.getElementById("ciSearch");if(sc){sc.href=cropSearchURL(crop,label);
+    sc.textContent=(cropCat(crop)==="水果")?"🔍 用 Google 查詢「"+(label&&label!==crop?label:crop)+"」實際照片":"🔍 用 Google 搜尋實際照片";}
   document.getElementById("cropInfo").classList.add("on");}
 function closeCropInfo(){document.getElementById("cropInfo").classList.remove("on");}
 function priceView(disp,variety){const es=sortedEntries(variety?variantSeries(disp,variety):seriesFor(disp));
@@ -1091,9 +1106,7 @@ function renderBoard(){
 }
 /* 縮圖(emoji)點擊→挑選要訣彈窗；阻止冒泡以免觸發卡片/選項本身 */
 function wireIcon(root,crop,label){const ic=root.querySelector(".cropicon");if(!ic)return;
-  ic.onclick=(e)=>{e.stopPropagation();
-    if(cropCat(crop)==="水果"){window.open(cropSearchURL(crop,label),"_blank","noopener");return;}   // 水果→直接 Google 圖片
-    openCropInfo(crop,label);};}
+  ic.onclick=(e)=>{e.stopPropagation();openCropInfo(crop,label);};}   // 點圖示→說明彈窗(含 Google 查圖鈕)
 function selectCrop(d){openDetail(d,null);}   // 相容舊呼叫
 /* 角色買賣價註記：批發拍賣是「一個成交價」，農夫扣手續費實得、商人進貨成本＋手續費 */
 const FEE_FARMER=0.06,FEE_MERCHANT=0.06;
@@ -1632,21 +1645,24 @@ function renderCropPick(){
   const box=document.getElementById("cropPick");if(!box)return;box.innerHTML="";
   const av=availableCrops(),watch=watchCrops();
   if(!av.length){box.innerHTML='<p class="hintline">此市場目前無行情資料。</p>';return;}
-  // 批量：全選 / 全部關閉 ＋ 已選計數
+  // 已選計數（總）
   const bar=document.createElement("div");bar.className="pickbar";
-  bar.innerHTML=`<span class="pickcount">已選 <b>${watch.length}</b> / ${av.length} 項</span>
-    <span class="pickbtns"><button type="button" data-all="1">全選</button><button type="button" data-all="0">全部關閉</button></span>`;
+  bar.innerHTML=`<span class="pickcount">已選 <b>${watch.length}</b> / ${av.length} 項</span>`;
   box.appendChild(bar);
-  bar.querySelector('[data-all="1"]').onclick=()=>{S.setWatch(MARKET,av.slice());renderCropPick();MKTMODE="list";DETAIL=null;renderBoard();};
-  bar.querySelector('[data-all="0"]').onclick=()=>{S.setWatch(MARKET,[]);CUR=null;renderCropPick();MKTMODE="list";DETAIL=null;renderBoard();};
+  const setW=w=>{S.setWatch(MARKET,w);renderCropPick();MKTMODE="list";DETAIL=null;renderBoard();};
+  // 蔬菜/水果 各自分區，各有「全選 / 取消全選」
   [["蔬菜","🥬"],["水果","🍉"]].forEach(([cat,emoji])=>{
     const items=av.filter(c=>cropCat(c)===cat);if(!items.length)return;
+    const nsel=items.filter(c=>watch.includes(c)).length;
     const grp=document.createElement("div");grp.className="pickgrp";
-    grp.innerHTML=`<div class="pickh">${emoji} ${cat}</div>`;
+    grp.innerHTML=`<div class="pickh"><span>${emoji} ${cat} <small>(${nsel}/${items.length})</small></span>
+      <span class="pickbtns"><button type="button" data-catall="1">全選</button><button type="button" data-catall="0">取消全選</button></span></div>`;
     const grid=document.createElement("div");grid.className="pickgrid";
     items.forEach(c=>{const on=watch.includes(c);const lab=document.createElement("label");lab.className="chip"+(on?" on":"");
       lab.innerHTML=`<input type="checkbox" value="${c}"${on?" checked":""}><span>${c}</span>`;grid.appendChild(lab);});
     grp.appendChild(grid);box.appendChild(grp);
+    grp.querySelector('[data-catall="1"]').onclick=()=>{const w=new Set(watchCrops());items.forEach(c=>w.add(c));setW([...w]);};
+    grp.querySelector('[data-catall="0"]').onclick=()=>{const rm=new Set(items);if(CUR&&rm.has(CUR))CUR=null;setW(watchCrops().filter(c=>!rm.has(c)));};
   });
   box.querySelectorAll("input[type=checkbox]").forEach(cb=>cb.onchange=()=>{
     const c=cb.value;let w=watchCrops().slice();
@@ -1729,6 +1745,31 @@ document.getElementById("aShare").addEventListener("click",async()=>{
   try{if(navigator.share){await navigator.share(data);return;}}catch(e){if(e&&e.name==="AbortError")return;}
   try{await navigator.clipboard.writeText(url);toast("已複製 App 連結，貼給農友吧！");}
   catch(e){toast(url);}});
+/* 資料備份／換手機：匯出/匯入所有 vs_* 設定為單一 .json（安卓/iOS 皆可讀） */
+function collectBackup(){const o={_app:"農商雷達",_ver:VERSION,_ts:new Date().toISOString(),data:{}};
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf("vs_")===0)o.data[k]=localStorage.getItem(k);}return o;}
+async function exportData(){const txt=JSON.stringify(collectBackup(),null,2);
+  const d=new Date();const fn=`農商雷達備份_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.json`;
+  const blob=new Blob([txt],{type:"application/json"});
+  try{const file=new File([blob],fn,{type:"application/json"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"農商雷達備份"});return;}}
+  catch(e){if(e&&e.name==="AbortError")return;}
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=fn;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1200);
+  toast("已匯出："+fn);}
+function importData(file){const r=new FileReader();
+  r.onload=()=>{try{const o=JSON.parse(r.result);
+    const data=(o&&o.data&&typeof o.data==="object")?o.data:o;   // 容錯：整包或直接 {vs_*}
+    const keys=Object.keys(data).filter(k=>k.indexOf("vs_")===0);
+    if(!keys.length){toast("檔案格式不符，找不到可匯入的資料");return;}
+    if(!confirm(`要匯入這個備份嗎？\n將覆蓋目前的設定與田區（共 ${keys.length} 項）。`))return;
+    keys.forEach(k=>{try{localStorage.setItem(k,String(data[k]));}catch(e){}});
+    toast("匯入成功，重新載入中…");setTimeout(()=>location.reload(),700);
+  }catch(e){toast("讀取失敗，請確認是農商雷達的備份檔");}};
+  r.readAsText(file);}
+document.getElementById("dataExport").addEventListener("click",exportData);
+document.getElementById("dataImport").addEventListener("click",()=>document.getElementById("dataFile").click());
+document.getElementById("dataFile").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];if(f)importData(f);e.target.value="";});
 document.getElementById("paField").addEventListener("change",renderPlantAdvisor);
 document.getElementById("paDate").addEventListener("change",renderPlantAdvisor);
 
@@ -1839,6 +1880,9 @@ document.querySelectorAll("#onboard .oncard").forEach(b=>b.addEventListener("cli
   document.addEventListener("touchcancel",release,{passive:true});
   document.addEventListener("gesturestart",e=>e.preventDefault());   // 擋 iOS 原生縮放，改用回彈式
 })();
+/* 回到 App（開連結返回/切回前景）時，清掉可能卡住的縮放 transform，避免版面殘留/白畫面 */
+window.addEventListener("pageshow",()=>{const zc=document.querySelector(".wrap");
+  if(zc){zc.style.transform="";zc.style.transition="";zc.style.transformOrigin="";}});
 
 /* ══════ 啟動 ══════ */
 (async function(){
