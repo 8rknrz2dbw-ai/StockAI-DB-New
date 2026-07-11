@@ -3,14 +3,15 @@
    - HTML / JSON 資料：network-first（連得上就拿最新，離線退回上次快取；HTML 再退回 index.html 殼）。
    - 圖示等靜態資源：cache-first。
    改版時把 CACHE 版本號 +1 即可讓舊快取失效（activate 會清掉非當前版本）。 */
-const CACHE = "nongshang-radar-v6";
+const CACHE = "nongshang-radar-v7";
 const SHELL = ["./", "./index.html", "./privacy.html", "./terms.html", "./manifest.json",
                "./icon-192.png", "./icon-512.png", "./icon.svg", "./apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
     caches.open(CACHE)
-      .then((c) => c.addAll(SHELL).catch(() => {}))   // 個別檔失敗不阻擋安裝
+      // 逐檔快取：單一檔失敗不會像 addAll 那樣整批失敗、導致殼快取全空（白畫面主因之一）
+      .then((c) => Promise.all(SHELL.map((u) => c.add(u).catch(() => {}))))
       .then(() => self.skipWaiting())
   );
 });
@@ -32,8 +33,23 @@ self.addEventListener("fetch", (e) => {
   const isHTML = req.mode === "navigate" || (req.headers.get("accept") || "").includes("text/html");
   const isJSON = url.pathname.endsWith(".json");
 
-  if (isHTML || isJSON) {
-    // network-first
+  if (isHTML) {
+    // 頁面殼：stale-while-revalidate —— 有快取就「立即」回快取（回到 App 不再白畫面），
+    // 同時背景抓最新更新快取；沒快取才等網路，網路也失敗才退回 index.html 殼。
+    e.respondWith(
+      caches.match(req).then((cached) => {
+        const network = fetch(req)
+          .then((res) => {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+            return res;
+          })
+          .catch(() => cached || caches.match("./index.html"));
+        return cached || network;
+      })
+    );
+  } else if (isJSON) {
+    // 資料：network-first（要最新行情/天氣），離線退回上次快取
     e.respondWith(
       fetch(req)
         .then((res) => {
@@ -41,9 +57,7 @@ self.addEventListener("fetch", (e) => {
           caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
           return res;
         })
-        .catch(() =>
-          caches.match(req).then((r) => r || (isHTML ? caches.match("./index.html") : undefined))
-        )
+        .catch(() => caches.match(req))
     );
   } else {
     // cache-first
