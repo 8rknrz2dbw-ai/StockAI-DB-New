@@ -311,6 +311,23 @@
   .fcslot .fct{display:block;font-size:0.66rem;color:var(--muted);}
   .fcslot .fcpop{display:block;font-size:0.95rem;font-weight:900;color:#bcd8ff;}
   .fcslot .fctemp{display:block;font-size:0.7rem;color:var(--muted);}
+  /* 推薦播種 + 產量收入試算 */
+  .pa-sec{margin-top:1.4rem;border-top:1px solid var(--line);padding-top:1rem;}
+  .pa-h{font-size:1.15rem;font-weight:900;margin:0 0 0.6rem;}
+  .pa-info{font-size:0.85rem;color:var(--muted);margin:0.3rem 0 0.7rem;} .pa-info b{color:var(--paper);}
+  .pacard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0.8rem 0.9rem;margin-bottom:0.6rem;}
+  .pacard.best{border-color:var(--leaf-dim);background:var(--panel2);}
+  .pa-top{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;}
+  .pa-rk{width:1.5rem;height:1.5rem;flex:0 0 auto;border-radius:50%;background:var(--panel2);border:1px solid var(--line);color:var(--muted);font-weight:900;font-size:0.8rem;display:flex;align-items:center;justify-content:center;}
+  .pacard.best .pa-rk{background:var(--leaf);color:var(--bg);border-color:var(--leaf);}
+  .pa-nm{font-size:1.3rem;font-weight:900;}
+  .pa-badge{font-size:0.68rem;font-weight:800;color:#0e1a08;background:var(--g);padding:0.12rem 0.5rem;border-radius:999px;}
+  .pa-typ{font-size:0.68rem;font-weight:800;color:#F6C6B4;background:rgba(228,87,46,.16);border:1px solid rgba(228,87,46,.4);padding:0.1rem 0.45rem;border-radius:999px;}
+  .pa-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 0.8rem;}
+  .pa-grid>div{display:flex;align-items:baseline;gap:0.3rem;flex-wrap:wrap;}
+  .pa-k{font-size:0.75rem;color:var(--muted);min-width:4.2rem;}
+  .pa-grid b{font-size:1.15rem;font-weight:900;} .pa-s{font-size:0.7rem;color:var(--muted);}
+  .pa-rev{color:var(--leaf);}
 
   .cards{display:flex;flex-direction:column;gap:0.7rem;}
   .fcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:0.9rem;position:relative;overflow:hidden;}
@@ -442,6 +459,16 @@
     </div>
     <div id="fcResult"></div>
     <p class="hintline">用近一年同期的實際行情推估採收時的價格區間，並提示颱風季風險。資料越多越準。</p>
+
+    <div class="pa-sec">
+      <h3 class="pa-h">🌱 本季推薦種植 · 產量收入試算</h3>
+      <div class="form" style="padding:0.7rem">
+        <div><label>用哪塊田試算（面積取自你的田區）</label><select id="paField"></select></div>
+        <div><label>預計種植日</label><input type="date" id="paDate"></div>
+      </div>
+      <div id="paResult"></div>
+      <p class="hintline">依「田面積 × 可種比例 × 季節」估各作物採收量，再用近兩年同期行情推估價格與收入，依<b>預估收入</b>排序。⚠ 產量係數為估算值，實際依品種/管理/天候而異。</p>
+    </div>
   </div>
 
   <p class="foot">
@@ -507,6 +534,12 @@
           <div><label>最後施藥日（可空）</label><input type="date" id="ffSpray"></div>
           <div><label>農藥安全期天數(PHI)</label><input type="number" id="ffPhi" min="0" placeholder="例：7"></div>
         </div>
+        <div class="frow">
+          <div><label>田區面積（推薦播種/產量試算用）</label>
+            <div class="frow"><input type="number" id="ffAreaVal" min="0" step="0.1" placeholder="例：50" inputmode="decimal">
+              <select id="ffAreaUnit"><option value="ping">坪</option><option value="fen">分</option><option value="m2">㎡</option></select></div></div>
+          <div><label>可種比例%（扣走道，預設80）</label><input type="number" id="ffUsable" min="10" max="100" placeholder="80" inputmode="numeric"></div>
+        </div>
         <div><label>田區座標（GPS，供淹水潛勢查詢；可空）</label>
           <div class="frow"><input id="ffLat" placeholder="緯度 lat" inputmode="decimal"><input id="ffLng" placeholder="經度 lng" inputmode="decimal"></div>
           <button type="button" class="gpsbtn" id="ffGeo">📍 用目前位置（站在田裡按）</button>
@@ -536,7 +569,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.9";
+const VERSION="v2.0";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -551,14 +584,30 @@ function addDaysISO(iso,n){const [Y,M,D]=iso.split("-").map(Number);const d=new 
 function daysBetween(a,b){return (Date.parse(b+"T00:00:00Z")-Date.parse(a+"T00:00:00Z"))/86400000;}
 
 /* ══════ 作物農藝參數 ══════ */
-const GROWTH={青江菜:[38,48],小白菜:[25,38],芥藍菜:[70,70],菠菜:[50,50],空心菜:[30,40],
-  地瓜葉:[35,45],莧菜:[30,40],茼蒿:[40,50],油菜:[35,45],"萵苣(A菜)":[40,50],芥菜:[55,65]};
+const GROWTH={青江菜:[38,48],青江白菜:[38,48],小白菜:[25,38],芥藍菜:[70,70],菠菜:[50,50],空心菜:[30,40],蕹菜:[30,40],
+  地瓜葉:[35,45],莧菜:[30,40],茼蒿:[40,50],油菜:[35,45],"萵苣(A菜)":[40,50],芥菜:[55,65],甘藍:[70,90],包心白菜:[60,80]};
 const MAT_MIN={青江菜:.75,小白菜:.7,芥藍菜:.75,菠菜:.75,空心菜:.7,地瓜葉:.7,莧菜:.7,茼蒿:.72,油菜:.72,"萵苣(A菜)":.75,芥菜:.75};
 const V_CROP={青江菜:.95,小白菜:.95,芥藍菜:.8,菠菜:.85,空心菜:.7,地瓜葉:.65,莧菜:.85,茼蒿:.85,油菜:.85,"萵苣(A菜)":.9,芥菜:.8};
 const FLOOD_ADV={1:0,2:0,3:12,4:18,5:24};
 function isSummer(iso){const m=+iso.split("-")[1];return m>=5&&m<=10;}
 function growthDays(crop,plantISO){const g=GROWTH[crop]||[35,45];return isSummer(plantISO)?g[0]:g[1];}
 function cropList(){return Object.keys(GROWTH);}
+/* ── 推薦播種＋產量試算：每㎡單次採收概略產量(kg，估算值、可校準)＋季節重量調整 ── */
+const YIELD_M2={青江菜:2.5,青江白菜:2.5,小白菜:2.2,菠菜:2.0,芥藍菜:3.0,空心菜:2.8,蕹菜:2.8,油菜:2.2,
+  莧菜:2.2,茼蒿:1.8,"萵苣(A菜)":2.5,芥菜:3.2,地瓜葉:2.5,甘藍:5.0,包心白菜:5.0};
+function yieldPerM2(c){return YIELD_M2[c]||(cropCat(c)==="蔬菜"?2.5:0);}
+function seasonYieldFactor(iso){return isSummer(iso)?0.9:1.1;}   // 夏長得快較輕、冬慢較結實重(概略)
+const AREA_UNIT={ping:{k:3.30579,label:"坪"},fen:{k:293.4,label:"分"},m2:{k:1,label:"㎡"}};
+function estYieldKg(crop,areaM2,usablePct,plantISO){const u=(+areaM2||0)*((+usablePct||80)/100);
+  return u*yieldPerM2(crop)*seasonYieldFactor(plantISO);}
+/* 採收期價格預判（同期中位；同期樣本少改用近三月），供推薦排序與試算 */
+function predictPrice(crop,harvestISO){const series=sortedEntries(seriesFor(crop));if(!series.length)return null;
+  const hw=weekOf(harvestISO);
+  const near=series.filter(e=>{const d=Math.abs(weekOf(e[0])-hw);return d<=2||d>=50;}).map(e=>e[1].avg);
+  if(near.length>=5)return {med:median(near),lo:pctile(near,.25),hi:pctile(near,.75),n:near.length,same:true};
+  const recent=series.slice(-90).map(e=>e[1].avg);
+  if(recent.length>=5)return {med:median(recent),lo:pctile(recent,.25),hi:pctile(recent,.75),n:recent.length,same:false};
+  return null;}
 
 /* ══════ 設定/儲存 ══════ */
 const S={
@@ -1271,6 +1320,41 @@ function renderForecast(){
   box.innerHTML=`<div class="fcresult">${head}<div class="band mono">${band} <span class="u">元/公斤</span></div>
     <div class="row">${note}</div>${riskHtml}</div>`;
 }
+/* 🌱 本季推薦種植 + 產量收入試算 */
+function fmtKg(kg){return kg>=1000?(kg/1000).toFixed(1)+" 噸":Math.round(kg)+" kg";}
+function fmtMoney(v){return v>=10000?"$"+(v/10000).toFixed(1)+" 萬":"$"+Math.round(v).toLocaleString();}
+function renderPlantAdvisor(){
+  const fsel=document.getElementById("paField");const box=document.getElementById("paResult");if(!box)return;
+  const fields=getFields();
+  if(fsel){const cur=fsel.value;
+    fsel.innerHTML=`<option value="__manual">— 選一塊田 —</option>`+fields.map(f=>{const u=(AREA_UNIT[f.areaUnit]||{}).label||"";
+      return `<option value="${f.id}">${f.name}${f.area?`（${f.area}${u}）`:"（未設面積）"}</option>`;}).join("");
+    if(cur&&[...fsel.options].some(o=>o.value===cur))fsel.value=cur;}
+  const fid=fsel?fsel.value:"__manual";
+  const plant=document.getElementById("paDate").value||todayISO();
+  let area_m2=0,usable=80,fname="";
+  const f=fields.find(x=>x.id===fid);if(f){area_m2=+f.area_m2||0;usable=+f.usable||80;fname=f.name;}
+  if(!area_m2){box.innerHTML=`<div class="empty">請選一塊有<b>面積</b>的田（在 ⚙️ 我的田區替該田填面積），就能算採收量與收入。</div>`;return;}
+  const rows=[];
+  for(const crop of cropList()){const T=growthDays(crop,plant);const harvestISO=addDaysISO(plant,T);
+    const pp=predictPrice(crop,harvestISO);if(!pp)continue;   // 無足夠行情資料的作物自動略過
+    const yieldKg=estYieldKg(crop,area_m2,usable,plant);const net=pp.med*0.94;
+    rows.push({crop,harvestISO,T,pp,yieldKg,revenue:yieldKg*net});}
+  if(!rows.length){box.innerHTML=`<div class="empty">此市場葉菜行情資料不足，暫無法推薦。可在右上 ⚙️ 換市場。</div>`;return;}
+  rows.sort((a,b)=>b.revenue-a.revenue);
+  const usable_m2=area_m2*(usable/100);
+  box.innerHTML=`<div class="pa-info">📐 <b>${fname}</b>：可種面積約 <b>${Math.round(usable_m2)}</b> ㎡（總 ${Math.round(area_m2)}㎡ × 可種 ${usable}%，已扣走道）</div>`+
+    rows.slice(0,8).map((r,i)=>{const hMonth=+r.harvestISO.split("-")[1];const typ=hMonth>=6&&hMonth<=10;
+      return `<div class="pacard${i===0?' best':''}">
+      <div class="pa-top"><span class="pa-rk">${i+1}</span><span class="pa-nm">${cropIcon(r.crop)} ${r.crop}</span>
+        ${i===0?'<span class="pa-badge">最高收入</span>':""}${typ?'<span class="pa-typ">颱風季採收</span>':""}</div>
+      <div class="pa-grid">
+        <div><span class="pa-k">採收約</span><b>${r.harvestISO.slice(5)}</b><span class="pa-s">生育 ${r.T} 天</span></div>
+        <div><span class="pa-k">預估價</span><b>${r.pp.med.toFixed(0)}</b><span class="pa-s">元/kg</span></div>
+        <div><span class="pa-k">預估採收量</span><b>${fmtKg(r.yieldKg)}</b></div>
+        <div><span class="pa-k">預估收入</span><b class="pa-rev">${fmtMoney(r.revenue)}</b></div>
+      </div></div>`;}).join("");
+}
 
 /* ══════ 座標 → 鄉鎮（本地查表，供核對座標對不對；雲林為主＋鄰近鄉鎮） ══════ */
 const TOWNSHIPS=[
@@ -1341,6 +1425,8 @@ function openFieldForm(f){editingId=f?f.id:null;const ff=document.getElementById
   document.getElementById("ffName").value=f?f.name:"";document.getElementById("ffCrop").value=f?f.crop:cropList()[0];
   document.getElementById("ffPlant").value=f?f.plant:todayISO();document.getElementById("ffFlood").value=f?f.flood:4;
   document.getElementById("ffSpray").value=f?(f.spray||""):"";document.getElementById("ffPhi").value=f?(f.phi||""):"";
+  document.getElementById("ffAreaVal").value=(f&&f.area)?f.area:"";document.getElementById("ffAreaUnit").value=(f&&f.areaUnit)||"ping";
+  document.getElementById("ffUsable").value=(f&&f.usable)?f.usable:"";
   document.getElementById("ffLat").value=(f&&f.geo)?f.geo.lat:"";document.getElementById("ffLng").value=(f&&f.geo)?f.geo.lng:"";
   updateFfArea();
   ff.scrollIntoView({behavior:"smooth",block:"nearest"});}
@@ -1349,9 +1435,12 @@ function updateFfArea(){const a=document.getElementById("ffArea");if(!a)return;
   a.innerHTML=(isFinite(lat)&&isFinite(lng))?townshipText(lat,lng):"";}
 function saveField(){const name=document.getElementById("ffName").value.trim()||"未命名田";
   const lat=parseFloat(document.getElementById("ffLat").value),lng=parseFloat(document.getElementById("ffLng").value);
+  const areaVal=+document.getElementById("ffAreaVal").value||0;const areaUnit=document.getElementById("ffAreaUnit").value||"ping";
+  const usable=+document.getElementById("ffUsable").value||0;
   const rec={id:editingId||("F"+Date.now().toString(36)),name,crop:document.getElementById("ffCrop").value,
     plant:document.getElementById("ffPlant").value||todayISO(),flood:+document.getElementById("ffFlood").value,
     spray:document.getElementById("ffSpray").value||"",phi:+document.getElementById("ffPhi").value||0,
+    area:areaVal||"",areaUnit,area_m2:+(areaVal*(AREA_UNIT[areaUnit]||AREA_UNIT.ping).k).toFixed(1),usable:usable||80,
     geo:(isFinite(lat)&&isFinite(lng))?{lat:+lat.toFixed(5),lng:+lng.toFixed(5)}:null};
   let fields=getFields();const idx=fields.findIndex(x=>x.id===rec.id);if(idx>=0)fields[idx]=rec;else fields.push(rec);
   S.setFields(fields);editingId=null;document.getElementById("fieldForm").classList.remove("on");renderSettings();renderHarvest();}
@@ -1379,6 +1468,8 @@ document.getElementById("typhoonModal").addEventListener("click",e=>{if(e.target
 document.getElementById("ciClose").addEventListener("click",closeCropInfo);
 document.getElementById("cropInfo").addEventListener("click",e=>{if(e.target.id==="cropInfo")closeCropInfo();});
 document.getElementById("fcGo").addEventListener("click",renderForecast);
+document.getElementById("paField").addEventListener("change",renderPlantAdvisor);
+document.getElementById("paDate").addEventListener("change",renderPlantAdvisor);
 
 /* ══════ 分頁 / 角色 ══════ */
 function ensureCropList(id){const sel=document.getElementById(id);if(sel.options.length)return;
@@ -1386,7 +1477,8 @@ function ensureCropList(id){const sel=document.getElementById(id);if(sel.options
 function switchTab(m){
   document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x.dataset.t===m));
   ["market","harvest","forecast","compare"].forEach(v=>document.getElementById("view-"+v).classList.toggle("on",v===m));
-  if(m==="forecast"){ensureCropList("fcCrop");if(!document.getElementById("fcDate").value)document.getElementById("fcDate").value=todayISO();}
+  if(m==="forecast"){ensureCropList("fcCrop");if(!document.getElementById("fcDate").value)document.getElementById("fcDate").value=todayISO();
+    if(!document.getElementById("paDate").value)document.getElementById("paDate").value=todayISO();renderPlantAdvisor();}
   if(m==="compare"){
     if(CUR&&cropCat(CUR))CMPCAT=cropCat(CUR);          // #3 沿用剛在行情看板看的品項
     renderCmpCat();populateCompareCrops();
