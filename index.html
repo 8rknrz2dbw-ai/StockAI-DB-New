@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
-<title>巡田水</title>
+<title>農商雷達</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg" />
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
 <link rel="manifest" href="manifest.json" />
@@ -11,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="巡田水" />
+<meta name="apple-mobile-web-app-title" content="農商雷達" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <style>
   :root{ font-size:19px; }
@@ -375,7 +375,10 @@
   @media(min-width:520px){.modal{align-items:center;} .sheet{border-radius:20px;}}
   .sheet h2{margin:0 0 0.2rem;font-size:1.2rem;font-weight:900;display:flex;align-items:center;}
   .sheet .close{margin-left:auto;background:var(--panel2);border:1px solid var(--line);color:var(--paper);width:2.1rem;height:2.1rem;border-radius:50%;font-size:1.1rem;}
-  .setblk{margin-top:1.2rem;} .setblk h4{margin:0 0 0.5rem;font-size:0.95rem;color:var(--muted);font-weight:700;}
+  .setcat{margin-top:1.6rem;padding-top:0.9rem;border-top:1px solid var(--line);font-size:0.78rem;font-weight:900;
+    color:var(--leaf);letter-spacing:1.5px;}
+  .setcat:first-of-type{border-top:0;padding-top:0.2rem;margin-top:0.9rem;}
+  .setblk{margin-top:0.9rem;} .setblk h4{margin:0 0 0.5rem;font-size:0.95rem;color:var(--paper);font-weight:700;}
   .fsrow{display:flex;gap:0.5rem;}
   .fsrow button{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--paper);padding:0.6rem 0.3rem;border-radius:12px;font-weight:800;}
   .fsrow button[data-v="s"]{font-size:0.85rem;} .fsrow button[data-v="m"]{font-size:1rem;} .fsrow button[data-v="l"]{font-size:1.2rem;} .fsrow button[data-v="xl"]{font-size:1.45rem;}
@@ -445,6 +448,7 @@
 
   <div class="view on" id="view-market">
     <div id="mktList">
+      <div class="alert" id="hAlertM" style="display:none"></div>
       <div id="wAdviceM"></div>
       <div class="boardtop">
         <div class="catbar" id="catbar"></div>
@@ -463,8 +467,8 @@
   </div>
 
   <div class="view" id="view-harvest">
-    <div id="wAdvice"></div>
     <div class="alert" id="hAlert"></div>
+    <div id="wAdvice"></div>
     <div class="cards" id="hCards"></div>
   </div>
 
@@ -522,6 +526,7 @@
   <div class="sheet" role="dialog" aria-label="設定">
     <h2>設定 <button class="close" id="closeSet" aria-label="關閉">✕</button></h2>
 
+    <div class="setcat">顯示與身分</div>
     <div class="setblk"><h4>角色</h4>
       <div class="fsrow rolerow" id="roleRow">
         <button data-r="farmer"><span class="ico">🧑‍🌾</span><span>蔬果農</span></button>
@@ -535,15 +540,17 @@
         <button data-v="s">小</button><button data-v="m">中</button><button data-v="l">大</button><button data-v="xl">特大</button>
       </div></div>
 
+    <div class="setcat">行情看板</div>
     <div class="setblk"><h4>果菜市場</h4><select class="mkt" id="mktSelect"></select></div>
-
-    <div class="setblk"><h4>天氣預報地區（全國）</h4>
-      <select class="mkt" id="regionSelect"></select>
-      <p class="hintline">選你所在縣市，天氣預報／擺攤指數／農事建議依此顯示。農夫若有填座標的田，會自動以田所在縣市為準。</p>
-    </div>
 
     <div class="setblk"><h4>我的品項（勾選＝行情看板要顯示的）</h4>
       <div class="croppick" id="cropPick"></div>
+    </div>
+
+    <div class="setcat">天氣與田區</div>
+    <div class="setblk"><h4>天氣預報地區（全國）</h4>
+      <select class="mkt" id="regionSelect"></select>
+      <p class="hintline">選你所在縣市，天氣預報／擺攤指數／農事建議依此顯示。農夫若有填座標的田，會自動以田所在縣市為準。</p>
     </div>
 
     <div class="setblk"><h4>我的田區（搶收/採收用）</h4>
@@ -579,9 +586,10 @@
       <p class="hintline">田區存在你手機，隨時增刪、改地勢立即生效。⚠ PHI 請查農藥登記值，勿臆填。</p>
     </div>
 
+    <div class="setcat">關於</div>
     <div class="setblk"><h4>關於 App</h4>
       <div class="aboutcard">
-        <div class="alogo">巡田水</div>
+        <div class="alogo">農商雷達</div>
         <div class="atag">雲林葉菜的行情看板＋颱風搶收預判<br>價格採農業部公開行情、天氣採中央氣象署資料</div>
         <div class="aver" id="aboutVer"></div>
       </div>
@@ -623,7 +631,7 @@
 
 <div class="onboard" id="onboard">
   <div class="onbox">
-    <div class="onlogo">巡田水</div>
+    <div class="onlogo">農商雷達</div>
     <p class="onsub">先選你的身分，開始使用（之後可在右上 ⚙️ 更改）</p>
     <button class="oncard" data-r="farmer">
       <span class="onemoji">🧑‍🌾</span><span class="ontitle">蔬果農夫</span>
@@ -636,7 +644,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v2.2";
+const VERSION="v3.0";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -958,6 +966,11 @@ function renderBoard(){
   renderCatbar();
   const searching=!!SEARCH.trim();
   const cb=document.getElementById("catbar");if(cb&&searching)cb.style.display="none";  // 搜尋時隱藏蔬果分類
+  // 颱風警戒在最上（有颱風/追蹤/豪雨才顯示，平安時隱藏不佔版面），天氣預報在其下
+  const alm=document.getElementById("hAlertM");
+  if(alm){const a=typhoonAlertInfo({board:true});
+    if(a.noteworthy&&!searching){alm.style.display="";alm.className=a.cls;alm.innerHTML=a.html;alm.onclick=a.clickable?openTyphoon:null;}
+    else{alm.style.display="none";alm.innerHTML="";alm.onclick=null;}}
   const wam=document.getElementById("wAdviceM");if(wam)wam.innerHTML=(S.role==="merchant"&&!searching)?weatherAdviceHTML("merchant"):"";
   const ml=document.getElementById("mktLabel");if(ml)ml.innerHTML=`<b>${MARKET}</b> · 批發`;
   const cs=document.getElementById("cropSearch");if(cs)cs.placeholder=`🔍 搜尋此市場 ${availableCrops().length} 種品項…`;
@@ -1350,29 +1363,34 @@ function weatherAdviceHTML(role){
     <div class="wadv-l">${rainLine}</div><div class="wadv-l">👉 ${advice}</div>${fcStripHTML()}
     <div class="wadv-f">中央氣象署 · 今明 36 小時預報（可在 ⚙️ 換地區）</div></div>`;
 }
-function renderHarvest(){
-  const w=WEATHER||{active:false};const al=document.getElementById("hAlert");
-  const wa=document.getElementById("wAdvice");if(wa)wa.innerHTML=weatherAdviceHTML("farmer");
-  const rain24=+w.rain_24h_mm||0;
-  // 各田(依座標)或雲林的侵襲機率；多塊地不同縣市→多列
+/* 颱風/豪雨警戒卡（農夫田區頁＋商人看板頁共用；置於天氣預報之上）。
+   board=true 給商人看板用：不顯示逐田侵襲率、平安時回傳 noteworthy=false 讓看板隱藏不佔版面。 */
+function typhoonAlertInfo(opts){
+  opts=opts||{};const board=opts.board;
+  const w=WEATHER||{active:false};const rain24=+w.rain_24h_mm||0;
   const byR=invasionByRegion();const rk=Object.keys(byR);
-  const invHTML=rk.length?rk.map(r=>`<span class="k">${r} 侵襲機率 <b>${Math.round(byR[r]*100)}%</b></span>`).join("")
-    :`<span class="k">雲林 侵襲機率 <b>${w.invade_prob!=null?Math.round(w.invade_prob*100)+"%":"—"}</b></span>`;
+  const invHTML=board?"":(rk.length?rk.map(r=>`<span class="k">${r} 侵襲機率 <b>${Math.round(byR[r]*100)}%</b></span>`).join("")
+    :`<span class="k">雲林 侵襲機率 <b>${w.invade_prob!=null?Math.round(w.invade_prob*100)+"%":"—"}</b></span>`);
   const moreHint=`<span class="k tmore">🛰 點看路徑・雷達 ›</span>`;
-  if(w.active){al.className="alert flash clickable";al.innerHTML=`<span class="ticon spin">🌀</span>
+  let cls="alert calm",html="",clickable=false,noteworthy=false;
+  if(w.active){noteworthy=true;clickable=true;cls="alert flash clickable";html=`<span class="ticon spin">🌀</span>
     <span class="big">颱風 <b>${w.name||"警報中"}</b> · ${w.warning||"接近中"}</span>
     ${invHTML}<span class="k">暴風圈到達 <b>${w.eta_text||"—"}</b></span>${rain24?`<span class="k">24hr雨量 <b>${rain24}mm</b></span>`:""}${moreHint}`;}
-  else if(rain24>=80){const heavy=rain24>=200;al.className="alert rain flash";
-    al.innerHTML=`<span class="ticon">${heavy?"⛈️":"🌧️"}</span>
+  else if(rain24>=80){noteworthy=true;const heavy=rain24>=200;cls="alert rain flash";
+    html=`<span class="ticon">${heavy?"⛈️":"🌧️"}</span>
       <span class="big">${heavy?"豪雨特報":"大雨特報"} · 雲林 24hr 雨量 <b>${rain24}mm</b></span>
-      <span class="k">低窪田注意積水、可提前搶收</span>`;}
-  else if(w.tracking){al.className="alert track clickable";al.innerHTML=`<span class="ticon">🌀</span>
+      <span class="k">${board?"外出擺攤請備雨具、生鮮防潮":"低窪田注意積水、可提前搶收"}</span>`;}
+  else if(w.tracking){noteworthy=true;clickable=true;cls="alert track clickable";html=`<span class="ticon">🌀</span>
     <span class="big">颱風 <b>${w.name||"—"}</b> 追蹤中</span>
     <span class="k">${w.warning||"對雲林暫無直接威脅"}</span>
     ${w.min_dist_km!=null?`<span class="k">最近距離 <b>${w.min_dist_km} km</b></span>`:""}${invHTML}${moreHint}`;}
-  else{al.className="alert calm";al.innerHTML=`<span class="ticon">🌿</span><span class="big">目前<b>無颱風警報</b></span><span class="k">下方顯示各田採收進度</span>`;}
-  const clickable=!!(w.active||w.tracking);
-  al.onclick=clickable?openTyphoon:null;
+  else{cls="alert calm";html=`<span class="ticon">🌿</span><span class="big">目前<b>無颱風警報</b></span>${board?"":'<span class="k">下方顯示各田採收進度</span>'}`;}
+  return {cls,html,clickable,noteworthy};
+}
+function renderHarvest(){
+  const w=WEATHER||{active:false};const al=document.getElementById("hAlert");
+  const a=typhoonAlertInfo();al.className=a.cls;al.innerHTML=a.html;al.onclick=a.clickable?openTyphoon:null;   // 颱風警戒在最上
+  const wa=document.getElementById("wAdvice");if(wa)wa.innerHTML=weatherAdviceHTML("farmer");                  // 天氣預報在其下
   const fields=getFields().map(computeField);
   if(w.active)fields.sort((a,b)=>b.risk-a.risk);
   const wrap=document.getElementById("hCards");wrap.innerHTML="";hTimers=[];
@@ -1600,7 +1618,7 @@ let TOASTT=null;
 function toast(msg){const t=document.getElementById("toast");if(!t)return;t.textContent=msg;t.classList.add("on");
   clearTimeout(TOASTT);TOASTT=setTimeout(()=>t.classList.remove("on"),2200);}
 document.getElementById("aFeedback").addEventListener("click",()=>{
-  const subj=encodeURIComponent("巡田水 App 意見回饋 ("+VERSION+")");
+  const subj=encodeURIComponent("農商雷達 App 意見回饋 ("+VERSION+")");
   const body=encodeURIComponent("我想回饋／回報：\n\n\n——\n(以下供除錯，可保留)\n版本："+VERSION+"\n裝置："+navigator.userAgent);
   location.href="mailto:xin7355@gmail.com?subject="+subj+"&body="+body;});
 function openFaq(){document.getElementById("faqModal").classList.add("on");}
@@ -1610,7 +1628,7 @@ document.getElementById("closeFaq").addEventListener("click",closeFaq);
 document.getElementById("faqModal").addEventListener("click",e=>{if(e.target.id==="faqModal")closeFaq();});
 document.getElementById("aShare").addEventListener("click",async()=>{
   const url=location.origin+location.pathname;
-  const data={title:"巡田水",text:"巡田水：雲林葉菜行情看板＋颱風搶收預判，免費免帳號。",url};
+  const data={title:"農商雷達",text:"農商雷達：雲林葉菜行情看板＋颱風搶收預判，免費免帳號。",url};
   try{if(navigator.share){await navigator.share(data);return;}}catch(e){if(e&&e.name==="AbortError")return;}
   try{await navigator.clipboard.writeText(url);toast("已複製 App 連結，貼給農友吧！");}
   catch(e){toast(url);}});
@@ -1686,7 +1704,7 @@ document.querySelectorAll("#onboard .oncard").forEach(b=>b.addEventListener("cli
 (async function(){
   applyFont();
   if(!S.onboarded)document.getElementById("onboard").classList.add("on");   // 第一次先選身分
-  const vl=document.getElementById("verLabel");if(vl)vl.textContent="巡田水 "+VERSION;
+  const vl=document.getElementById("verLabel");if(vl)vl.textContent="農商雷達 "+VERSION;
   const av=document.getElementById("aboutVer");if(av)av.textContent="版本 "+VERSION;
   const {index,live}=await loadIndex();INDEX=index;
   document.getElementById("updated").textContent="更新："+(index.updated||"—");
