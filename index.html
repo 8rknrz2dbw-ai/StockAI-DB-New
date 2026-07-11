@@ -45,7 +45,8 @@
     width:2.4rem;height:2.4rem;border-radius:50%;font-size:1.2rem;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
   .hgroup{margin-left:auto;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;justify-content:flex-end;}
   .upd{font-size:0.72rem;color:var(--muted);white-space:nowrap;}
-  header.slim{gap:0.5rem;padding-top:0.1rem;justify-content:space-between;}
+  header.slim{gap:0.5rem;padding-top:0.1rem;justify-content:flex-start;}
+  header.slim .gear{margin-left:auto;}
   .hright{display:flex;align-items:center;gap:0.5rem;flex:0 0 auto;}
   /* 首次啟動：身分選擇（獨立介面） */
   .onboard{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;align-items:center;justify-content:center;
@@ -249,6 +250,11 @@
   .varrow{display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:0.35rem 0.6rem;margin-top:0.3rem;}
   .varrow .vl{font-weight:700;} .varrow .vp{margin-left:auto;font-weight:900;font-size:1rem;} .varrow .vu{font-size:0.7rem;color:var(--muted);}
   /* 我的品項：勾選表（省空間、可勾選增刪） */
+  .pickbar{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin:0.2rem 0 0.5rem;flex-wrap:wrap;}
+  .pickcount{font-size:0.8rem;color:var(--muted);} .pickcount b{color:var(--leaf);}
+  .pickbtns{display:flex;gap:0.4rem;}
+  .pickbtns button{background:var(--panel2);border:1px solid var(--leaf-dim);color:var(--leaf);border-radius:999px;padding:0.3rem 0.8rem;font-size:0.8rem;font-weight:800;}
+  .pickbtns button:active{background:var(--leaf-dim);color:var(--bg);}
   .pickgrp{margin-top:0.4rem;} .pickh{font-size:0.85rem;color:var(--muted);font-weight:800;margin:0.35rem 0 0.25rem;}
   .pickgrid{display:flex;flex-wrap:wrap;gap:0.4rem;}
   .chip{display:inline-flex;align-items:center;gap:0.35rem;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:0.35rem 0.7rem;font-size:0.95rem;cursor:pointer;user-select:none;}
@@ -405,6 +411,15 @@
   .fieldform .frow{display:flex;gap:0.5rem;} .fieldform .frow>div{flex:1;min-width:0;}
   .fieldform .save{background:var(--leaf);color:var(--bg);border:0;border-radius:10px;padding:0.6rem;font-weight:800;}
   .gpsbtn{width:100%;background:var(--panel);border:1px solid var(--leaf-dim);color:var(--leaf);border-radius:10px;padding:0.5rem;font-weight:700;margin-top:0.35rem;}
+  .gearth{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:0.7rem 0.85rem;margin-top:0.3rem;}
+  .gearth-h{font-weight:800;font-size:0.85rem;color:var(--paper);margin-bottom:0.4rem;}
+  .gearth-steps{margin:0;padding-left:1.2rem;font-size:0.8rem;color:var(--muted);line-height:1.7;}
+  .gearth-steps b{color:var(--paper);}
+  .gearth-btn{display:block;text-align:center;margin-top:0.6rem;background:var(--panel);border:1px solid var(--leaf-dim);
+    color:var(--leaf);border-radius:10px;padding:0.5rem;font-weight:800;text-decoration:none;}
+  .gearth-btn:active{background:var(--leaf-dim);color:var(--bg);}
+  .gearth-tip{font-size:0.72rem;color:var(--muted);margin:0.5rem 0 0;line-height:1.6;}
+  .gearth-tip b{color:var(--paper);}
   .fieldform a{color:var(--leaf);}
   .hintline{font-size:0.74rem;color:var(--muted);margin-top:0.5rem;line-height:1.6;}
   .ver{color:#5a6146;font-size:0.7rem;text-align:center;margin-top:1.5rem;letter-spacing:.5px;}
@@ -435,8 +450,9 @@
 <body>
 <div class="wrap">
   <header class="slim">
+    <span id="mode" class="badge demo">示範資料</span>
     <span id="updated" class="upd">—</span>
-    <div class="hright"><span id="mode" class="badge demo">示範資料</span><button class="gear" id="gear" aria-label="設定">⚙️</button></div>
+    <button class="gear" id="gear" aria-label="設定">⚙️</button>
   </header>
 
   <nav class="tabs">
@@ -544,7 +560,8 @@
     <div class="setcat">行情看板</div>
     <div class="setblk"><h4>果菜市場</h4><select class="mkt" id="mktSelect"></select></div>
 
-    <div class="setblk"><h4>我的品項（勾選＝行情看板要顯示的）</h4>
+    <div class="setblk"><h4>我的品項</h4>
+      <p class="hintline" style="margin-top:0">勾選＝行情看板要顯示的品項（此市場）。</p>
       <div class="croppick" id="cropPick"></div>
     </div>
 
@@ -580,6 +597,17 @@
               <select id="ffAreaUnit"><option value="ping">坪</option><option value="fen">分</option><option value="m2">㎡</option></select></div></div>
           <div><label>可種比例%（扣走道，預設80）</label><input type="number" id="ffUsable" min="10" max="100" placeholder="80" inputmode="numeric"></div>
         </div>
+        <div class="gearth">
+          <div class="gearth-h">📐 不知道幾坪？用 Google Earth 量（免費、準）</div>
+          <ol class="gearth-steps">
+            <li>開 Google Earth，點左側工具列「<b>測量</b>」📏</li>
+            <li>沿著田的邊界<b>點一圈</b>回到起點</li>
+            <li>讀它顯示的「<b>面積 ○○ 平方公尺</b>」</li>
+            <li>回到這裡：單位切「<b>㎡</b>」，把數字填進「田區面積」</li>
+          </ol>
+          <a class="gearth-btn" href="https://earth.google.com/web/" target="_blank" rel="noopener">🌍 開啟 Google Earth 量田</a>
+          <p class="gearth-tip">Earth 也會給「海拔」高低，可對照設你的<b>地勢淹水等級</b>（低窪處易積水）。</p>
+        </div>
         <div><label>田區座標（GPS，供淹水潛勢查詢；可空）</label>
           <div class="frow"><input id="ffLat" placeholder="緯度 lat" inputmode="decimal"><input id="ffLng" placeholder="經度 lng" inputmode="decimal"></div>
           <button type="button" class="gpsbtn" id="ffGeo">📍 用目前位置（站在田裡按）</button>
@@ -594,7 +622,7 @@
     <div class="setblk"><h4>關於 App</h4>
       <div class="aboutcard">
         <div class="alogo">農商雷達</div>
-        <div class="atag">雲林葉菜的行情看板＋颱風搶收預判<br>價格採農業部公開行情、天氣採中央氣象署資料</div>
+        <div class="atag">全台蔬果行情看板＋颱風搶收預判<br>價格採農業部公開行情、天氣採中央氣象署資料</div>
         <div class="aver" id="aboutVer"></div>
       </div>
       <div class="about">
@@ -648,7 +676,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v3.1";
+const VERSION="v3.2";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -1181,6 +1209,12 @@ function invasionAt(lat,lng){
 function shortRegion(nm){return nm?nm.replace("雲林縣","").replace("彰化縣","彰化·").replace("嘉義縣","嘉義·").replace(/[縣市]$/,""):"雲林";}
 function invasionByRegion(){const map={};getFields().forEach(f=>{if(!f.geo)return;const t=whichTownship(f.geo.lat,f.geo.lng);
   const r=t?shortRegion(t.name):"你的田";const pr=invasionAt(f.geo.lat,f.geo.lng).prob||0;if(map[r]==null||pr>map[r])map[r]=pr;});return map;}
+/* 全國化：無田座標時，用「使用者所在縣市」中心點以颱風軌跡算侵襲機率（不再寫死雲林） */
+function countyShort(nm){return (normCounty(nm||"")).replace(/[縣市]$/,"")||"你的地區";}
+function countyCentroid(nm){nm=normCounty(nm);const r=COUNTY_LL.find(c=>c[0]===nm);return r?{lat:r[1],lng:r[2]}:null;}
+function regionInvasion(){const cty=activeCounty();const c=countyCentroid(cty);const w=WEATHER||{};
+  const prob=c?invasionAt(c.lat,c.lng).prob:(w.invade_prob!=null?w.invade_prob:null);
+  return {name:countyShort(cty),prob};}
 function computeField(f){
   const now=todayISO();const T=growthDays(f.crop,f.plant);const age=daysBetween(f.plant,now);
   const maturity=clamp(age/T,0,2);const harvestISO=addDaysISO(f.plant,T);const daysToHarvest=Math.round(daysBetween(now,harvestISO));
@@ -1283,10 +1317,10 @@ function typhoonNarrative(){
     if(cur.gust)s+=`，近中心最大陣風約 ${Math.round(cur.gust)} m/s`;
     if(w.min_dist_km!=null&&w.min_dist_km<dist-10)s+=`；預估最近將接近至約 ${w.min_dist_km} 公里`;
     s+="。";}else s+=`${w.warning||"追蹤中"}。`;
-  const P=w.invade_prob||0;const prob=w.invade_prob!=null?Math.round(P*100):null;
-  if(prob!=null)s+=`雲林侵襲機率約 ${prob}%`;
+  const ri=regionInvasion();const P=ri.prob!=null?ri.prob:(w.invade_prob||0);const prob=ri.prob!=null?Math.round(ri.prob*100):(w.invade_prob!=null?Math.round(w.invade_prob*100):null);
+  if(prob!=null)s+=`${ri.name}侵襲機率約 ${prob}%`;
   if(w.eta_text&&w.eta_text!=="追蹤中")s+=`，暴風圈預估 ${w.eta_text}接近`;s+="。";
-  const rain=+w.rain_24h_mm||0;if(rain>0)s+=`雲林過去 24 小時累積雨量約 ${rain}mm。`;
+  const rain=+w.rain_24h_mm||0;if(rain>0)s+=`監測站過去 24 小時累積雨量約 ${rain}mm。`;
   const adv=(P>=0.5||rain>=150)?"低窪田請提前搶收、留意積水與強陣風；已達成熟度者優先收成。"
     :(P>=0.25||rain>=80)?"持續留意路徑與短延時強降雨，低窪田先做排水準備。"
     :"威脅尚低，維持追蹤即可，暫可照常管理。";
@@ -1296,9 +1330,9 @@ function windyURL(ov){const lat=23.7,lng=120.5;const prod=ov==="radar"?"&product
   return `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&detailLat=${lat}&detailLon=${lng}&zoom=6&level=surface&overlay=${ov}${prod}&calendar=now&menu=&type=map&location=coordinates&metricWind=default&metricTemp=default&radarRange=-1`;}
 const WINDY_OV=[["radar","雷達"],["rain","雨量"],["wind","風速"],["gust","陣風"]];
 function typhoonBodyHTML(){
-  const w=WEATHER||{};const byR=invasionByRegion();const rk=Object.keys(byR);
+  const w=WEATHER||{};const byR=invasionByRegion();const rk=Object.keys(byR);const ri=regionInvasion();
   const inv=rk.length?rk.map(r=>`<span class="tychip">${r} <b>${Math.round(byR[r]*100)}%</b></span>`).join("")
-    :`<span class="tychip">雲林 <b>${w.invade_prob!=null?Math.round(w.invade_prob*100)+"%":"—"}</b></span>`;
+    :`<span class="tychip">${ri.name} <b>${ri.prob!=null?Math.round(ri.prob*100)+"%":"—"}</b></span>`;
   const ncdr="https://watch.ncdr.nat.gov.tw/watch_page_typhoon_v2";
   const windyFull="https://www.windy.com/23.700/120.500?radar,23.700,120.500,6";
   return `<div class="tysum">
@@ -1374,9 +1408,9 @@ function weatherAdviceHTML(role){
 function typhoonAlertInfo(opts){
   opts=opts||{};const board=opts.board;
   const w=WEATHER||{active:false};const rain24=+w.rain_24h_mm||0;
-  const byR=invasionByRegion();const rk=Object.keys(byR);
+  const byR=invasionByRegion();const rk=Object.keys(byR);const ri=regionInvasion();
   const invHTML=board?"":(rk.length?rk.map(r=>`<span class="k">${r} 侵襲機率 <b>${Math.round(byR[r]*100)}%</b></span>`).join("")
-    :`<span class="k">雲林 侵襲機率 <b>${w.invade_prob!=null?Math.round(w.invade_prob*100)+"%":"—"}</b></span>`);
+    :`<span class="k">${ri.name} 侵襲機率 <b>${ri.prob!=null?Math.round(ri.prob*100)+"%":"—"}</b></span>`);
   const moreHint=`<span class="k tmore">🛰 點看路徑・雷達 ›</span>`;
   let cls="alert calm",html="",clickable=false,noteworthy=false;
   if(w.active){noteworthy=true;clickable=true;cls="alert flash clickable";html=`<span class="ticon spin">🌀</span>
@@ -1384,11 +1418,11 @@ function typhoonAlertInfo(opts){
     ${invHTML}<span class="k">暴風圈到達 <b>${w.eta_text||"—"}</b></span>${rain24?`<span class="k">24hr雨量 <b>${rain24}mm</b></span>`:""}${moreHint}`;}
   else if(rain24>=80){noteworthy=true;const heavy=rain24>=200;cls="alert rain flash";
     html=`<span class="ticon">${heavy?"⛈️":"🌧️"}</span>
-      <span class="big">${heavy?"豪雨特報":"大雨特報"} · 雲林 24hr 雨量 <b>${rain24}mm</b></span>
+      <span class="big">${heavy?"豪雨特報":"大雨特報"} · 24hr 雨量 <b>${rain24}mm</b></span>
       <span class="k">${board?"外出擺攤請備雨具、生鮮防潮":"低窪田注意積水、可提前搶收"}</span>`;}
   else if(w.tracking){noteworthy=true;clickable=true;cls="alert track clickable";html=`<span class="ticon">🌀</span>
     <span class="big">颱風 <b>${w.name||"—"}</b> 追蹤中</span>
-    <span class="k">${w.warning||"對雲林暫無直接威脅"}</span>
+    <span class="k">${w.warning||"對各地暫無直接威脅"}</span>
     ${w.min_dist_km!=null?`<span class="k">最近距離 <b>${w.min_dist_km} km</b></span>`:""}${invHTML}${moreHint}`;}
   else{cls="alert calm";html=`<span class="ticon">🌿</span><span class="big">目前<b>無颱風警報</b></span>${board?"":'<span class="k">下方顯示各田採收進度</span>'}`;}
   return {cls,html,clickable,noteworthy};
@@ -1553,10 +1587,17 @@ function renderCropPick(){
   const box=document.getElementById("cropPick");if(!box)return;box.innerHTML="";
   const av=availableCrops(),watch=watchCrops();
   if(!av.length){box.innerHTML='<p class="hintline">此市場目前無行情資料。</p>';return;}
+  // 批量：全選 / 全部關閉 ＋ 已選計數
+  const bar=document.createElement("div");bar.className="pickbar";
+  bar.innerHTML=`<span class="pickcount">已選 <b>${watch.length}</b> / ${av.length} 項</span>
+    <span class="pickbtns"><button type="button" data-all="1">全選</button><button type="button" data-all="0">全部關閉</button></span>`;
+  box.appendChild(bar);
+  bar.querySelector('[data-all="1"]').onclick=()=>{S.setWatch(MARKET,av.slice());renderCropPick();MKTMODE="list";DETAIL=null;renderBoard();};
+  bar.querySelector('[data-all="0"]').onclick=()=>{S.setWatch(MARKET,[]);CUR=null;renderCropPick();MKTMODE="list";DETAIL=null;renderBoard();};
   [["蔬菜","🥬"],["水果","🍉"]].forEach(([cat,emoji])=>{
     const items=av.filter(c=>cropCat(c)===cat);if(!items.length)return;
     const grp=document.createElement("div");grp.className="pickgrp";
-    grp.innerHTML=`<div class="pickh">${emoji} ${cat}（勾選要看的）</div>`;
+    grp.innerHTML=`<div class="pickh">${emoji} ${cat}</div>`;
     const grid=document.createElement("div");grid.className="pickgrid";
     items.forEach(c=>{const on=watch.includes(c);const lab=document.createElement("label");lab.className="chip"+(on?" on":"");
       lab.innerHTML=`<input type="checkbox" value="${c}"${on?" checked":""}><span>${c}</span>`;grid.appendChild(lab);});
@@ -1567,6 +1608,7 @@ function renderCropPick(){
     if(cb.checked){if(!w.includes(c))w.push(c);}else{w=w.filter(x=>x!==c);}
     S.setWatch(MARKET,w);cb.closest(".chip").classList.toggle("on",cb.checked);
     if(!cb.checked&&CUR===c){CUR=null;}
+    const cnt=box.querySelector(".pickcount b");if(cnt)cnt.textContent=w.length;
     MKTMODE="list";DETAIL=null;renderBoard();   // 改看板清單後回列表
   });
 }
@@ -1634,7 +1676,7 @@ document.getElementById("closeFaq").addEventListener("click",closeFaq);
 document.getElementById("faqModal").addEventListener("click",e=>{if(e.target.id==="faqModal")closeFaq();});
 document.getElementById("aShare").addEventListener("click",async()=>{
   const url=location.origin+location.pathname;
-  const data={title:"農商雷達",text:"農商雷達：雲林葉菜行情看板＋颱風搶收預判，免費免帳號。",url};
+  const data={title:"農商雷達",text:"農商雷達：全台蔬果行情看板＋颱風搶收預判，免費免帳號。",url};
   try{if(navigator.share){await navigator.share(data);return;}}catch(e){if(e&&e.name==="AbortError")return;}
   try{await navigator.clipboard.writeText(url);toast("已複製 App 連結，貼給農友吧！");}
   catch(e){toast(url);}});
@@ -1705,6 +1747,29 @@ document.getElementById("roleRow").addEventListener("click",e=>{const b=e.target
 /* 首次啟動：身分選擇獨立介面；選完設 vs_onboarded，之後不再出現（設定仍可改角色） */
 document.querySelectorAll("#onboard .oncard").forEach(b=>b.addEventListener("click",()=>{
   S.role=b.dataset.r;S.onboarded=true;document.getElementById("onboard").classList.remove("on");applyRole();}));
+
+/* ══════ 兩指縮放（放大檢視，放開回彈原狀；純視覺放大、不改版面） ══════ */
+(function(){
+  const zc=document.querySelector(".wrap");if(!zc)return;
+  let pinching=false,startDist=0;
+  const d2=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+  const mid=t=>({x:(t[0].clientX+t[1].clientX)/2,y:(t[0].clientY+t[1].clientY)/2});
+  document.addEventListener("touchstart",e=>{
+    if(e.touches.length===2){pinching=true;startDist=d2(e.touches)||1;
+      const m=mid(e.touches),r=zc.getBoundingClientRect();
+      zc.style.transition="none";zc.style.transformOrigin=(m.x-r.left)+"px "+(m.y-r.top)+"px";}
+  },{passive:true});
+  document.addEventListener("touchmove",e=>{
+    if(pinching&&e.touches.length===2){e.preventDefault();
+      const s=Math.min(3,Math.max(1,d2(e.touches)/startDist));zc.style.transform="scale("+s.toFixed(3)+")";}
+  },{passive:false});
+  function release(){if(!pinching)return;pinching=false;
+    zc.style.transition="transform .25s ease";zc.style.transform="scale(1)";
+    setTimeout(()=>{zc.style.transition="";zc.style.transformOrigin="";},300);}
+  document.addEventListener("touchend",e=>{if(e.touches.length<2)release();},{passive:true});
+  document.addEventListener("touchcancel",release,{passive:true});
+  document.addEventListener("gesturestart",e=>e.preventDefault());   // 擋 iOS 原生縮放，改用回彈式
+})();
 
 /* ══════ 啟動 ══════ */
 (async function(){
