@@ -299,6 +299,18 @@
     text-decoration:none;font-weight:800;padding:0.6rem 0.7rem;border-radius:12px;font-size:0.9rem;}
   .tyfoot{font-size:0.72rem;color:var(--muted);margin:0.6rem 0 0;}
   .tynote{background:var(--panel2);border:1px dashed var(--line);border-radius:12px;padding:0.9rem;color:var(--muted);font-size:0.85rem;}
+  /* 天氣建議卡（商人擺攤指數／農夫農事時段） */
+  .wadv{background:linear-gradient(180deg,rgba(111,176,166,.12),transparent);border:1px solid var(--line);border-left:4px solid var(--cool);
+    border-radius:14px;padding:0.8rem 0.9rem;margin-bottom:0.8rem;}
+  .wadv-h{font-weight:900;font-size:1rem;margin-bottom:0.35rem;} .wadv-h b.up{color:var(--g);} .wadv-h b.mid{color:var(--y);} .wadv-h b.dn{color:var(--r);}
+  .wadv-l{font-size:0.9rem;line-height:1.55;color:var(--paper);margin:0.15rem 0;} .wadv-l b{color:var(--cool);}
+  .wadv-f{font-size:0.7rem;color:var(--muted);margin-top:0.3rem;}
+  .fcstrip{display:flex;gap:0.3rem;overflow-x:auto;margin-top:0.5rem;padding-bottom:0.2rem;}
+  .fcslot{flex:0 0 auto;min-width:3rem;text-align:center;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:0.35rem 0.2rem;}
+  .fcslot.wet{border-color:#3f79c9;background:rgba(59,125,216,.14);}
+  .fcslot .fct{display:block;font-size:0.66rem;color:var(--muted);}
+  .fcslot .fcpop{display:block;font-size:0.95rem;font-weight:900;color:#bcd8ff;}
+  .fcslot .fctemp{display:block;font-size:0.7rem;color:var(--muted);}
 
   .cards{display:flex;flex-direction:column;gap:0.7rem;}
   .fcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:0.9rem;position:relative;overflow:hidden;}
@@ -392,6 +404,7 @@
 
   <div class="view on" id="view-market">
     <div id="mktList">
+      <div id="wAdviceM"></div>
       <div class="boardtop">
         <div class="catbar" id="catbar"></div>
         <div class="mktrow">
@@ -409,6 +422,7 @@
   </div>
 
   <div class="view" id="view-harvest">
+    <div id="wAdvice"></div>
     <div class="alert" id="hAlert"></div>
     <div class="cards" id="hCards"></div>
   </div>
@@ -522,7 +536,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.8";
+const VERSION="v1.9";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -568,7 +582,7 @@ function seedFields(){return [
 function getFields(){let f=S.fields;if(!f){f=seedFields();S.setFields(f);}return f;}
 
 /* ══════ 行情資料 ══════ */
-let INDEX=null,MDATA={},MVAR={},MARKET="",CUR=null,WEATHER=null;
+let INDEX=null,MDATA={},MVAR={},MARKET="",CUR=null,WEATHER=null,FORECAST=null;
 function marketNames(){return ((INDEX&&INDEX.markets)||[]).map(m=>m.name);}
 function cropMap(){return (INDEX&&INDEX.crop_map)||{};}
 /* 分類：蔬菜/水果（後端 prices_index.categories 提供；缺則用內建水果清單判斷） */
@@ -589,6 +603,9 @@ async function loadMarket(mk){
 async function loadWeather(){
   try{const r=await fetch(`${resolveGhBase()}/typhoon_status.json`,{cache:"no-store"});if(!r.ok)throw 0;
     const j=await r.json();return (j&&typeof j==="object")?j:{active:false};}catch(e){return {active:false};}}
+async function loadForecast(){
+  try{const r=await fetch(`${resolveGhBase()}/weather_forecast.json`,{cache:"no-store"});if(!r.ok)throw 0;
+    const j=await r.json();return (j&&Array.isArray(j.slots))?j:{slots:[]};}catch(e){return {slots:[]};}}
 async function loadEvents(){
   // 真實天氣事件（颱風/大雨/低溫），由後端 fetch_cwa.py 逐日累積；抓不到就空、K線只顯示節慶/爆量
   try{const r=await fetch(`${resolveGhBase()}/weather_events.json`,{cache:"no-store"});if(!r.ok)throw 0;
@@ -796,6 +813,7 @@ function renderBoard(){
   renderCatbar();
   const searching=!!SEARCH.trim();
   const cb=document.getElementById("catbar");if(cb&&searching)cb.style.display="none";  // 搜尋時隱藏蔬果分類
+  const wam=document.getElementById("wAdviceM");if(wam)wam.innerHTML=(S.role==="merchant"&&!searching)?weatherAdviceHTML("merchant"):"";
   const ml=document.getElementById("mktLabel");if(ml)ml.innerHTML=`<b>${MARKET}</b> · 批發`;
   const cs=document.getElementById("cropSearch");if(cs)cs.placeholder=`🔍 搜尋此市場 ${availableCrops().length} 種品項…`;
   const ub=document.getElementById("unitbar");if(ub){ub.innerHTML=unitToggleHTML("ubSeg");bindUnitToggle(ub);}
@@ -1144,8 +1162,41 @@ function openTyphoon(){const w=WEATHER||{};if(!(w.active||w.tracking))return;
   document.getElementById("typhoonModal").classList.add("on");}
 function closeTyphoon(){document.getElementById("typhoonModal").classList.remove("on");
   const b=document.getElementById("tyBody");if(b)b.innerHTML="";}   // 卸載 iframe 省資源
+/* ══════ 天氣預報建議：商人「擺攤指數/何時下雨」、農夫「農事時段」 ══════ */
+function fcSlots(){return (FORECAST&&Array.isArray(FORECAST.slots))?FORECAST.slots.filter(s=>s&&s.t):[];}
+function fcHH(iso){const m=String(iso).match(/T(\d{2})/);return m?m[1]:"";}
+function fcMDHH(iso){const m=String(iso).match(/(\d{2})-(\d{2})T(\d{2})/);return m?`${+m[1]}/${+m[2]} ${m[3]}時`:"";}
+function fcNextRain(){for(const s of fcSlots()){if(s.pop!=null&&s.pop>=50)return s;}return null;}
+function fcTodayMaxPop(){let m=0;fcSlots().slice(0,4).forEach(s=>{if(s.pop!=null)m=Math.max(m,s.pop);});return m;}
+function fcStripHTML(){const s=fcSlots().slice(0,8);if(!s.length)return "";
+  return `<div class="fcstrip">${s.map(x=>{const wet=x.pop!=null&&x.pop>=50;
+    return `<div class="fcslot${wet?' wet':''}"><span class="fct">${fcHH(x.t)}時</span>`+
+    `<span class="fcpop">${x.pop!=null?x.pop+"%":"–"}</span>`+
+    `<span class="fctemp">${x.temp!=null?Math.round(x.temp)+"°":""}</span></div>`;}).join("")}</div>`;}
+function weatherAdviceHTML(role){
+  const s=fcSlots();if(!s.length)return "";     // 無預報資料就不顯示（不佔版面）
+  const nr=fcNextRain();const tmax=fcTodayMaxPop();
+  const rainLine=nr?`☔ 最近可能下雨：<b>${fcMDHH(nr.t)}</b>（降雨機率 ${nr.pop}%）`
+    :`🌤 未來約 1–2 天降雨機率偏低，以晴到多雲為主。`;
+  if(role==="merchant"){
+    let idx,cls,note;
+    if(tmax>=70){idx="不佳";cls="dn";note="近期降雨機率高，戶外擺攤請備雨具或改期、生鮮防潮。";}
+    else if(tmax>=40){idx="普通";cls="mid";note="部分時段可能有雨，擺攤留意遮雨。";}
+    else{idx="佳";cls="up";note="降雨機率低，適合戶外擺攤。";}
+    return `<div class="wadv"><div class="wadv-h">🌦 今日天氣 · 擺攤指數 <b class="${cls}">${idx}</b></div>
+      <div class="wadv-l">${rainLine}</div><div class="wadv-l">${note}</div>${fcStripHTML()}
+      <div class="wadv-f">未來 24 小時逐 3 小時降雨機率／氣溫</div></div>`;
+  }
+  const advice=tmax>=70?"今日多雨，宜室內整備；避免噴藥(易被沖刷)。"
+    :tmax>=40?"午後可能有雨，農事宜安排上午；噴藥避開雨前 3 小時。"
+    :"降雨機率低，全日適合農事、採收與噴藥。";
+  return `<div class="wadv"><div class="wadv-h">🧑‍🌾 農事天氣建議</div>
+    <div class="wadv-l">${rainLine}</div><div class="wadv-l">👉 ${advice}</div>${fcStripHTML()}
+    <div class="wadv-f">未來 24 小時逐 3 小時降雨機率／氣溫</div></div>`;
+}
 function renderHarvest(){
   const w=WEATHER||{active:false};const al=document.getElementById("hAlert");
+  const wa=document.getElementById("wAdvice");if(wa)wa.innerHTML=weatherAdviceHTML("farmer");
   const rain24=+w.rain_24h_mm||0;
   // 各田(依座標)或雲林的侵襲機率；多塊地不同縣市→多列
   const byR=invasionByRegion();const rk=Object.keys(byR);
@@ -1402,7 +1453,7 @@ document.querySelectorAll("#onboard .oncard").forEach(b=>b.addEventListener("cli
   await loadMarket(MARKET);
   WEVENTS=await loadEvents();
   renderBoard();   // 預設進看板清單；點一項才進詳細頁（K線+逐日明細）
-  WEATHER=await loadWeather();renderHarvest();
+  WEATHER=await loadWeather();FORECAST=await loadForecast();renderHarvest();renderBoard();
   // 採收預判作物下拉
   const fc=document.getElementById("fcCrop");cropList().forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;fc.appendChild(o);});
   document.getElementById("fcDate").value=todayISO();
