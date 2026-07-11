@@ -1,16 +1,16 @@
 {
-  "updated": "2026-07-11 05:35",
+  "updated": "2026-07-11 09:33",
   "typhoon": {
     "name": "巴威",
     "warning": "颱風接近中",
     "invade_prob": 0.35,
     "eta_text": "追蹤中",
-    "rain_24h_mm": 44.0,
+    "rain_24h_mm": 197.0,
     "active": true
   },
   "region": {
     "surge_ratio": 1.0,
-    "loss_rate": 0.04,
+    "loss_rate": 0.2,
     "price_source": "fallback"
   },
   "schedule": null,
@@ -20,8 +20,8 @@
       "crop": "青江菜",
       "decision": "NORMAL",
       "confidence": 0.9,
-      "risk_score": 5,
-      "maturity": 0.69,
+      "risk_score": 24,
+      "maturity": 0.695,
       "flood_potential_level": 4,
       "harvest_deadline": null,
       "dilemma": null,
@@ -30,13 +30,13 @@
       "ev": null,
       "risk_breakdown": {
         "P_arrival": 0.35,
-        "I_norm": 0.13,
+        "I_norm": 0.56,
         "W_terrain": 1.3,
         "V_crop": 0.95,
-        "R_raw": 5
+        "R_raw": 24
       },
       "reasons": [
-        "雲林暴風圈侵襲機率 35%，預估 24hr 雨量 44.0mm，滅田風險 5/100",
+        "雲林暴風圈侵襲機率 35%，預估 24hr 雨量 197.0mm，滅田風險 24/100",
         "淹水潛勢等級 4（低窪），泡水 48hr 起爛根，需提前搶收",
         "⚠ 不可上市：距安全採收期還差 2 天（陶斯松）"
       ]
@@ -46,8 +46,8 @@
       "crop": "芥藍菜",
       "decision": "NORMAL",
       "confidence": 0.9,
-      "risk_score": 4,
-      "maturity": 0.946,
+      "risk_score": 19,
+      "maturity": 0.949,
       "flood_potential_level": 3,
       "harvest_deadline": null,
       "dilemma": null,
@@ -56,13 +56,13 @@
       "ev": null,
       "risk_breakdown": {
         "P_arrival": 0.35,
-        "I_norm": 0.13,
+        "I_norm": 0.56,
         "W_terrain": 1.19,
         "V_crop": 0.8,
-        "R_raw": 4
+        "R_raw": 19
       },
       "reasons": [
-        "雲林暴風圈侵襲機率 35%，預估 24hr 雨量 44.0mm，滅田風險 4/100",
+        "雲林暴風圈侵襲機率 35%，預估 24hr 雨量 197.0mm，滅田風險 19/100",
         "淹水潛勢等級 3（偏低），泡水 48hr 起爛根，需提前搶收",
         "中長期作物（60–80 天），颱風曝險期最長",
         "PHI 已過，可合法上市"
@@ -73,8 +73,8 @@
       "crop": "小白菜",
       "decision": "NORMAL",
       "confidence": 0.9,
-      "risk_score": 5,
-      "maturity": 1.169,
+      "risk_score": 22,
+      "maturity": 1.176,
       "flood_potential_level": 3,
       "harvest_deadline": null,
       "dilemma": null,
@@ -83,13 +83,13 @@
       "ev": null,
       "risk_breakdown": {
         "P_arrival": 0.35,
-        "I_norm": 0.13,
+        "I_norm": 0.56,
         "W_terrain": 1.2,
         "V_crop": 0.95,
-        "R_raw": 5
+        "R_raw": 22
       },
       "reasons": [
-        "雲林暴風圈侵襲機率 35%，預估 24hr 雨量 44.0mm，滅田風險 5/100",
+        "雲林暴風圈侵襲機率 35%，預估 24hr 雨量 197.0mm，滅田風險 22/100",
         "淹水潛勢等級 3（偏低），泡水 48hr 起爛根，需提前搶收",
         "PHI 已過，可合法上市"
       ]
@@ -99,8 +99,8 @@
       "crop": "菠菜",
       "decision": "NORMAL",
       "confidence": 0.9,
-      "risk_score": 4,
-      "maturity": 0.345,
+      "risk_score": 18,
+      "maturity": 0.348,
       "flood_potential_level": 2,
       "harvest_deadline": null,
       "dilemma": null,
@@ -109,13 +109,13 @@
       "ev": null,
       "risk_breakdown": {
         "P_arrival": 0.35,
-        "I_norm": 0.13,
+        "I_norm": 0.56,
         "W_terrain": 1.08,
         "V_crop": 0.85,
-        "R_raw": 4
+        "R_raw": 18
       },
       "reasons": [
-        "雲林暴風圈侵襲機率 35%，預估 24hr 雨量 44.0mm，滅田風險 4/100",
+        "雲林暴風圈侵襲機率 35%，預估 24hr 雨量 197.0mm，滅田風險 18/100",
         "⚠ 不可上市：距安全採收期還差 2 天（免賴得）"
       ]
     },
@@ -124,8 +124,8 @@
       "crop": "青江菜",
       "decision": "NORMAL",
       "confidence": 0.9,
-      "risk_score": 4,
-      "maturity": 0.559,
+      "risk_score": 18,
+      "maturity": 0.563,
       "flood_potential_level": 1,
       "harvest_deadline": null,
       "dilemma": null,
@@ -134,13 +134,13 @@
       "ev": null,
       "risk_breakdown": {
         "P_arrival": 0.35,
-        "I_norm": 0.13,
+        "I_norm": 0.56,
         "W_terrain": 0.95,
         "V_crop": 0.95,
-        "R_raw": 4
+        "R_raw": 18
       },
       "reasons": [
-        "雲林暴風圈侵襲機率 35%，預估 24hr 雨量 44.0mm，滅田風險 4/100",
+        "雲林暴風圈侵襲機率 35%，預估 24hr 雨量 197.0mm，滅田風險 18/100",
         "PHI 已過，可合法上市"
       ]
     }
