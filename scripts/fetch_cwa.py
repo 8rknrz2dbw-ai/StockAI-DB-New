@@ -387,6 +387,77 @@ def _first_local_station(records, county=COUNTY):
     return found[0]
 
 
+def parse_township_forecast(recs, now, town_pref=("二崙", "西螺", "崙背", "虎尾")):
+    """從 F-D0047-025（雲林逐 3 小時預報）取一代表鄉鎮的逐時段：降雨機率/溫度/天氣現象。
+    回傳 {'town':名, 'slots':[{'t':iso,'pop':int|None,'temp':float|None,'wx':str}]}（未來約 2 天）。
+    ⚠ 欄位路徑以真實 F-D0047 回應校準（見 cwa_debug）。"""
+    if not recs:
+        return {"town": None, "slots": []}
+    locs = [None]
+
+    def find_locs(o):
+        if locs[0] is not None:
+            return
+        if isinstance(o, dict):
+            for k, v in o.items():
+                if k in ("Location", "location") and isinstance(v, list) and v and isinstance(v[0], dict) \
+                        and any(("LocationName" in x or "locationName" in x) for x in v):
+                    locs[0] = v
+                    return
+                find_locs(v)
+        elif isinstance(o, list):
+            for v in o:
+                find_locs(v)
+    find_locs(recs)
+    L = locs[0]
+    if not L:
+        return {"town": None, "slots": []}
+
+    def nm(x):
+        return str(x.get("LocationName") or x.get("locationName") or "")
+    pick = None
+    for pref in town_pref:
+        pick = next((x for x in L if pref in nm(x)), None)
+        if pick:
+            break
+    pick = pick or L[0]
+    elems = pick.get("WeatherElement") or pick.get("weatherElement") or []
+    series = {}
+    for e in elems:
+        en = str(e.get("ElementName") or e.get("elementName") or "")
+        for tm in (e.get("Time") or e.get("time") or []):
+            t = str(tm.get("StartTime") or tm.get("DataTime") or tm.get("startTime") or tm.get("dataTime") or "")
+            if not t:
+                continue
+            ev = tm.get("ElementValue") or tm.get("elementValue") or []
+            if isinstance(ev, dict):
+                ev = [ev]
+            v = ev[0] if ev else {}
+            rec = series.setdefault(t, {})
+            if "降雨機率" in en:
+                raw = v.get("ProbabilityOfPrecipitation", v.get("降雨機率"))
+                try:
+                    rec["pop"] = int(float(raw))
+                except (TypeError, ValueError):
+                    pass
+            elif "溫度" in en and "露點" not in en:
+                raw = v.get("Temperature", v.get("溫度"))
+                try:
+                    rec["temp"] = float(raw)
+                except (TypeError, ValueError):
+                    pass
+            elif "天氣現象" in en:
+                rec["wx"] = str(v.get("Weather") or v.get("天氣現象") or "")
+    out = []
+    for t in sorted(series.keys()):
+        dt = _parse_cwa_time(t)
+        if dt and dt < now - timedelta(hours=3):
+            continue
+        r = series[t]
+        out.append({"t": t, "pop": r.get("pop"), "temp": r.get("temp"), "wx": r.get("wx", "")})
+    return {"town": nm(pick), "slots": out[:16]}
+
+
 def main():
     now = datetime.now(TZ)
     key_set = bool(os.environ.get("CWA_API_KEY"))
@@ -396,8 +467,18 @@ def main():
     path = cwa_get(DATASETS["path_potential"])
     rain_recs = cwa_get(DATASETS["rainfall"], CountyName=COUNTY)
     temp_recs = cwa_get(DATASETS["temp_obs"], CountyName=COUNTY)
+    fcst_recs = cwa_get(DATASETS["township_fcst"])           # 雲林逐 3 小時預報（降雨機率/溫度/天氣現象）
 
-    # 除錯：把資料集真實結構 + 一筆雲林站原始樣本寫出，供校準 parse_*（雨量/氣溫欄位路徑）
+    # 未來天氣預報（供商人「擺攤指數/何時下雨」、農夫「農事時段建議」）
+    forecast = parse_township_forecast(fcst_recs, now)
+    try:
+        with open("weather_forecast.json", "w", encoding="utf-8") as f:
+            json.dump({"updated": now.strftime("%Y-%m-%d %H:%M"), "source": "CWA F-D0047-025",
+                       **forecast}, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"[fetch_cwa] 預報寫出失敗：{e}", file=sys.stderr)
+
+    # 除錯：把資料集真實結構 + 一筆雲林站原始樣本寫出，供校準 parse_*（雨量/氣溫/預報欄位路徑）
     try:
         with open("cwa_debug.json", "w", encoding="utf-8") as f:
             json.dump({"key_set": key_set, "generated": now.isoformat(),
@@ -406,7 +487,8 @@ def main():
                        "W-C0034-005_path": _struct(path),
                        "O-A0002-001_rain": _struct(rain_recs),
                        "O-A0002-001_rain_yunlin_sample": _first_local_station(rain_recs),
-                       "O-A0001-001_temp_yunlin_sample": _first_local_station(temp_recs)},
+                       "O-A0001-001_temp_yunlin_sample": _first_local_station(temp_recs),
+                       "F-D0047-025_fcst": _struct(fcst_recs)},
                       f, ensure_ascii=False, indent=2)
     except Exception as e:
         print(f"[fetch_cwa] debug dump 失敗：{e}", file=sys.stderr)
