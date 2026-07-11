@@ -18,5 +18,10 @@
   "date": "2026-07-11",
   "type": "typhoon",
   "label": "巴威"
+ },
+ {
+  "date": "2026-07-12",
+  "type": "rain",
+  "label": "豪雨 550mm"
  }
 ]

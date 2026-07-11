@@ -1,16 +1,16 @@
 {
-  "updated": "2026-07-11 22:38",
+  "updated": "2026-07-12 02:08",
   "typhoon": {
     "name": "巴威",
-    "warning": "颱風接近中",
-    "invade_prob": 0.12,
+    "warning": "追蹤中，對雲林暫無直接威脅",
+    "invade_prob": 0.0,
     "eta_text": "追蹤中",
-    "rain_24h_mm": 552.5,
-    "active": true
+    "rain_24h_mm": 550.0,
+    "active": false
   },
   "region": {
     "surge_ratio": 1.0,
-    "loss_rate": 0.12,
+    "loss_rate": 0.0,
     "price_source": "fallback"
   },
   "schedule": null,
@@ -19,50 +19,36 @@
       "field_id": "YL-A12",
       "crop": "青江菜",
       "decision": "NORMAL",
-      "confidence": 0.9,
-      "risk_score": 15,
-      "maturity": 0.816,
+      "confidence": 0.8,
+      "risk_score": 0,
+      "maturity": 0.821,
       "flood_potential_level": 4,
       "harvest_deadline": null,
       "dilemma": null,
       "partial_pct": null,
       "immature": false,
       "ev": null,
-      "risk_breakdown": {
-        "P_arrival": 0.12,
-        "I_norm": 1,
-        "W_terrain": 1.3,
-        "V_crop": 0.95,
-        "R_raw": 15
-      },
+      "risk_breakdown": {},
       "reasons": [
-        "雲林暴風圈侵襲機率 12%，預估 24hr 雨量 552.5mm，滅田風險 15/100",
         "淹水潛勢等級 4（低窪），泡水 48hr 起爛根，需提前搶收",
-        "⚠ 不可上市：距安全採收期還差 2 天（陶斯松）"
+        "⚠ 不可上市：距安全採收期還差 1 天（陶斯松）"
       ]
     },
     {
       "field_id": "YL-C03",
       "crop": "芥藍菜",
       "decision": "NORMAL",
-      "confidence": 0.9,
-      "risk_score": 11,
-      "maturity": 1.339,
+      "confidence": 0.8,
+      "risk_score": 0,
+      "maturity": 1.342,
       "flood_potential_level": 3,
       "harvest_deadline": null,
       "dilemma": null,
       "partial_pct": null,
       "immature": false,
       "ev": null,
-      "risk_breakdown": {
-        "P_arrival": 0.12,
-        "I_norm": 1,
-        "W_terrain": 1.19,
-        "V_crop": 0.8,
-        "R_raw": 11
-      },
+      "risk_breakdown": {},
       "reasons": [
-        "雲林暴風圈侵襲機率 12%，預估 24hr 雨量 552.5mm，滅田風險 11/100",
         "淹水潛勢等級 3（偏低），泡水 48hr 起爛根，需提前搶收",
         "中長期作物（60–80 天），颱風曝險期最長",
         "PHI 已過，可合法上市"
@@ -72,24 +58,17 @@
       "field_id": "YL-B07",
       "crop": "小白菜",
       "decision": "NORMAL",
-      "confidence": 0.9,
-      "risk_score": 14,
-      "maturity": 1.198,
+      "confidence": 0.8,
+      "risk_score": 0,
+      "maturity": 1.204,
       "flood_potential_level": 3,
       "harvest_deadline": null,
       "dilemma": null,
       "partial_pct": null,
       "immature": false,
       "ev": null,
-      "risk_breakdown": {
-        "P_arrival": 0.12,
-        "I_norm": 1,
-        "W_terrain": 1.2,
-        "V_crop": 0.95,
-        "R_raw": 14
-      },
+      "risk_breakdown": {},
       "reasons": [
-        "雲林暴風圈侵襲機率 12%，預估 24hr 雨量 552.5mm，滅田風險 14/100",
         "淹水潛勢等級 3（偏低），泡水 48hr 起爛根，需提前搶收",
         "PHI 已過，可合法上市"
       ]
@@ -98,49 +77,35 @@
       "field_id": "YL-D21",
       "crop": "菠菜",
       "decision": "NORMAL",
-      "confidence": 0.9,
-      "risk_score": 11,
-      "maturity": 0.472,
+      "confidence": 0.8,
+      "risk_score": 0,
+      "maturity": 0.476,
       "flood_potential_level": 2,
       "harvest_deadline": null,
       "dilemma": null,
       "partial_pct": null,
       "immature": true,
       "ev": null,
-      "risk_breakdown": {
-        "P_arrival": 0.12,
-        "I_norm": 1,
-        "W_terrain": 1.08,
-        "V_crop": 0.85,
-        "R_raw": 11
-      },
+      "risk_breakdown": {},
       "reasons": [
-        "雲林暴風圈侵襲機率 12%，預估 24hr 雨量 552.5mm，滅田風險 11/100",
-        "⚠ 不可上市：距安全採收期還差 2 天（免賴得）"
+        "⚠ 不可上市：距安全採收期還差 1 天（免賴得）"
       ]
     },
     {
       "field_id": "YL-E09",
       "crop": "青江菜",
       "decision": "NORMAL",
-      "confidence": 0.9,
-      "risk_score": 11,
-      "maturity": 0.665,
+      "confidence": 0.8,
+      "risk_score": 0,
+      "maturity": 0.669,
       "flood_potential_level": 1,
       "harvest_deadline": null,
       "dilemma": null,
       "partial_pct": null,
       "immature": true,
       "ev": null,
-      "risk_breakdown": {
-        "P_arrival": 0.12,
-        "I_norm": 1,
-        "W_terrain": 0.95,
-        "V_crop": 0.95,
-        "R_raw": 11
-      },
+      "risk_breakdown": {},
       "reasons": [
-        "雲林暴風圈侵襲機率 12%，預估 24hr 雨量 552.5mm，滅田風險 11/100",
         "PHI 已過，可合法上市"
       ]
     }
