@@ -41,7 +41,8 @@ DATASETS = {
     "path_potential":  "W-C0034-005",   # 颱風路徑潛勢預報
     "rainfall":        "O-A0002-001",   # 自動雨量站
     "temp_obs":        "O-A0001-001",   # 自動氣象站（含氣溫，供低溫/寒流事件）
-    "township_fcst":   "F-D0047-025",   # 雲林縣未來 3 天天氣預報
+    "township_fcst":   "F-D0047-025",   # 雲林縣未來 3 天天氣預報（逐 3 小時，較細）
+    "county_fcst":     "F-C0032-001",   # 全國各縣市今明 36 小時天氣預報（全國、輕量、穩定）
 }
 
 # 天氣事件累積檔（K線標記用）；僅逐日「向前累積」真實觀測，不臆造歷史。
@@ -458,6 +459,93 @@ def parse_township_forecast(recs, now, town_pref=("二崙", "西螺", "崙背", 
     return {"town": nm(pick), "slots": out[:16]}
 
 
+def _period_label(start_dt, now):
+    """依起始時間相對今天，給友善標籤：今日白天/今晚/明日白天/明晚…"""
+    if not start_dt:
+        return ""
+    day_diff = (start_dt.date() - now.date()).days
+    daytime = 6 <= start_dt.hour < 18
+    day = {0: "今", 1: "明", 2: "後"}.get(day_diff, start_dt.strftime("%m/%d"))
+    if day_diff < 0:
+        day = "今"
+    return (day + "日白天") if daytime else (day + "晚")
+
+
+def parse_nationwide_36h(recs, now):
+    """從 F-C0032-001（全國各縣市今明 36 小時）整理每縣市的 3 時段預報。
+    回傳 {'雲林縣': {'periods':[{'label','start','end','pop','minT','maxT','wx'}]}, ...}。
+    欄位大小寫/中英文皆容錯（v1 lower / v2 Pascal）。"""
+    if not recs:
+        return {}
+
+    def g(o, *keys):
+        for k in keys:
+            if isinstance(o, dict) and k in o and o[k] not in (None, ""):
+                return o[k]
+        return None
+
+    locs = g(recs, "location", "Location")
+    if not isinstance(locs, list):
+        # 有些版本包一層 Locations
+        wrap = g(recs, "locations", "Locations")
+        if isinstance(wrap, list) and wrap:
+            locs = g(wrap[0], "location", "Location")
+    if not isinstance(locs, list):
+        return {}
+
+    out = {}
+    for loc in locs:
+        name = str(g(loc, "locationName", "LocationName") or "").strip()
+        if not name:
+            continue
+        name = name.replace("臺", "台")
+        elems = g(loc, "weatherElement", "WeatherElement") or []
+        # 收集各元素逐時段 → 以 startTime 為鍵
+        periods = {}
+        for e in elems:
+            en = str(g(e, "elementName", "ElementName") or "")
+            for tm in (g(e, "time", "Time") or []):
+                st = str(g(tm, "startTime", "StartTime", "dataTime", "DataTime") or "")
+                et = str(g(tm, "endTime", "EndTime") or "")
+                if not st:
+                    continue
+                par = g(tm, "parameter", "Parameter") or {}
+                ev = g(tm, "elementValue", "ElementValue")
+                if isinstance(ev, list) and ev:
+                    par = ev[0] if not par else par
+                pname = g(par, "parameterName", "ParameterName", "value", "Value")
+                pval = g(par, "parameterValue", "ParameterValue")
+                rec = periods.setdefault(st, {"start": st, "end": et})
+                if en in ("Wx",):
+                    rec["wx"] = str(pname or "")
+                elif en in ("PoP", "PoP12h"):
+                    try:
+                        rec["pop"] = int(float(pname))
+                    except (TypeError, ValueError):
+                        pass
+                elif en == "MinT":
+                    try:
+                        rec["minT"] = int(round(float(pname)))
+                    except (TypeError, ValueError):
+                        pass
+                elif en == "MaxT":
+                    try:
+                        rec["maxT"] = int(round(float(pname)))
+                    except (TypeError, ValueError):
+                        pass
+        rows = []
+        for st in sorted(periods.keys()):
+            dt = _parse_cwa_time(st)
+            if dt and dt < now - timedelta(hours=12):
+                continue
+            r = periods[st]
+            r["label"] = _period_label(dt, now)
+            rows.append(r)
+        if rows:
+            out[name] = {"periods": rows[:4]}
+    return out
+
+
 def main():
     now = datetime.now(TZ)
     key_set = bool(os.environ.get("CWA_API_KEY"))
@@ -467,14 +555,14 @@ def main():
     path = cwa_get(DATASETS["path_potential"])
     rain_recs = cwa_get(DATASETS["rainfall"], CountyName=COUNTY)
     temp_recs = cwa_get(DATASETS["temp_obs"], CountyName=COUNTY)
-    fcst_recs = cwa_get(DATASETS["township_fcst"])           # 雲林逐 3 小時預報（降雨機率/溫度/天氣現象）
+    county_recs = cwa_get(DATASETS["county_fcst"])           # 全國各縣市今明 36 小時（全國天氣預報）
 
-    # 未來天氣預報（供商人「擺攤指數/何時下雨」、農夫「農事時段建議」）
-    forecast = parse_township_forecast(fcst_recs, now)
+    # 未來天氣預報（全國各縣市；供商人「擺攤指數/何時下雨」、農夫「農事時段建議」）
+    counties = parse_nationwide_36h(county_recs, now)
     try:
         with open("weather_forecast.json", "w", encoding="utf-8") as f:
-            json.dump({"updated": now.strftime("%Y-%m-%d %H:%M"), "source": "CWA F-D0047-025",
-                       **forecast}, f, ensure_ascii=False, indent=2)
+            json.dump({"updated": now.strftime("%Y-%m-%d %H:%M"), "source": "CWA F-C0032-001",
+                       "counties": counties}, f, ensure_ascii=False, indent=2)
     except Exception as e:
         print(f"[fetch_cwa] 預報寫出失敗：{e}", file=sys.stderr)
 
@@ -488,7 +576,8 @@ def main():
                        "O-A0002-001_rain": _struct(rain_recs),
                        "O-A0002-001_rain_yunlin_sample": _first_local_station(rain_recs),
                        "O-A0001-001_temp_yunlin_sample": _first_local_station(temp_recs),
-                       "F-D0047-025_fcst": _struct(fcst_recs)},
+                       "F-C0032-001_fcst": _struct(county_recs),
+                       "F-C0032-001_counties_parsed": sorted(counties.keys())},
                       f, ensure_ascii=False, indent=2)
     except Exception as e:
         print(f"[fetch_cwa] debug dump 失敗：{e}", file=sys.stderr)
