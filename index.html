@@ -495,7 +495,8 @@
         <div><label>預計種植日</label><input type="date" id="paDate"></div>
       </div>
       <div id="paResult"></div>
-      <p class="hintline">依「田面積 × 可種比例 × 季節」估各作物採收量，再用近兩年同期行情推估價格與收入，依<b>預估收入</b>排序。⚠ 產量係數為估算值，實際依品種/管理/天候而異。</p>
+      <p class="hintline">依「田面積 × 可種比例 × 季節」估各作物採收量，再用近兩年同期行情推估價格與收入，依<b>預估收入</b>排序。
+        產量係數與生育日數已參考農業部農情調查／各區農改場資料校準，仍屬<b>估算值</b>，實際依品種/管理/天候而異。</p>
     </div>
   </div>
 
@@ -570,6 +571,9 @@
           <div><label>最後施藥日（可空）</label><input type="date" id="ffSpray"></div>
           <div><label>農藥安全期天數(PHI)</label><input type="number" id="ffPhi" min="0" placeholder="例：7"></div>
         </div>
+        <p class="hintline">⚠ PHI 是「該支農藥×該作物」的法規登記值（同種菜不同藥天數不同），<b>不可臆填</b>。
+          查你實際用的藥：<a href="https://m.moa.gov.tw/Pesticide/Index" target="_blank" rel="noopener">田邊好幫手</a>
+          ・<a href="https://pesticide.aphia.gov.tw/information/Query/Pesticide" target="_blank" rel="noopener">農藥資訊服務網</a></p>
         <div class="frow">
           <div><label>田區面積（推薦播種/產量試算用）</label>
             <div class="frow"><input type="number" id="ffAreaVal" min="0" step="0.1" placeholder="例：50" inputmode="decimal">
@@ -583,7 +587,7 @@
           <p class="hintline">填了座標可到 <a href="https://dmap.ncdr.nat.gov.tw/" target="_blank" rel="noopener">NCDR 災害潛勢地圖</a> 查你這點的淹水潛勢，回來設對應等級。</p></div>
         <button class="save" id="ffSave">儲存這塊田</button>
       </div>
-      <p class="hintline">田區存在你手機，隨時增刪、改地勢立即生效。⚠ PHI 請查農藥登記值，勿臆填。</p>
+      <p class="hintline">田區存在你手機，隨時增刪、改地勢立即生效。</p>
     </div>
 
     <div class="setcat">關於</div>
@@ -644,7 +648,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v3.0";
+const VERSION="v3.1";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -659,17 +663,19 @@ function addDaysISO(iso,n){const [Y,M,D]=iso.split("-").map(Number);const d=new 
 function daysBetween(a,b){return (Date.parse(b+"T00:00:00Z")-Date.parse(a+"T00:00:00Z"))/86400000;}
 
 /* ══════ 作物農藝參數 ══════ */
-const GROWTH={青江菜:[38,48],青江白菜:[38,48],小白菜:[25,38],芥藍菜:[70,70],菠菜:[50,50],空心菜:[30,40],蕹菜:[30,40],
-  地瓜葉:[35,45],莧菜:[30,40],茼蒿:[40,50],油菜:[35,45],"萵苣(A菜)":[40,50],芥菜:[55,65],甘藍:[70,90],包心白菜:[60,80]};
+/* 生育日數[夏,冬]（播種/定植→採收）；已依農業部農業知識入口網/各區農改場資料校準（估算，實際依品種/氣候而異） */
+const GROWTH={青江菜:[33,45],青江白菜:[33,45],小白菜:[25,35],芥藍菜:[50,62],菠菜:[38,45],空心菜:[20,32],蕹菜:[20,32],
+  地瓜葉:[35,45],莧菜:[35,45],茼蒿:[40,50],油菜:[32,42],"萵苣(A菜)":[30,42],芥菜:[55,65],甘藍:[70,90],包心白菜:[60,80]};
 const MAT_MIN={青江菜:.75,小白菜:.7,芥藍菜:.75,菠菜:.75,空心菜:.7,地瓜葉:.7,莧菜:.7,茼蒿:.72,油菜:.72,"萵苣(A菜)":.75,芥菜:.75};
 const V_CROP={青江菜:.95,小白菜:.95,芥藍菜:.8,菠菜:.85,空心菜:.7,地瓜葉:.65,莧菜:.85,茼蒿:.85,油菜:.85,"萵苣(A菜)":.9,芥菜:.8};
 const FLOOD_ADV={1:0,2:0,3:12,4:18,5:24};
 function isSummer(iso){const m=+iso.split("-")[1];return m>=5&&m<=10;}
 function growthDays(crop,plantISO){const g=GROWTH[crop]||[35,45];return isSummer(plantISO)?g[0]:g[1];}
 function cropList(){return Object.keys(GROWTH);}
-/* ── 推薦播種＋產量試算：每㎡單次採收概略產量(kg，估算值、可校準)＋季節重量調整 ── */
-const YIELD_M2={青江菜:2.5,青江白菜:2.5,小白菜:2.2,菠菜:2.0,芥藍菜:3.0,空心菜:2.8,蕹菜:2.8,油菜:2.2,
-  莧菜:2.2,茼蒿:1.8,"萵苣(A菜)":2.5,芥菜:3.2,地瓜葉:2.5,甘藍:5.0,包心白菜:5.0};
+/* ── 推薦播種＋產量試算：每㎡單次採收概略產量(kg)。有查到官方統計者已校準(菠菜/甘藍/包心白菜/
+   空心菜取農業部農情調查·農糧署年報之田間或平均單產÷面積推估)，其餘為量級估算值、實際依品種/管理/天候而異 ── */
+const YIELD_M2={青江菜:2.5,青江白菜:2.5,小白菜:2.2,菠菜:2.5,芥藍菜:3.0,空心菜:2.2,蕹菜:2.2,油菜:2.2,
+  莧菜:2.2,茼蒿:1.8,"萵苣(A菜)":2.5,芥菜:3.2,地瓜葉:2.5,甘藍:5.5,包心白菜:4.5};
 function yieldPerM2(c){return YIELD_M2[c]||(cropCat(c)==="蔬菜"?2.5:0);}
 function seasonYieldFactor(iso){return isSummer(iso)?0.9:1.1;}   // 夏長得快較輕、冬慢較結實重(概略)
 const AREA_UNIT={ping:{k:3.30579,label:"坪"},fen:{k:293.4,label:"分"},m2:{k:1,label:"㎡"}};
