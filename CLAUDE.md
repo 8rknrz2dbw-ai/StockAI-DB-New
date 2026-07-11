@@ -61,6 +61,7 @@ scripts/
                               作物名以 norm_crop() 收斂到母作物(鳳梨-金鑽→鳳梨)、量加權合併；同時把各品種
                               的「完整逐日序列」存到 variants[母作物]={品種:{iso:{avg..}}}供前端「點品種看它自己 K線」。
                               crop_map 為 identity。每日 series 存 avg/high(上價)/mid(中價,取 API「中價」量加權)/low(下價)/qty。
+                              index 另存 latest_var[市場][作物][品種]=最新價，供比價分頁「品種細部」跨市場排序。
                               各市場僅出實際有交易者(葉菜市場只有葉菜、大市場整排水果+品種)。
                               --probe <市場> 可 dump 原始欄位(prices_probe.json)。latest 取最近 avg>0。
   fetch_cwa.py                抓 CWA 颱風/路徑潛勢/侵襲機率/雨量/氣溫 → typhoon_status.json；
@@ -69,6 +70,10 @@ scripts/
                               另抓 F-C0032-001（全國各縣市今明36小時）→ weather_forecast.json
                               ={counties:{縣市:{periods:[{label,pop,minT,maxT,wx}]}}}，供商人擺攤指數/
                               農夫農事建議。parse_nationwide_36h 大小寫/中英文欄位容錯、縣市名「臺→台」。
+  fetch_yield.py              抓農業部「生產概況」(UnitId=113蔬菜/135果品，免金鑰) → yield_index.json
+                              ={national:{作物:kg/ha}, counties:{縣市:{作物:kg/ha}}}。取最新年度、排除彙總列
+                              (臺灣省/合計)、臺→台；欄名容錯(每公頃平均產量_公斤 有無後綴皆可)。前端 yieldInfo()
+                              以所在縣市優先(÷10000→kg/㎡)、退全國、再退內建估算(YIELD_ALIAS 對照概況作物名)。
   build_advisory.py           田區登記表 + 天氣 → 決策模型 → harvest_advisory.json（含 EV、schedule）。
                               註：前端 index.html 另有自帶的 client 版決策，這支為後端/通知用。
   notify.py                   挑急迫田 → LINE Messaging API / webhook 推播（去重；未設則 dry-run）

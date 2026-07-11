@@ -364,6 +364,7 @@
   .form input,.form select{width:100%;box-sizing:border-box;min-width:0;background:var(--panel2);border:1px solid var(--line);color:var(--paper);padding:0.6rem 0.7rem;border-radius:12px;font-size:1rem;}
   .form input[type=date]{-webkit-appearance:none;appearance:none;}
   .form .go{background:var(--leaf);color:var(--bg);border:0;border-radius:12px;padding:0.7rem;font-size:1.05rem;font-weight:800;}
+  .cmpform{flex-direction:row;gap:0.6rem;} .cmpform select{flex:1;}
   .fcresult{margin-top:0.9rem;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1rem;}
   .fcresult h3{margin:0 0 0.4rem;font-size:1.1rem;}
   .fcresult .band{font-size:2rem;font-weight:900;} .fcresult .band .u{font-size:0.75rem;color:var(--muted);font-weight:400;}
@@ -491,7 +492,10 @@
   <div class="view" id="view-compare">
     <p class="mkt-label">比全台各市場批發價（低→高，適合進貨）</p>
     <div class="catbar" id="cmpCat"></div>
-    <div class="form" style="padding:0.6rem 0.7rem"><select id="cmpCrop"></select></div>
+    <div class="form cmpform" style="padding:0.6rem 0.7rem">
+      <select id="cmpCrop"></select>
+      <select id="cmpVar" style="display:none"></select>
+    </div>
     <div id="cmpResult"></div>
   </div>
 
@@ -676,7 +680,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v3.2";
+const VERSION="v3.3";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -704,7 +708,21 @@ function cropList(){return Object.keys(GROWTH);}
    空心菜取農業部農情調查·農糧署年報之田間或平均單產÷面積推估)，其餘為量級估算值、實際依品種/管理/天候而異 ── */
 const YIELD_M2={青江菜:2.5,青江白菜:2.5,小白菜:2.2,菠菜:2.5,芥藍菜:3.0,空心菜:2.2,蕹菜:2.2,油菜:2.2,
   莧菜:2.2,茼蒿:1.8,"萵苣(A菜)":2.5,芥菜:3.2,地瓜葉:2.5,甘藍:5.5,包心白菜:4.5};
-function yieldPerM2(c){return YIELD_M2[c]||(cropCat(c)==="蔬菜"?2.5:0);}
+/* App 作物名 → 農業部「生產概況」作物名候選（供 yield_index.json 對照，逐縣市真實單產） */
+const YIELD_ALIAS={甘藍:["甘藍","高麗菜"],包心白菜:["結球白菜","包心白菜","大白菜"],菠菜:["菠菜"],
+  小白菜:["小白菜","不結球白菜"],青江菜:["青江白菜","青梗白菜","青江菜"],青江白菜:["青江白菜","青江菜"],
+  芥藍菜:["芥藍","芥藍菜"],蕹菜:["蕹菜","空心菜"],空心菜:["蕹菜","空心菜"],茼蒿:["茼蒿"],莧菜:["莧菜"],
+  芥菜:["芥菜"],油菜:["油菜"],"萵苣(A菜)":["萵苣","不結球萵苣","萵苣菜"],地瓜葉:["甘藷葉","地瓜葉"],
+  芒果:["芒果"],鳳梨:["鳳梨"],香蕉:["香蕉"],西瓜:["西瓜"],木瓜:["木瓜"]};
+/* 逐縣市真實單產(kg/㎡)：所在縣市優先 → 全國平均 → 內建估算值。回 {v, real} */
+function yieldInfo(c){
+  const cands=YIELD_ALIAS[c]||[c];
+  if(YIELDDATA){const cty=(typeof activeCounty==="function")?activeCounty():"雲林縣";
+    const inC=(YIELDDATA.counties||{})[cty]||{};const nat=YIELDDATA.national||{};
+    for(const cand of cands){if(inC[cand]>0)return {v:+(inC[cand]/10000).toFixed(2),real:true,scope:cty};}
+    for(const cand of cands){if(nat[cand]>0)return {v:+(nat[cand]/10000).toFixed(2),real:true,scope:"全國"};}}
+  return {v:(YIELD_M2[c]||(cropCat(c)==="蔬菜"?2.5:0)),real:false,scope:""};}
+function yieldPerM2(c){return yieldInfo(c).v;}
 function seasonYieldFactor(iso){return isSummer(iso)?0.9:1.1;}   // 夏長得快較輕、冬慢較結實重(概略)
 const AREA_UNIT={ping:{k:3.30579,label:"坪"},fen:{k:293.4,label:"分"},m2:{k:1,label:"㎡"}};
 function estYieldKg(crop,areaM2,usablePct,plantISO){const u=(+areaM2||0)*((+usablePct||80)/100);
@@ -741,7 +759,7 @@ function seedFields(){return [
 function getFields(){let f=S.fields;if(!f){f=seedFields();S.setFields(f);}return f;}
 
 /* ══════ 行情資料 ══════ */
-let INDEX=null,MDATA={},MVAR={},MARKET="",CUR=null,WEATHER=null,FORECAST=null;
+let INDEX=null,MDATA={},MVAR={},MARKET="",CUR=null,WEATHER=null,FORECAST=null,YIELDDATA=null;
 function marketNames(){return ((INDEX&&INDEX.markets)||[]).map(m=>m.name);}
 function cropMap(){return (INDEX&&INDEX.crop_map)||{};}
 /* 分類：蔬菜/水果（後端 prices_index.categories 提供；缺則用內建水果清單判斷） */
@@ -765,6 +783,10 @@ async function loadWeather(){
 async function loadForecast(){
   try{const r=await fetch(`${resolveGhBase()}/weather_forecast.json`,{cache:"no-store"});if(!r.ok)throw 0;
     const j=await r.json();return (j&&j.counties&&typeof j.counties==="object")?j:{counties:{}};}catch(e){return {counties:{}};}}
+async function loadYield(){
+  // 各縣市每公頃單產（農業部生產概況，後端排程產出）；抓不到就 null，前端退回內建估算值
+  try{const r=await fetch(`${resolveGhBase()}/yield_index.json`,{cache:"no-store"});if(!r.ok)throw 0;
+    const j=await r.json();return (j&&(j.counties||j.national))?j:null;}catch(e){return null;}}
 async function loadEvents(){
   // 真實天氣事件（颱風/大雨/低溫），由後端 fetch_cwa.py 逐日累積；抓不到就空、K線只顯示節慶/爆量
   try{const r=await fetch(`${resolveGhBase()}/weather_events.json`,{cache:"no-store"});if(!r.ok)throw 0;
@@ -1500,8 +1522,8 @@ function renderPlantAdvisor(){
   const rows=[];
   for(const crop of cropList()){const T=growthDays(crop,plant);const harvestISO=addDaysISO(plant,T);
     const pp=predictPrice(crop,harvestISO);if(!pp)continue;   // 無足夠行情資料的作物自動略過
-    const yieldKg=estYieldKg(crop,area_m2,usable,plant);const net=pp.med*0.94;
-    rows.push({crop,harvestISO,T,pp,yieldKg,revenue:yieldKg*net});}
+    const yieldKg=estYieldKg(crop,area_m2,usable,plant);const net=pp.med*0.94;const yi=yieldInfo(crop);
+    rows.push({crop,harvestISO,T,pp,yieldKg,revenue:yieldKg*net,yreal:yi.real,yscope:yi.scope});}
   if(!rows.length){box.innerHTML=`<div class="empty">此市場葉菜行情資料不足，暫無法推薦。可在右上 ⚙️ 換市場。</div>`;return;}
   rows.sort((a,b)=>b.revenue-a.revenue);
   const usable_m2=area_m2*(usable/100);
@@ -1513,7 +1535,7 @@ function renderPlantAdvisor(){
       <div class="pa-grid">
         <div><span class="pa-k">採收約</span><b>${r.harvestISO.slice(5)}</b><span class="pa-s">生育 ${r.T} 天</span></div>
         <div><span class="pa-k">預估價</span><b>${r.pp.med.toFixed(0)}</b><span class="pa-s">元/kg</span></div>
-        <div><span class="pa-k">預估採收量</span><b>${fmtKg(r.yieldKg)}</b></div>
+        <div><span class="pa-k">預估採收量</span><b>${fmtKg(r.yieldKg)}</b><span class="pa-s">${r.yreal?`📊 ${r.yscope}實測`:"估算"}</span></div>
         <div><span class="pa-k">預估收入</span><b class="pa-rev">${fmtMoney(r.revenue)}</b></div>
       </div></div>`;}).join("");
 }
@@ -1695,7 +1717,7 @@ function switchTab(m){
     if(CUR&&cropCat(CUR))CMPCAT=cropCat(CUR);          // #3 沿用剛在行情看板看的品項
     renderCmpCat();populateCompareCrops();
     if(CUR){const sel=document.getElementById("cmpCrop");if([...sel.options].some(o=>o.value===CUR))sel.value=CUR;}
-    renderCompare();
+    populateCmpVar();renderCompare();
   }
 }
 let CMPCAT="蔬菜";
@@ -1707,30 +1729,50 @@ function renderCmpCat(){const bar=document.getElementById("cmpCat");if(!bar)retu
 function populateCompareCrops(){const sel=document.getElementById("cmpCrop");if(!sel)return;
   const items=Object.keys(cropMap()).filter(c=>cropCat(c)===CMPCAT).sort();const cur=sel.value;
   sel.innerHTML=items.map(c=>`<option value="${c}">${c}</option>`).join("");
-  if(cur&&items.includes(cur))sel.value=cur;}
+  if(cur&&items.includes(cur))sel.value=cur;
+  populateCmpVar();}
+/* 該作物在各市場出現過的品種（union，來自 index.latest_var）；供比價「品種細部」 */
+function cmpVarieties(crop){const w=cropMap()[crop];const lv=(INDEX&&INDEX.latest_var)||{};const set=new Set();
+  for(const mk of marketNames()){const m=lv[mk];if(m&&m[w])Object.keys(m[w]).forEach(v=>set.add(v));}
+  return [...set].sort();}
+function populateCmpVar(){const sel=document.getElementById("cmpVar");if(!sel)return;
+  const crop=document.getElementById("cmpCrop").value;const vs=cmpVarieties(crop);const cur=sel.value;
+  if(!vs.length){sel.style.display="none";sel.innerHTML="";return;}
+  sel.style.display="";
+  sel.innerHTML=`<option value="">🍴 全部綜合</option>`+vs.map(v=>`<option value="${v}">${v}</option>`).join("");
+  sel.value=(cur&&vs.includes(cur))?cur:"";}
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchTab(t.dataset.t)));
 
 function renderCompare(){
   const crop=document.getElementById("cmpCrop").value;const box=document.getElementById("cmpResult");
-  const w=cropMap()[crop];const latest=(INDEX&&INDEX.latest)||{};const rows=[];
-  for(const mk of marketNames()){const lm=latest[mk];if(lm&&lm[w]&&lm[w].avg>0)rows.push({mk,avg:lm[w].avg,date:lm[w].date||""});}
-  if(!rows.length){box.innerHTML='<div class="empty">此品項目前各市場無行情資料。</div>';return;}
+  const vsel=document.getElementById("cmpVar");const variety=(vsel&&vsel.style.display!=="none")?vsel.value:"";
+  const w=cropMap()[crop];const latest=(INDEX&&INDEX.latest)||{};const lv=(INDEX&&INDEX.latest_var)||{};const rows=[];
+  for(const mk of marketNames()){
+    let cell=null;
+    if(variety){const m=lv[mk];cell=m&&m[w]?m[w][variety]:null;}   // 指定品種
+    else{const lm=latest[mk];cell=lm?lm[w]:null;}                 // 全部綜合(母作物)
+    if(cell&&cell.avg>0)rows.push({mk,avg:cell.avg,date:cell.date||""});
+  }
+  const vlabel=variety?`<span class="cmpvtag">${variety}</span>`:"";
+  if(!rows.length){box.innerHTML=`<div class="empty">此品項${variety?"（"+variety+"）":""}目前各市場無行情資料。${variety?"可改回「全部綜合」。":""}</div>`;return;}
   rows.sort((a,b)=>a.avg-b.avg);
-  box.innerHTML=rows.map((r,i)=>`<button class="cmprow ${i===0?'cheap':''}" data-mk="${r.mk}">
+  box.innerHTML=(variety?`<p class="mkt-label">正在比 <b>${crop}·${variety}</b> 各市場價（低→高）</p>`:"")+
+    rows.map((r,i)=>`<button class="cmprow ${i===0?'cheap':''}" data-mk="${r.mk}">
     <span class="rk">${i+1}</span><span class="mk">${r.mk}<small>${r.date}</small></span>
     <span class="pv mono">${pxU(r.avg).toFixed(1)}</span><span class="pu">${unitU()}</span>
     ${i===0?'<span class="best">最便宜</span>':''}<span class="chev">›</span></button>`).join("");
-  box.querySelectorAll(".cmprow").forEach(el=>el.onclick=()=>openCompareRow(el.dataset.mk,crop));   // #2 點進去看該市場 K線
+  box.querySelectorAll(".cmprow").forEach(el=>el.onclick=()=>openCompareRow(el.dataset.mk,crop,variety));   // 點進去看該市場 K線(帶品種)
 }
-/* #2 從比價點某市場 → 切到行情看板、載入該市場、開該作物 K線 */
-async function openCompareRow(mk,crop){
+/* #2 從比價點某市場 → 切到行情看板、載入該市場、開該作物(可帶品種) K線 */
+async function openCompareRow(mk,crop,variety){
   if(!mk||!crop)return;
   MARKET=mk;S.market=mk;CUR=crop;
   switchTab("market");
   await loadMarket(mk);
-  openDetail(crop,null);
+  openDetail(crop,variety||null);
 }
-document.getElementById("cmpCrop").addEventListener("change",renderCompare);
+document.getElementById("cmpCrop").addEventListener("change",()=>{populateCmpVar();renderCompare();});
+document.getElementById("cmpVar").addEventListener("change",renderCompare);
 
 function applyRole(){
   const r=S.role;
@@ -1784,7 +1826,7 @@ document.querySelectorAll("#onboard .oncard").forEach(b=>b.addEventListener("cli
   await loadMarket(MARKET);
   WEVENTS=await loadEvents();
   renderBoard();   // 預設進看板清單；點一項才進詳細頁（K線+逐日明細）
-  WEATHER=await loadWeather();FORECAST=await loadForecast();renderHarvest();renderBoard();
+  WEATHER=await loadWeather();FORECAST=await loadForecast();YIELDDATA=await loadYield();renderHarvest();renderBoard();
   // 採收預判作物下拉
   const fc=document.getElementById("fcCrop");cropList().forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;fc.appendChild(o);});
   document.getElementById("fcDate").value=todayISO();

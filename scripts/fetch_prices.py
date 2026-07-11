@@ -194,7 +194,7 @@ def main():
     start = now - timedelta(days=args.days)
 
     os.makedirs("prices", exist_ok=True)
-    index_markets, latest, categories, total = [], {}, {}, 0
+    index_markets, latest, latest_var, categories, total = [], {}, {}, {}, 0
     for mk in MARKETS:
         recs = fetch_market_all(mk, start, now)
         # 母作物 → 日 → 同日多品種明細；用種類代碼自動分類、跳過花卉/休市/0 元
@@ -254,6 +254,16 @@ def main():
                        "data": mdata, "variants": variants}, f, ensure_ascii=False)
         index_markets.append({"name": mk, "file": fname})
         latest[mk] = {c: _latest_valid(s) for c, s in mdata.items()}
+        # 各品種最新價（供跨市場比價「品種細部」）：{作物:{品種:latest}}
+        if variants:
+            lv = {}
+            for crop, vv in variants.items():
+                d = {lab: _latest_valid(s) for lab, s in vv.items()}
+                d = {lab: v for lab, v in d.items() if v}
+                if d:
+                    lv[crop] = d
+            if lv:
+                latest_var[mk] = lv
         categories.update(cat)
         total += sum(len(s) for s in mdata.values())
         print(f"[fetch_prices] {mk}：{len(mdata)} 種、{sum(len(s) for s in mdata.values())} 筆 → {fname}")
@@ -264,7 +274,8 @@ def main():
              "crop_map": crop_map,
              "categories": categories,   # {作物: 蔬菜|水果}（種類代碼自動分類）
              "markets": index_markets,
-             "latest": latest}
+             "latest": latest,
+             "latest_var": latest_var}
     with open("prices_index.json", "w", encoding="utf-8") as f:
         json.dump(index, f, ensure_ascii=False)
 
