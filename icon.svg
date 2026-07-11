@@ -1,38 +1,52 @@
 <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#8fd14f"/><stop offset="1" stop-color="#3f8f3a"/>
+    <linearGradient id="blade" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a7dc63"/><stop offset="1" stop-color="#3f8f3a"/>
     </linearGradient>
-    <linearGradient id="leaf2" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#a7dc63"/><stop offset="1" stop-color="#5aa83f"/>
+    <linearGradient id="leaf" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#5aa83f"/><stop offset="1" stop-color="#9ed85a"/>
     </linearGradient>
-    <linearGradient id="field" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#4f9a3e"/><stop offset="1" stop-color="#2b6b30"/>
-    </linearGradient>
+    <clipPath id="ring"><circle cx="256" cy="258" r="176"/></clipPath>
   </defs>
-  <rect width="512" height="512" rx="116" fill="#ffffff"/>
-  <!-- ring -->
-  <circle cx="256" cy="256" r="188" fill="none" stroke="#2f7a3c" stroke-width="15"/>
-  <!-- radar reticle top -->
-  <g stroke="#aab8ac" stroke-width="8" stroke-linecap="round" fill="none">
-    <path d="M150 118 A168 168 0 0 1 362 118"/>
-    <line x1="256" y1="60" x2="256" y2="104"/>
-    <line x1="150" y1="150" x2="178" y2="178"/>
-    <line x1="362" y1="150" x2="334" y2="178"/>
+  <rect x="6" y="6" width="500" height="500" rx="118" fill="#ffffff" stroke="#e7e7e7" stroke-width="3"/>
+
+  <!-- ===== inside the scope (clipped to circle) ===== -->
+  <g clip-path="url(#ring)">
+    <!-- fields: lower half, perspective plots -->
+    <path d="M60 300 Q256 258 452 300 L452 452 L60 452 Z" fill="#2e6e35"/>
+    <!-- right half lighter (split at the stem) -->
+    <path d="M256 279 Q360 284 452 300 L452 452 L256 452 Z" fill="#6cbf46"/>
+    <!-- furrows radiating from the sprout base + curved bands = plot grid -->
+    <g stroke="#f2f7ec" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.95">
+      <path d="M256 280 L96 452"/>
+      <path d="M256 280 L176 452"/>
+      <path d="M256 280 L256 452"/>
+      <path d="M256 280 L340 452"/>
+      <path d="M256 280 L420 452"/>
+      <path d="M104 344 Q256 312 408 344"/>
+      <path d="M84 398 Q256 358 428 398"/>
+    </g>
+    <!-- radar range arcs (upper), light gray-green -->
+    <g stroke="#b9c6ba" stroke-width="9" fill="none" stroke-linecap="round" opacity="0.9">
+      <path d="M150 214 A118 118 0 0 1 362 214"/>
+      <path d="M186 180 A80 80 0 0 1 326 180"/>
+    </g>
   </g>
-  <!-- field globe (perspective furrows) -->
-  <g stroke="url(#field)" stroke-width="11" fill="none" stroke-linecap="round">
-    <path d="M118 342 Q256 300 396 342"/>
-    <path d="M106 378 Q256 328 406 378"/>
-    <path d="M120 414 Q256 366 392 414"/>
-    <path d="M256 330 Q214 380 178 428"/>
-    <path d="M256 330 Q298 380 334 428"/>
-    <path d="M256 330 L256 430"/>
+
+  <!-- ===== radar ring with cardinal notches ===== -->
+  <circle cx="256" cy="258" r="176" fill="none" stroke="#2e6e39" stroke-width="17"/>
+  <g stroke="#2e6e39" stroke-width="17" stroke-linecap="butt">
+    <line x1="256" y1="74" x2="256" y2="104"/>
+    <line x1="72" y1="258" x2="102" y2="258"/>
+    <line x1="410" y1="258" x2="440" y2="258"/>
   </g>
-  <!-- sprout stem -->
-  <path d="M256 344 C256 300 256 262 258 232" stroke="#3f8f3a" stroke-width="15" fill="none" stroke-linecap="round"/>
-  <!-- left leaf (smaller) -->
-  <path d="M252 274 C220 272 190 250 182 214 C222 208 254 228 260 266 Z" fill="url(#leaf2)" stroke="#2f5a26" stroke-width="4"/>
-  <!-- right leaf (big, curving up-right) -->
-  <path d="M258 250 C280 214 322 194 360 198 C356 244 322 282 272 288 C266 276 260 262 258 250 Z" fill="url(#leaf)" stroke="#2f5a26" stroke-width="4"/>
+
+  <!-- ===== big sweeping blade (top-right → center) ===== -->
+  <path d="M372 150 C300 168 258 214 250 288 C300 276 344 244 366 196 C374 180 374 164 372 150 Z"
+        fill="url(#blade)" stroke="#2f5a26" stroke-width="4"/>
+  <!-- ===== sprout: two bright leaves at center ===== -->
+  <path d="M246 286 C206 282 178 256 172 218 C214 214 246 238 252 278 Z" fill="url(#leaf)" stroke="#2f5a26" stroke-width="4"/>
+  <path d="M252 278 C258 238 286 212 326 214 C322 254 292 282 250 288 Z" fill="url(#leaf)" stroke="#2f5a26" stroke-width="4"/>
+  <!-- stem into the field -->
+  <path d="M250 288 C252 316 254 300 256 330" stroke="#3f8f3a" stroke-width="13" fill="none" stroke-linecap="round"/>
 </svg>
