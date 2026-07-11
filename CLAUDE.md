@@ -107,9 +107,13 @@ push 前都有 fetch+rebase 重試，避免彼此/部署競爭 main 造成非快
 
 ## ⚠ 上線前務必
 
-- **PHI 逐藥×逐作物實查**：`data/fields.example.json` 的 `phi_days` 為量級示意，
-  真實值須由農業部「植物保護資訊系統」/ 防檢署「農藥資訊服務網」查登記值寫入。**PHI 是法規硬限制，不可臆填。**
-- **菠菜等作物生育日數**與 `fetch_cwa.py` 各 `parse_*` 的 CWA 實際 JSON 欄位路徑（標了 TODO），須以真實 API 回應校準。
+- **PHI 逐藥×逐作物實查**：`data/fields.example.json` 的 `phi_days` 為量級示意，PHI 是「該藥×該作物」
+  的登記值（同種菜不同藥天數不同），**不可臆填、法規硬限制**。前端田區表單已改為讓農友自填＋附官方查詢
+  連結（田邊好幫手 m.moa.gov.tw/Pesticide、防檢署 pesticide.aphia.gov.tw），不內建假 PHI 常數。
+- **生育日數/產量係數已校準**：`GROWTH`(index.html)／`GROWTH_DAYS`(build_advisory.py)／`YIELD_M2` 已依
+  農業部農業知識入口網·各區農改場·農情調查資料校準（snippet 來源、med 信心，gov 站 403 無法直讀原表，
+  仍屬估算）。要更精準可改由農情調查開放資料(每公頃單產×縣市)動態帶入。`fetch_cwa.py` 各 `parse_*`
+  的 CWA JSON 欄位路徑仍須以真實 API 回應校準。
 - **雲林測站站號別寫死**：以 `O-A0001-001` / `C-B0074-002` 回應過濾雲林縣站點取當前有效站號。
 - **作物批發名校準**：`fetch_prices.py` 的 `VEG_MAP`/`FRUIT_MAP` 批發名須與農業部「農產品交易行情」
   實際「作物名稱」相符。已知 `地瓜葉→甘藷葉` 全台回 0（名稱不符，前端不顯示），水果批發名
