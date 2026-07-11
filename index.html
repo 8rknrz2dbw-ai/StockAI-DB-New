@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
-<title>農商雷達</title>
+<title>精準務農</title>
 <link rel="icon" type="image/svg+xml" href="icon.svg" />
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
 <link rel="manifest" href="manifest.json" />
@@ -11,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="農商雷達" />
+<meta name="apple-mobile-web-app-title" content="精準務農" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <style>
   :root{ font-size:19px; }
@@ -649,7 +649,7 @@
       <button class="foldh" id="aboutFold" aria-expanded="false"><span>關於 App</span><span class="foldi" id="aboutFoldI">▸</span></button>
       <div class="foldbody" id="aboutBody" hidden>
       <div class="aboutcard">
-        <div class="alogo">農商雷達</div>
+        <div class="alogo">精準務農</div>
         <div class="atag">全台蔬果行情看板＋颱風搶收預判<br>價格採農業部公開行情、天氣採中央氣象署資料</div>
       </div>
       <div class="about">
@@ -692,7 +692,7 @@
 
 <div class="onboard" id="onboard">
   <div class="onbox">
-    <div class="onlogo">農商雷達</div>
+    <div class="onlogo">精準務農</div>
     <p class="onsub">先選你的身分，開始使用（之後可在右上 ⚙️ 更改）</p>
     <button class="oncard" data-r="farmer">
       <span class="onemoji">🧑‍🌾</span><span class="ontitle">蔬果農夫</span>
@@ -705,7 +705,11 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.0.2";
+const VERSION="v1.1.0";
+/* 單一身分 App：farmer＝精準務農（行情＋田區搶收＋採收預判）；merchant＝精準進貨（批發行情＋跨市場比價）。
+   同一份程式碼，改這兩個常數即可切換另一支 App；角色固定、不再讓使用者切換。 */
+const APP="farmer";
+const APP_NAME=APP==="merchant"?"精準進貨":"精準務農";
 function resolveGhBase(){const {origin,pathname,hostname}=location;
   if(hostname.endsWith("github.io")){const s=pathname.split("/").filter(Boolean);return origin+(s.length?"/"+s[0]:"");}return ".";}
 function doyOf(iso){const [Y,M,D]=iso.split("-").map(Number);return Math.floor((Date.UTC(Y,M-1,D)-Date.UTC(Y,0,0))/86400000);}
@@ -766,7 +770,7 @@ function predictPrice(crop,harvestISO){const series=sortedEntries(seriesFor(crop
 /* ══════ 設定/儲存 ══════ */
 const S={
   get fs(){return localStorage.getItem("vs_fs")||"l";}, set fs(v){localStorage.setItem("vs_fs",v);},
-  get role(){return localStorage.getItem("vs_role")||"farmer";}, set role(v){localStorage.setItem("vs_role",v);},
+  get role(){return APP;}, set role(v){/* 單一身分 App：角色固定為 APP，不可切換 */},
   get market(){return localStorage.getItem("vs_market")||"";}, set market(v){localStorage.setItem("vs_market",v);},
   get unit(){return localStorage.getItem("vs_unit")||"kg";}, set unit(v){localStorage.setItem("vs_unit",v);},
   get region(){return localStorage.getItem("vs_region")||"雲林縣";}, set region(v){localStorage.setItem("vs_region",v);},
@@ -1727,7 +1731,7 @@ let TOASTT=null;
 function toast(msg){const t=document.getElementById("toast");if(!t)return;t.textContent=msg;t.classList.add("on");
   clearTimeout(TOASTT);TOASTT=setTimeout(()=>t.classList.remove("on"),2200);}
 document.getElementById("aFeedback").addEventListener("click",()=>{
-  const subj=encodeURIComponent("農商雷達 App 意見回饋 ("+VERSION+")");
+  const subj=encodeURIComponent(APP_NAME+" App 意見回饋 ("+VERSION+")");
   const body=encodeURIComponent("我想回饋／回報：\n\n\n——\n(以下供除錯，可保留)\n版本："+VERSION+"\n裝置："+navigator.userAgent);
   location.href="mailto:xin7355@gmail.com?subject="+subj+"&body="+body;});
 function openFaq(){document.getElementById("faqModal").classList.add("on");}
@@ -1741,18 +1745,19 @@ document.getElementById("closeFaq").addEventListener("click",closeFaq);
 document.getElementById("faqModal").addEventListener("click",e=>{if(e.target.id==="faqModal")closeFaq();});
 document.getElementById("aShare").addEventListener("click",async()=>{
   const url=location.origin+location.pathname;
-  const data={title:"農商雷達",text:"農商雷達：全台蔬果行情看板＋颱風搶收預判，免費免帳號。",url};
+  const tagline=APP==="merchant"?"全台蔬果批發行情＋跨市場比價，找便宜的市場進貨，免費免帳號。":"全台蔬果行情看板＋颱風搶收預判，免費免帳號。";
+  const data={title:APP_NAME,text:APP_NAME+"："+tagline,url};
   try{if(navigator.share){await navigator.share(data);return;}}catch(e){if(e&&e.name==="AbortError")return;}
   try{await navigator.clipboard.writeText(url);toast("已複製 App 連結，貼給農友吧！");}
   catch(e){toast(url);}});
 /* 資料備份／換手機：匯出/匯入所有 vs_* 設定為單一 .json（安卓/iOS 皆可讀） */
-function collectBackup(){const o={_app:"農商雷達",_ver:VERSION,_ts:new Date().toISOString(),data:{}};
+function collectBackup(){const o={_app:APP_NAME,_ver:VERSION,_ts:new Date().toISOString(),data:{}};
   for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf("vs_")===0)o.data[k]=localStorage.getItem(k);}return o;}
 async function exportData(){const txt=JSON.stringify(collectBackup(),null,2);
-  const d=new Date();const fn=`農商雷達備份_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.json`;
+  const d=new Date();const fn=`${APP_NAME}備份_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.json`;
   const blob=new Blob([txt],{type:"application/json"});
   try{const file=new File([blob],fn,{type:"application/json"});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"農商雷達備份"});return;}}
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:APP_NAME+"備份"});return;}}
   catch(e){if(e&&e.name==="AbortError")return;}
   const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=fn;
   document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1200);
@@ -1765,7 +1770,7 @@ function importData(file){const r=new FileReader();
     if(!confirm(`要匯入這個備份嗎？\n將覆蓋目前的設定與田區（共 ${keys.length} 項）。`))return;
     keys.forEach(k=>{try{localStorage.setItem(k,String(data[k]));}catch(e){}});
     toast("匯入成功，重新載入中…");setTimeout(()=>location.reload(),700);
-  }catch(e){toast("讀取失敗，請確認是農商雷達的備份檔");}};
+  }catch(e){toast("讀取失敗，請確認是"+APP_NAME+"的備份檔");}};
   r.readAsText(file);}
 document.getElementById("dataExport").addEventListener("click",exportData);
 document.getElementById("dataImport").addEventListener("click",()=>document.getElementById("dataFile").click());
@@ -1884,11 +1889,26 @@ document.querySelectorAll("#onboard .oncard").forEach(b=>b.addEventListener("cli
 window.addEventListener("pageshow",()=>{const zc=document.querySelector(".wrap");
   if(zc){zc.style.transform="";zc.style.transition="";zc.style.transformOrigin="";}});
 
+/* 單一身分 App：固定角色、隱藏「角色」切換與另一身分才用得到的設定 */
+function singleRoleUI(){
+  document.documentElement.dataset.app=APP;
+  const hideBlk=el=>{const b=el&&el.closest(".setblk");if(b)b.style.display="none";};
+  const relabelCat=(from,to)=>document.querySelectorAll(".setcat").forEach(c=>{if(c.textContent.trim()===from)c.textContent=to;});
+  hideBlk(document.getElementById("roleRow"));         // 角色切換：兩支 App 都不需要
+  relabelCat("顯示與身分","顯示設定");
+  if(APP==="merchant"){
+    hideBlk(document.getElementById("fieldAddBtn"));    // 我的田區：農夫專屬
+    relabelCat("天氣與田區","天氣");
+    const rs=document.getElementById("regionSelect");
+    if(rs){const h=rs.parentElement.querySelector(".hintline");if(h)h.textContent="選你所在縣市，天氣預報／擺攤指數依此顯示。";}
+  }
+}
+
 /* ══════ 啟動 ══════ */
 (async function(){
   applyFont();
-  if(!S.onboarded)document.getElementById("onboard").classList.add("on");   // 第一次先選身分
-  const vl=document.getElementById("verLabel");if(vl)vl.textContent="農商雷達 "+VERSION;
+  singleRoleUI();   // 單一身分 App：固定角色、隱藏角色切換與不相關設定
+  const vl=document.getElementById("verLabel");if(vl)vl.textContent=APP_NAME+" "+VERSION;
   const av=document.getElementById("aboutVer");if(av)av.textContent="版本 "+VERSION;
   const {index,live}=await loadIndex();INDEX=index;
   document.getElementById("updated").textContent="更新："+(index.updated||"—");

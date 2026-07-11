@@ -1,7 +1,7 @@
 {
-  "name": "農商雷達",
-  "short_name": "農商雷達",
-  "description": "全台蔬果批發行情看板＋颱風搶收預判",
+  "name": "精準務農",
+  "short_name": "精準務農",
+  "description": "全台蔬果行情看板＋颱風搶收預判，給蔬果農的精準搶收決策工具",
   "lang": "zh-Hant",
   "dir": "ltr",
   "start_url": ".",
