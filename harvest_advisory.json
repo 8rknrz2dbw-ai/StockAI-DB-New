@@ -1,11 +1,11 @@
 {
-  "updated": "2026-07-12 23:39",
+  "updated": "2026-07-13 04:03",
   "typhoon": {
     "name": "巴威",
     "warning": "颱風遠離中",
     "invade_prob": 0.0,
     "eta_text": "追蹤中",
-    "rain_24h_mm": 4.5,
+    "rain_24h_mm": 1.0,
     "active": false
   },
   "region": {
@@ -21,7 +21,7 @@
       "decision": "NORMAL",
       "confidence": 0.8,
       "risk_score": 0,
-      "maturity": 0.848,
+      "maturity": 0.854,
       "flood_potential_level": 4,
       "harvest_deadline": null,
       "dilemma": null,
@@ -31,7 +31,7 @@
       "risk_breakdown": {},
       "reasons": [
         "淹水潛勢等級 4（低窪），泡水 48hr 起爛根，需提前搶收",
-        "⚠ 不可上市：距安全採收期還差 1 天（陶斯松）"
+        "PHI 已過，可合法上市"
       ]
     },
     {
@@ -40,7 +40,7 @@
       "decision": "NORMAL",
       "confidence": 0.8,
       "risk_score": 0,
-      "maturity": 1.36,
+      "maturity": 1.363,
       "flood_potential_level": 3,
       "harvest_deadline": null,
       "dilemma": null,
@@ -60,7 +60,7 @@
       "decision": "NORMAL",
       "confidence": 0.8,
       "risk_score": 0,
-      "maturity": 1.239,
+      "maturity": 1.247,
       "flood_potential_level": 3,
       "harvest_deadline": null,
       "dilemma": null,
@@ -79,7 +79,7 @@
       "decision": "NORMAL",
       "confidence": 0.8,
       "risk_score": 0,
-      "maturity": 0.5,
+      "maturity": 0.504,
       "flood_potential_level": 2,
       "harvest_deadline": null,
       "dilemma": null,
@@ -88,7 +88,7 @@
       "ev": null,
       "risk_breakdown": {},
       "reasons": [
-        "⚠ 不可上市：距安全採收期還差 1 天（免賴得）"
+        "PHI 已過，可合法上市"
       ]
     },
     {
@@ -97,7 +97,7 @@
       "decision": "NORMAL",
       "confidence": 0.8,
       "risk_score": 0,
-      "maturity": 0.697,
+      "maturity": 0.702,
       "flood_potential_level": 1,
       "harvest_deadline": null,
       "dilemma": null,
