@@ -618,11 +618,15 @@ def main():
             warning = "颱風接近中"
         else:
             warning = "追蹤中，對雲林暫無直接威脅"
+        # 追蹤顯示：跑很遠(>600km)或正在遠離就不再追蹤，免一直掛著；若之後又逼近(下次重算 departing=False
+        # 且距離縮短)自然恢復。有陸上警報一定顯示(threatening 已涵蓋)。
+        far = (typ["min_dist"] is None) or (typ["min_dist"] > 600)
+        tracking = (not threatening) and (not departing) and (not far)
         status = {
             "updated": now.strftime("%Y-%m-%d %H:%M"),
             "source": "CWA opendata (W-C0034-005 路徑潛勢)",
             "active": bool(threatening),
-            "tracking": (not threatening),
+            "tracking": bool(tracking),
             "departing": departing,
             "name": typ["name"],
             "warning": warning,
