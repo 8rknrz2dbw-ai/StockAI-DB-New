@@ -247,6 +247,8 @@
   .pickgrp{margin-top:0.6rem;} .pickh{font-size:0.85rem;color:var(--muted);font-weight:800;margin:0.35rem 0 0.3rem;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;}
   .pickh small{color:var(--leaf);font-weight:700;}
   /* 我的品項：整齊清單，每項一列(勾選＋品名)、有品種者品種各自獨立小標(不擠成一串) */
+  .picktype{margin:0.7rem 0 0.3rem;font-size:0.8rem;font-weight:800;color:var(--leaf);letter-spacing:0.5px;
+    padding-bottom:0.2rem;border-bottom:1px dashed var(--line);}
   .picklist{display:flex;flex-direction:column;gap:0.4rem;}
   .pickrow{display:flex;flex-direction:column;gap:0.3rem;background:var(--panel2);border:1px solid var(--line);
     border-radius:12px;padding:0.55rem 0.75rem;cursor:pointer;user-select:none;}
@@ -677,7 +679,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.8.0";
+const VERSION="v1.8.1";
 /* 精準務農（farmer）：行情看板＋採收預判＋田園巡查。單一身分 App、無角色切換。
    （原「精準進貨/商人」批發比價功能已自本 repo 移除，改由另一支獨立 App 交付。） */
 const APP="farmer";
@@ -1696,6 +1698,16 @@ const VEG_SUBTYPE=[
   [/蘿蔔|菜頭|甘藷|馬鈴薯|薯|芋|薑|蒜|蓮藕|藕|牛蒡|洋蔥|山藥|荸薺/,2],
   [/筍|菇|蕈|木耳/,3]];
 function subtypeRank(c){for(const [re,r] of VEG_SUBTYPE)if(re.test(c))return r;return 9;}
+/* 我的品項「類型」小標分組（第一版，可再細分/校正）。順序＝顯示順序，先比對到者為準；葉菜類放最後當其餘歸屬。 */
+const VEG_TYPES=[
+  ["甘藍花菜類",/甘藍|高麗|花椰|青花|白花|花菜|芥藍|抱子|娃娃菜/],
+  ["根莖類",/蘿蔔|菜頭|甘藷|甘薯|馬鈴薯|薯$|芋|蓮藕|藕|牛蒡|山藥|荸薺|菱角|防風/],
+  ["蔥蒜薑類",/蔥|蒜|韭|洋蔥|薑/],
+  ["瓜果菜類",/瓜|茄|椒|番茄|秋葵|玉米/],
+  ["豆菜類",/豆|莢|落花生/],
+  ["菇筍類",/筍|菇|蕈|木耳/],
+  ["葉菜類",/./]];
+function vegType(c){for(const [name,re] of VEG_TYPES)if(re.test(c))return name;return "其他";}
 function renderCropPick(){
   const box=document.getElementById("cropPick");if(!box)return;box.innerHTML="";
   const av=availableCrops(),watch=watchCrops();
@@ -1713,8 +1725,8 @@ function renderCropPick(){
     const grp=document.createElement("div");grp.className="pickgrp";
     grp.innerHTML=`<div class="pickh"><span>${emoji} ${cat} <small>(${nsel}/${items.length})</small></span>
       <span class="pickbtns"><button type="button" data-catall="1">全選</button><button type="button" data-catall="0">取消全選</button></span></div>`;
-    const grid=document.createElement("div");grid.className="picklist";
-    items.forEach(c=>{const vls=varietyLabels(c);const hasVar=vls.length>=2;
+    box.appendChild(grp);
+    const buildRow=c=>{const vls=varietyLabels(c);const hasVar=vls.length>=2;
       const cropOn=watch.includes(c);                                   // 母作物勾＝看全部品種
       const someVar=hasVar&&vls.some(v=>watch.includes(mkVar(c,v)));    // 只勾了部分品種
       const vtags=hasVar?`<div class="prvars">${vls.map(v=>{const von=cropOn||watch.includes(mkVar(c,v));
@@ -1722,10 +1734,15 @@ function renderCropPick(){
       const row=document.createElement("div");row.className="pickrow"+(cropOn||someVar?" on":"");
       row.innerHTML=`<label class="prtop"><input type="checkbox" data-kind="crop" data-crop="${c}"${cropOn?" checked":""}>`
         +`<span class="prnm">${c}</span>${hasVar?`<span class="prcount">${vls.length} 種</span>`:""}</label>${vtags}`;
-      grid.appendChild(row);
       if(hasVar&&!cropOn&&someVar){const cc=row.querySelector('input[data-kind="crop"]');if(cc)cc.indeterminate=true;}   // 部分品種→半勾
-    });
-    grp.appendChild(grid);box.appendChild(grp);
+      return row;};
+    // 蔬菜依「類型」分小標（葉菜類/甘藍花菜類/根莖類…）；水果一組
+    const order=cat==="蔬菜"?VEG_TYPES.map(t=>t[0]).concat("其他"):["水果"];
+    const bucket={};items.forEach(c=>{const t=cat==="蔬菜"?vegType(c):"水果";(bucket[t]=bucket[t]||[]).push(c);});
+    order.forEach(tname=>{const list=(bucket[tname]||[]).sort((a,b)=>a.localeCompare(b,"zh-Hant"));if(!list.length)return;
+      if(cat==="蔬菜"){const th=document.createElement("div");th.className="picktype";th.textContent=`${tname}（${list.length}）`;grp.appendChild(th);}
+      const grid=document.createElement("div");grid.className="picklist";
+      list.forEach(c=>grid.appendChild(buildRow(c)));grp.appendChild(grid);});
     grp.querySelector('[data-catall="1"]').onclick=()=>{const w=watchCrops().filter(e=>!inCat(e));items.forEach(c=>w.push(c));setW(w);};   // 全選＝各作物看全部品種
     grp.querySelector('[data-catall="0"]').onclick=()=>{if(CUR&&items.includes(CUR))CUR=null;setW(watchCrops().filter(e=>!inCat(e)));};   // 取消＝清該類
   });
