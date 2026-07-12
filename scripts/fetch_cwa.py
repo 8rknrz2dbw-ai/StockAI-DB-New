@@ -156,13 +156,22 @@ def eval_typhoon(path_records, now, ref_lat=REF_LAT, ref_lng=REF_LNG):
         # 暴風圈未覆蓋雲林時，僅以距離給極小「接近度」（不足以觸發搶收，僅供顯示）
         if prob == 0.0 and min_dist < 400:
             prob = round(0.12 * (1 - min_dist / 400), 2)
+        # 接近 vs 遠離：以時間排序的預報點，若「最近距離」出現在最早的點、且之後距離持續拉開，
+        # 代表颱風已通過最近點、正在遠離 → 供狀態判斷，修正「離開後仍顯示接近中」。
+        ts = sorted([p for p in track if p["t"]], key=lambda p: p["t"])
+        departing = False
+        if len(ts) >= 2:
+            dists = [haversine_km(ref_lat, ref_lng, p["lat"], p["lng"]) for p in ts]
+            min_i = dists.index(min(dists))
+            departing = (min_i == 0 and dists[-1] > dists[0] + 5)
         # 精簡逐時軌跡（供前端以「田區座標」自算各地侵襲機率）：時間 ISO + 位置 + 暴風圈半徑
         track_out = [{"t": p["t"].isoformat() if p["t"] else None,
                       "lat": round(p["lat"], 3), "lng": round(p["lng"], 3),
                       "r15": round(p["r15"] or 0), "r25": round(p["r25"] or 0),
                       "gust": p["gust"]} for p in track]
         cand = {"name": name, "min_dist": round(min_dist), "invade_prob": round(prob, 2),
-                "eta_iso": eta_iso, "eta_text": eta_text, "gust": gust, "track": track_out}
+                "eta_iso": eta_iso, "eta_text": eta_text, "gust": gust,
+                "departing": departing, "track": track_out}
         if best is None or cand["invade_prob"] > best["invade_prob"] or \
                 (cand["invade_prob"] == best["invade_prob"] and cand["min_dist"] < best["min_dist"]):
             best = cand
@@ -557,7 +566,7 @@ def main():
     temp_recs = cwa_get(DATASETS["temp_obs"], CountyName=COUNTY)
     county_recs = cwa_get(DATASETS["county_fcst"])           # 全國各縣市今明 36 小時（全國天氣預報）
 
-    # 未來天氣預報（全國各縣市；供商人「擺攤指數/何時下雨」、農夫「農事時段建議」）
+    # 未來天氣預報（全國各縣市；供農夫「農事時段建議／何時下雨」）
     counties = parse_nationwide_36h(county_recs, now)
     try:
         with open("weather_forecast.json", "w", encoding="utf-8") as f:
@@ -596,16 +605,27 @@ def main():
     warn_info = parse_warning(warn, now)
 
     if typ:
-        # 對雲林有威脅（發布警報 或 侵襲機率≥10%）才進「搶收模式」；否則只「追蹤中」
-        threatening = warn_info["land_warning"] or (typ["invade_prob"] or 0) >= 0.10
+        # 對雲林有威脅（發布警報 或 侵襲機率≥10%）才進「搶收模式」；否則只「追蹤中」。
+        # 颱風已通過最近點、正在遠離時（departing），若無陸上警報就不再視為逼近，避免卡在「接近中」。
+        departing = bool(typ.get("departing"))
+        threatening = warn_info["land_warning"] or \
+            ((typ["invade_prob"] or 0) >= 0.10 and not departing)
+        if warn_info["land_warning"]:
+            warning = warn_info["text"]
+        elif departing:
+            warning = "颱風遠離中"
+        elif threatening:
+            warning = "颱風接近中"
+        else:
+            warning = "追蹤中，對雲林暫無直接威脅"
         status = {
             "updated": now.strftime("%Y-%m-%d %H:%M"),
             "source": "CWA opendata (W-C0034-005 路徑潛勢)",
             "active": bool(threatening),
             "tracking": (not threatening),
+            "departing": departing,
             "name": typ["name"],
-            "warning": (warn_info["text"] if warn_info["land_warning"]
-                        else ("颱風接近中" if threatening else "追蹤中，對雲林暫無直接威脅")),
+            "warning": warning,
             "land_warning": warn_info["land_warning"],
             "invade_prob": typ["invade_prob"],
             "eta_iso": typ["eta_iso"],
@@ -620,7 +640,7 @@ def main():
     else:
         status = {
             "updated": now.strftime("%Y-%m-%d %H:%M"), "source": "CWA opendata",
-            "active": False, "tracking": False, "name": None, "warning": None,
+            "active": False, "tracking": False, "departing": False, "name": None, "warning": None,
             "land_warning": False, "invade_prob": None, "eta_iso": None, "eta_text": None,
             "min_dist_km": None, "rain_24h_mm": rain24, "rain_1h_mm": rain1, "rain": rain_multi,
             "forecast_gust_ms": None, "track": None,

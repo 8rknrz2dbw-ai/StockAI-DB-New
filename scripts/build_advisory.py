@@ -403,11 +403,13 @@ def main():
     fields = reg.get("fields", reg if isinstance(reg, list) else [])
 
     typhoon = None
-    if os.path.exists(args.typhoon):
+    # --demo-typhoon 優先於既有檔：確保 demo/CI 冒煙測試不受 repo 內（可能過期 eta）的
+    # typhoon_status.json 影響而變不確定；正式排程走 --typhoon（見 update-data.yml），不受影響。
+    if args.demo_typhoon:
+        typhoon = demo_typhoon(now)
+    elif os.path.exists(args.typhoon):
         with open(args.typhoon, encoding="utf-8") as f:
             typhoon = json.load(f)
-    elif args.demo_typhoon:
-        typhoon = demo_typhoon(now)
     typhoon_active = bool(typhoon and typhoon.get("active"))
 
     base_prices = load_base_prices(args.prices)
