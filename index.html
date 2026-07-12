@@ -143,10 +143,16 @@
   .mktlabel{font-size:0.95rem;color:var(--muted);font-weight:600;white-space:nowrap;}
   .mktlabel b{color:var(--leaf);font-weight:900;}
   .unitbar{margin-left:auto;flex:0 0 auto;}
-  .searchrow{display:flex;}
+  .searchrow{display:flex;position:relative;}
   .cropsearch{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--paper);
     padding:0.55rem 0.8rem;border-radius:999px;font-size:0.95rem;font-family:inherit;-webkit-appearance:none;}
   .cropsearch::placeholder{color:var(--muted);}
+  .searchsug{position:absolute;top:100%;left:0;right:0;margin-top:5px;z-index:12;background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;overflow:hidden auto;max-height:17rem;box-shadow:0 10px 28px rgba(0,0,0,.45);}
+  .searchsug button{display:flex;align-items:center;justify-content:space-between;gap:0.6rem;width:100%;text-align:left;
+    background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--paper);padding:0.6rem 0.9rem;font-size:1.02rem;font-weight:700;}
+  .searchsug button:last-child{border-bottom:0;} .searchsug button:active{background:var(--panel2);}
+  .searchsug .sg-cat{color:var(--muted);font-size:0.74rem;font-weight:600;} .searchsug .sg-px{color:var(--leaf);font-weight:900;white-space:nowrap;}
   .cropsearch:focus{outline:none;border-color:var(--leaf-dim);}
   .searchhint{font-size:0.8rem;color:var(--muted);padding:0.1rem 0.2rem 0.5rem;}
   .unitseg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px;flex:0 0 auto;}
@@ -162,6 +168,9 @@
   .mcard .mc-px{margin-left:auto;display:flex;align-items:baseline;gap:0.12rem;white-space:nowrap;flex:0 0 auto;}
   .mcard .mc-v{font-size:1.7rem;font-weight:900;} .mcard .mc-u{font-size:0.62rem;color:var(--muted);}
   .mcard .mc-tag{min-width:0;} .mcard .mc-tag .tag{white-space:normal;}
+  .mcard .mc-info{flex:0 0 auto;display:inline-flex;align-items:center;gap:0.2rem;font-size:0.78rem;font-weight:800;color:var(--cool);
+    background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:0.2rem 0.6rem;cursor:pointer;}
+  .mcard .mc-info:active{background:var(--line);}
   .mcard .mc-chg{margin-left:auto;font-size:0.92rem;font-weight:800;white-space:nowrap;flex:0 0 auto;}
   .mcard .mc-chg.up{color:var(--r);} .mcard .mc-chg.dn{color:var(--g);} .mcard .mc-chg.mid{color:var(--muted);}
   .mcard .mc-none{color:var(--muted);font-size:0.95rem;margin-left:auto;}
@@ -175,6 +184,8 @@
   .vopt:active{background:var(--panel2);border-color:var(--leaf-dim);}
   .vopt .vname{flex:1;min-width:0;}
   .vopt .vprice{font-size:1.05rem;color:var(--leaf);font-weight:900;white-space:nowrap;}
+  .vopt .vinfo{flex:0 0 auto;font-size:0.9rem;font-weight:800;color:var(--cool);background:var(--panel2);
+    border:1px solid var(--line);border-radius:999px;padding:0.15rem 0.5rem;cursor:pointer;}
   /* 品項介紹彈窗 */
   .cropinfo{align-items:center;}
   .cisheet{background:var(--panel);border:1px solid var(--line);border-radius:20px;width:92%;max-width:380px;padding:1.4rem 1.2rem 1.6rem;text-align:center;position:relative;}
@@ -229,6 +240,10 @@
   .pickh small{color:var(--leaf);font-weight:700;}
   .pickgrid{display:flex;flex-wrap:wrap;gap:0.4rem;}
   .chip{display:inline-flex;align-items:center;gap:0.35rem;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:0.35rem 0.7rem;font-size:0.95rem;cursor:pointer;user-select:none;}
+  .chip .chiptop{display:inline-flex;align-items:center;gap:0.35rem;}
+  .chip.chip-v{flex-direction:column;align-items:flex-start;gap:0.2rem;border-radius:12px;}
+  .chip .chipnm{display:inline-flex;align-items:center;gap:0.3rem;} .chip .chipvn{font-size:0.66rem;color:var(--cool);font-weight:800;}
+  .chip .chipvar{color:var(--muted);font-size:0.72rem;padding-left:1.4rem;line-height:1.25;}
   .chip.on{background:var(--leaf-dim);color:var(--bg);border-color:var(--leaf-dim);font-weight:800;}
   .chip input{width:1.05rem;height:1.05rem;accent-color:var(--leaf);margin:0;}
 
@@ -453,6 +468,7 @@
         <div class="searchrow">
           <input id="cropSearch" class="cropsearch" type="search" inputmode="search"
                  placeholder="🔍 搜尋此市場所有品項…" autocomplete="off">
+          <div class="searchsug" id="cropSug" style="display:none"></div>
         </div>
       </div>
       <div class="board" id="board"></div>
@@ -645,7 +661,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.4.0";
+const VERSION="v1.5.0";
 /* 精準務農（farmer）：行情看板＋採收預判＋田園巡查。單一身分 App、無角色切換。
    （原「精準進貨/商人」批發比價功能已自本 repo 移除，改由另一支獨立 App 交付。） */
 const APP="farmer";
@@ -848,8 +864,10 @@ function defaultWatch(){const av=availableCrops();const lat=(INDEX&&INDEX.latest
   const q=c=>{const w=cropMap()[c];return (lat[w]&&lat[w].qty)||0;};
   const veg0=av.filter(c=>cropCat(c)==="蔬菜");
   const commonV=COMMON_VEG.filter(c=>veg0.includes(c));                       // 該市場有的常見葉菜
-  const veg=[...commonV,...veg0.filter(c=>!commonV.includes(c)).sort((a,b)=>q(b)-q(a))].slice(0,16);
-  const fruit=av.filter(c=>cropCat(c)==="水果").sort((a,b)=>q(b)-q(a)).slice(0,12);
+  // 預設看板精簡：常見葉菜優先(該市場有的)＋量大者補到 ~10 項、水果 ~6 項，避免一次列太多讓人眼花；
+  // 其餘用上方搜尋或到 ⚙️「我的品項」自行勾選。
+  const veg=[...commonV,...veg0.filter(c=>!commonV.includes(c)).sort((a,b)=>q(b)-q(a))].slice(0,10);
+  const fruit=av.filter(c=>cropCat(c)==="水果").sort((a,b)=>q(b)-q(a)).slice(0,6);
   return [...veg,...fruit];}
 function watchCrops(){let w=S.watch(MARKET);const av=availableCrops();if(!Array.isArray(w))return defaultWatch();return w.filter(c=>av.includes(c));}  /* 未設定→預設常用；設定後為精確集合 */
 /* ── 品項縮圖(emoji)＋挑選要訣：純前端、離線、零資產 ── */
@@ -1030,11 +1048,13 @@ function renderBoard(){
     hint.textContent=`搜尋結果 ${list.length} 筆（含未在清單的品項）`;el.appendChild(hint);}
   list.forEach(disp=>{const pv=priceView(disp);const card=document.createElement("button");card.className="mcard";
     const vlabels=varietyLabels(disp);const hasVar=vlabels.length>=2;
-    // 單一品項→點卡片開「品項說明＋Google 查圖」；多品項→展開各品種（各品種再點開說明）
-    const tapCrop=()=>{if(hasVar){PICK=(PICK===disp?null:disp);renderBoard();}else openCropInfo(disp,null);};
+    // 單一品項→點卡片進 K線價格走勢；多品項→展開各品種（各品種再點進 K線）。「ⓘ 說明」鈕另開品項說明＋Google 查圖。
+    const tapCrop=()=>{if(hasVar){PICK=(PICK===disp?null:disp);renderBoard();}else openDetail(disp,null);};
     const chev=hasVar?(PICK===disp?"▴":"▾"):"›";
+    const infoBtn=`<span class="mc-info" data-info="1">ⓘ 說明</span>`;
     if(!pv){card.innerHTML=`<div class="mc-r1"><span class="mc-nm">${disp}</span>
-      <span class="mc-none">近期無成交</span><span class="chev">${chev}</span></div>`;
+      <span class="mc-none">近期無成交</span><span class="chev">${chev}</span></div>
+      <div class="mc-r2">${infoBtn}</div>`;
       card.onclick=tapCrop;el.appendChild(card);}
     else{
     const es=pv.es;const prev=es.length>1?es[es.length-2][1].avg:pv.avg;const chg=pv.avg-prev;const chgP=prev?chg/prev*100:0;
@@ -1046,16 +1066,19 @@ function renderBoard(){
       </div>
       <div class="mc-r2">
         <span class="mc-tag">${tag}</span>
+        ${infoBtn}
         <span class="mc-chg ${dcls} mono">${arr}${chgP>=0?"+":""}${chgP.toFixed(1)}%</span>
         <span class="chev">${chev}</span>
       </div>`;
     card.onclick=tapCrop;el.appendChild(card);}
-    // 品種下拉：只列各品種（無「全部綜合」），點品種→開該品種的說明＋Google 查圖
+    const ib=card.querySelector(".mc-info");if(ib)ib.onclick=(e)=>{e.stopPropagation();openCropInfo(disp,null);};   // ⓘ 說明→品項說明彈窗
+    // 品種下拉：只列各品種（無「全部綜合」），點品種→進該品種 K線；品種列的 ⓘ→該品種說明
     if(hasVar&&PICK===disp){const dd=document.createElement("div");dd.className="vdrop";
       dd.innerHTML=vlabels.map(l=>{const s=variantSeries(disp,l);const ks=Object.keys(s).sort();const last=ks.length?s[ks[ks.length-1]]:null;
-          return `<button class="vopt" data-v="${l}"><span class="vname">${l}</span>${last?`<span class="vprice mono">${pxU(last.avg).toFixed(1)} ${unitU()}</span>`:""}</button>`;}).join("");
+          return `<button class="vopt" data-v="${l}"><span class="vname">${l}</span>${last?`<span class="vprice mono">${pxU(last.avg).toFixed(1)} ${unitU()}</span>`:""}<span class="vinfo" data-info="1">ⓘ</span></button>`;}).join("");
       dd.querySelectorAll(".vopt").forEach(o=>{const lab=o.dataset.v;
-        o.onclick=(e)=>{e.stopPropagation();openCropInfo(disp,lab);};});
+        o.onclick=()=>openDetail(disp,lab);
+        const vi=o.querySelector(".vinfo");if(vi)vi.onclick=(e)=>{e.stopPropagation();openCropInfo(disp,lab);};});
       el.appendChild(dd);}
   });
 }
@@ -1192,7 +1215,7 @@ function attachCross(box){
   svg.addEventListener("pointermove",e=>{if(e.buttons||e.pressure>0)at(e);});
   svg.addEventListener("touchstart",at,{passive:false});
   svg.addEventListener("touchmove",at,{passive:false});
-  crossDraw(QGEO.n-1);   // 預設顯示最新一筆查價線
+  // 不預設畫查價線：圖一開始保持乾淨（避免使用者以為切單位跑出橫豎線），橫滑才顯示查價線與價格/日期標。
 }
 
 /* ══════ 田區搶收（前端即時計算） ══════ */
@@ -1637,6 +1660,13 @@ function renderSettings(){
     cropList().forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;ff.appendChild(o);});
 }
 /* 我的品項：勾選表（勾＝顯示；分蔬菜/水果；省空間、可增可刪） */
+/* 我的品項排序用細類型：葉菜→花果菜→根莖→菇筍→其他(水果多落 9、再依名稱) */
+const VEG_SUBTYPE=[
+  [/菜$|白菜|菠菜|芥藍|蕹|空心|莧|茼蒿|芹菜|萵|油麥|皇宮|青江|A菜|地瓜葉|甘藷葉|蔥|韭|芫荽|香菜|莧菜/,0],
+  [/瓜|茄|椒|豆|玉米|秋葵|番茄|花椰|青花|花菜|苦瓜|絲瓜|冬瓜|南瓜/,1],
+  [/蘿蔔|菜頭|甘藷|馬鈴薯|薯|芋|薑|蒜|蓮藕|藕|牛蒡|洋蔥|山藥|荸薺/,2],
+  [/筍|菇|蕈|木耳/,3]];
+function subtypeRank(c){for(const [re,r] of VEG_SUBTYPE)if(re.test(c))return r;return 9;}
 function renderCropPick(){
   const box=document.getElementById("cropPick");if(!box)return;box.innerHTML="";
   const av=availableCrops(),watch=watchCrops();
@@ -1649,13 +1679,17 @@ function renderCropPick(){
   // 蔬菜/水果 各自分區，各有「全選 / 取消全選」
   [["蔬菜","🥬"],["水果","🍉"]].forEach(([cat,emoji])=>{
     const items=av.filter(c=>cropCat(c)===cat);if(!items.length)return;
+    items.sort((a,b)=>subtypeRank(a)-subtypeRank(b)||a.localeCompare(b,"zh-Hant"));   // 依細類型(葉菜/花果/根莖…)再依名稱排序
     const nsel=items.filter(c=>watch.includes(c)).length;
     const grp=document.createElement("div");grp.className="pickgrp";
     grp.innerHTML=`<div class="pickh"><span>${emoji} ${cat} <small>(${nsel}/${items.length})</small></span>
       <span class="pickbtns"><button type="button" data-catall="1">全選</button><button type="button" data-catall="0">取消全選</button></span></div>`;
     const grid=document.createElement("div");grid.className="pickgrid";
-    items.forEach(c=>{const on=watch.includes(c);const lab=document.createElement("label");lab.className="chip"+(on?" on":"");
-      lab.innerHTML=`<input type="checkbox" value="${c}"${on?" checked":""}><span>${c}</span>`;grid.appendChild(lab);});
+    items.forEach(c=>{const on=watch.includes(c);const vls=varietyLabels(c);const hasV=vls.length>=2;
+      const lab=document.createElement("label");lab.className="chip"+(on?" on":"")+(hasV?" chip-v":"");
+      lab.innerHTML=`<span class="chiptop"><input type="checkbox" value="${c}"${on?" checked":""}><span class="chipnm">${c}${hasV?` <b class="chipvn">${vls.length}種</b>`:""}</span></span>`
+        +(hasV?`<small class="chipvar">${vls.slice(0,6).join("・")}${vls.length>6?"…":""}</small>`:"");
+      grid.appendChild(lab);});
     grp.appendChild(grid);box.appendChild(grp);
     grp.querySelector('[data-catall="1"]').onclick=()=>{const w=new Set(watchCrops());items.forEach(c=>w.add(c));setW([...w]);};
     grp.querySelector('[data-catall="0"]').onclick=()=>{const rm=new Set(items);if(CUR&&rm.has(CUR))CUR=null;setW(watchCrops().filter(c=>!rm.has(c)));};
@@ -1706,8 +1740,28 @@ document.getElementById("mktSelect").addEventListener("change",async e=>{MARKET=
   await loadMarket(MARKET);renderBoard();renderSettings();});
 document.getElementById("regionSelect").addEventListener("change",e=>{S.region=e.target.value;
   renderHarvest();renderBoard();});   // 換地區→天氣建議即時更新
+/* 搜尋自動完成下拉：輸入即列出符合品項，「開頭符合」優先，點一項＝直接看該品項 */
+function renderSug(){
+  const sug=document.getElementById("cropSug");if(!sug)return;
+  const q=SEARCH.trim().toLowerCase();
+  if(!q){sug.style.display="none";sug.innerHTML="";return;}
+  const matches=availableCrops().filter(c=>c.toLowerCase().includes(q));
+  matches.sort((a,b)=>{const as=a.toLowerCase().startsWith(q)?0:1,bs=b.toLowerCase().startsWith(q)?0:1;   // 開頭符合優先
+    return as-bs || cropCat(a).localeCompare(cropCat(b)) || a.localeCompare(b,"zh-Hant");});
+  const top=matches.slice(0,8);
+  if(!top.length){sug.style.display="none";sug.innerHTML="";return;}
+  sug.innerHTML=top.map(c=>{const pv=priceView(c);const px=pv?`${pxU(pv.avg).toFixed(1)} ${unitU()}`:"近期無成交";
+    return `<button type="button" data-c="${c}"><span>${c} <span class="sg-cat">${cropCat(c)}</span></span><span class="sg-px mono">${px}</span></button>`;}).join("");
+  sug.style.display="";
+  sug.querySelectorAll("button").forEach(btn=>btn.onclick=()=>{
+    const c=btn.dataset.c;const inp=document.getElementById("cropSearch");inp.value=c;SEARCH=c;
+    sug.style.display="none";PICK=null;if(MKTMODE==="detail"){MKTMODE="list";DETAIL=null;CURVAR=null;}renderBoard();});
+}
+function hideSug(){const s=document.getElementById("cropSug");if(s){s.style.display="none";}}
 document.getElementById("cropSearch").addEventListener("input",e=>{SEARCH=e.target.value;PICK=null;
-  if(MKTMODE==="detail"){MKTMODE="list";DETAIL=null;CURVAR=null;}renderBoard();});
+  if(MKTMODE==="detail"){MKTMODE="list";DETAIL=null;CURVAR=null;}renderBoard();renderSug();});
+document.getElementById("cropSearch").addEventListener("focus",renderSug);
+document.getElementById("cropSearch").addEventListener("blur",()=>setTimeout(hideSug,180));   // 延遲關閉讓點擊生效
 document.getElementById("fieldAddBtn").addEventListener("click",()=>openFieldForm(null));
 document.getElementById("ffSave").addEventListener("click",saveField);
 document.getElementById("gear").addEventListener("click",openSettings);
