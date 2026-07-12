@@ -45,18 +45,15 @@ def norm_crop(name):
     小番茄-聖女→小番茄、南瓜-栗子 小黑→南瓜。"""
     return _SPLIT.split((name or "").strip())[0]
 
-# 保底靜態清單：全台主要果菜批發市場短名（動態探索失敗時才用；partial match、維持既有市場名不變）。
-# ⚑ 預設會先「動態探索」API 實際回報的所有市場（含合作社／農會／青果運銷社經營的批發市場），
-#    再與本清單聯集。避免像過去 API 把市場叫「桃農／北港鎮」，而寫死短名「桃園／北港」對不到就整個漏掉
-#    （實測靜態 19 個裡桃園、北港長期抓不到）。
-MARKETS = ["台北一", "台北二", "三重", "板橋", "宜蘭", "桃園", "台中", "豐原",
-           "南投", "溪湖", "永靖", "西螺", "北港", "斗南", "嘉義", "台南",
-           "高雄", "鳳山", "岡山", "楠梓", "屏東", "台東", "花蓮",
-           "埔里", "東勢", "員林", "二林"]
-# 上表為候選短名（探索失敗時的保底；用短名做 API partial 過濾）。實際能否抓到取決於該市場當期是否有蔬果
-# 成交、且 API「市場名稱」需相符；對不到／無成交者由主流程自動略過、不影響其他市場（見 fetch_market_all）。
+# 保底靜態清單：僅在「動態探索」完全失敗時才用。內容＝2026-07 實跑確認「查得到 2 年資料」的市場名
+# （用 API 實際回報名，桃園農產＝『桃農』、含農會型『東勢』）。⚑ 正常情況一律以 discover_markets
+# 探索到的即時清單為準，本清單只是離線/API 異常時的退路，避免整站空掉。
+MARKETS = ["台北一", "台北二", "三重", "板橋", "宜蘭", "桃農", "台中", "豐原", "東勢",
+           "南投", "溪湖", "永靖", "西螺", "嘉義", "高雄", "鳳山", "屏東", "台東", "花蓮"]
 # 沙盒擋 data.moa.gov.tw，市場名以 GitHub Actions 實跑驗證（workflow_dispatch / --discover）。
-DISCOVER_DAYS = 10   # 動態探索市場清單時往回看幾天的成交（逐日查、避免單次回應過大或被截斷）
+DISCOVER_DAYS = 14   # 動態探索市場清單時往回看幾天的成交（逐日查；14 天確保各市場至少有一個交易日被看到）
+# API 會回一些「縣市彙總」名（如『台北市場／彰化市場』），無單一市場明細、以 Market 再查得不到 → 濾掉。
+ROLLUP_MARKET = re.compile(r"市場$|彙總|合計|小計")
 
 # 展示名 → 農業部作物名稱（批發端）。名稱須與 API「作物名稱」相符，
 # 不符者該品項抓不到即安全略過。上線時可對照「農產品交易行情」實際名稱微調。
@@ -225,30 +222,26 @@ def discover_markets(end, days=DISCOVER_DAYS):
 
 def resolve_markets(end):
     """決定要抓的市場清單 → [(顯示名, 查詢用名)]。
-    先動態探索；探索到就用 API 實際名稱當查詢鍵（顯示名盡量對回既有短名，維持「西螺」等不變），
-    再補上探索期間剛好休市、但仍在靜態清單裡的市場；探索完全失敗則整份退回靜態 MARKETS。"""
+    以動態探索為準（含合作社/農會/青果社），濾掉縣市彙總名；探索完全失敗才退回靜態 MARKETS。
+    查詢一律用 API 實際回報名（最可靠，解決『桃園』其實叫『桃農』對不到而漏掉整區的老問題）；
+    顯示名盡量對回既有短名以維持用戶設定/『西螺』等不變。"""
     disc = discover_markets(end)
-    if not disc:
+    real = {nm: c for nm, c in disc.items() if nm and not ROLLUP_MARKET.search(nm)}   # 濾掉『台北市場』等彙總
+    if not real:
         print("[fetch_prices] ⚠ 市場探索無結果（API 可能需帶 Market，或當下無外網）→ 退回靜態清單。", file=sys.stderr)
         return [(m, m) for m in MARKETS]
-    out, used, covered_short = [], set(), set()
-    for nm, _cnt in sorted(disc.items(), key=lambda kv: (-kv[1], kv[0])):
+    out, used = [], set()
+    for nm, _cnt in sorted(real.items(), key=lambda kv: (-kv[1], kv[0])):
         short = next((s for s in MARKETS if s in nm), None)   # 能對回既有短名就沿用（維持顯示名/用戶設定不變）
-        if short:
-            covered_short.add(short)
         display = short or nm
         if display in used:      # 顯示名撞名 → 改用 API 完整名區隔
             display = nm
         if display in used:
             continue
         used.add(display)
-        out.append((display, nm))   # 查詢一律用 API 實際回報的名稱，最可靠（解決桃園/北港對不到）
-    for s in MARKETS:            # 靜態清單裡、探索期間剛好沒成交的市場也補進來（保底）
-        if s not in covered_short and s not in used:
-            used.add(s)
-            out.append((s, s))
-    print(f"[fetch_prices] 市場清單：探索到 {len(disc)} 個、最終要抓 {len(out)} 個（含合作社/農會等）："
-          f"{'、'.join(d for d, _ in out)}")
+        out.append((display, nm))
+    print(f"[fetch_prices] 市場清單：探索到 {len(disc)} 個（濾彙總後 {len(real)} 個）、要抓 {len(out)} 個"
+          f"（含合作社/農會等）：{'、'.join(d for d, _ in out)}")
     return out
 
 
