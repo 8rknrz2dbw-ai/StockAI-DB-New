@@ -175,18 +175,10 @@
   .vopt:active{background:var(--panel2);border-color:var(--leaf-dim);}
   .vopt .vname{flex:1;min-width:0;}
   .vopt .vprice{font-size:1.05rem;color:var(--leaf);font-weight:900;white-space:nowrap;}
-  /* 品項縮圖(手繪插圖/emoji)，可點看挑選要訣 */
-  .cropicon{flex:0 0 auto;font-size:1.7rem;line-height:1;width:2rem;text-align:center;cursor:pointer;}
-  .vopt .cropicon{font-size:2rem;width:2.3rem;}
-  .mc-r1 .cropicon{font-size:1.5rem;width:1.9rem;}
-  .cropicon svg{width:1.3em;height:1.3em;vertical-align:middle;display:inline-block;}
   /* 品項介紹彈窗 */
   .cropinfo{align-items:center;}
   .cisheet{background:var(--panel);border:1px solid var(--line);border-radius:20px;width:92%;max-width:380px;padding:1.4rem 1.2rem 1.6rem;text-align:center;position:relative;}
   .cisheet .ciclose{position:absolute;top:0.7rem;right:0.8rem;}
-  .cibig{font-size:5.5rem;line-height:1.1;}
-  .cibig svg{width:6.5rem;height:6.5rem;display:block;margin:0.2rem auto 0;}
-  .ciphoto{width:9rem;height:9rem;object-fit:cover;border-radius:16px;border:1px solid var(--line);}
   .ciname{font-size:1.6rem;font-weight:900;letter-spacing:2px;margin:0.3rem 0 1rem;}
   .citip-h{font-weight:900;color:var(--leaf);font-size:0.95rem;margin-bottom:0.4rem;}
   .citip{font-size:1.02rem;line-height:1.7;color:var(--paper);text-align:left;margin:0;}
@@ -500,7 +492,6 @@
 <div class="modal cropinfo" id="cropInfo">
   <div class="cisheet" role="dialog" aria-label="品項介紹">
     <button class="close ciclose" id="ciClose" aria-label="關閉">✕</button>
-    <div class="cibig" id="ciIcon">🥬</div>
     <div class="ciname" id="ciName"></div>
     <div class="citip-h">🛒 挑選要訣</div>
     <p class="citip" id="ciTip"></p>
@@ -646,7 +637,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.2.0";
+const VERSION="v1.3.0";
 /* 精準務農（farmer）：行情看板＋採收預判＋田區巡查。單一身分 App、無角色切換。
    （原「精準進貨/商人」批發比價功能已自本 repo 移除，改由另一支獨立 App 交付。） */
 const APP="farmer";
@@ -815,39 +806,9 @@ const CROP_ICON={鳳梨:"🍍",芒果:"🥭",香蕉:"🍌",荔枝:"🍒",龍眼:
   花椰菜:"🥦",青花菜:"🥦",青花苔:"🥦",豌豆:"🫛",菜豆:"🫛",敏豆:"🫛",毛豆:"🫛",萊豆:"🫛",落花生:"🥜",
   竹筍:"🎋",筍:"🎋",薑:"🫚",蒜:"🧄",蔥:"🧅",黃秋葵:"🌿",牛蒡:"🥕"};
 function cropIcon(c){return CROP_ICON[c]||(cropCat(c)==="水果"?"🍎":"🥬");}
-/* 手繪 SVG 精緻插圖（自繪、零版權；政府農試所素材為「政府資料開放授權」需標示來源且無逐作物照片包，故採自繪）。
-   有插圖用插圖、否則退回 emoji。品種(如愛文/金煌)有專屬色調。 */
-const CROP_SVG={
-菠菜:`<svg viewBox="0 0 96 96"><g stroke="#274d20" stroke-width="1.5" stroke-linejoin="round"><path d="M48 82C40 74 22 70 12 62c-2 12 10 22 24 24 6 1 10-1 12-4z" fill="#4f9137"/><path d="M48 82C56 74 74 70 84 62c2 12-10 22-24 24-6 1-10-1-12-4z" fill="#5ba33f"/><path d="M48 84C36 74 26 56 24 40c14 2 24 18 28 40z" fill="#5ba33f"/><path d="M48 84C60 74 70 56 72 40c-14 2-24 18-28 40z" fill="#478a33"/><path d="M48 86C44 66 44 42 48 22c4 20 4 44 0 64z" fill="#6fb84a"/></g><g stroke="#2f5a26" stroke-width="1" opacity=".5" fill="none"><path d="M48 78C40 66 32 54 30 44"/><path d="M48 78C56 66 64 54 66 44"/></g><path d="M44 82h8l-1 8h-6z" fill="#d98c9a" stroke="#b06b78" stroke-width="1"/></svg>`,
-青江白菜:`<svg viewBox="0 0 96 96"><g stroke="#2f5a26" stroke-width="1.4" stroke-linejoin="round"><path d="M34 90C26 82 24 62 32 50c6 8 8 26 6 40z" fill="#5ba33f"/><path d="M62 90C70 82 72 62 64 50c-6 8-8 26-6 40z" fill="#4f9137"/><path d="M48 92C40 78 40 56 48 42c8 14 8 36 0 50z" fill="#6fb84a"/></g><g fill="#eef3e0" stroke="#c2cfa6" stroke-width="1.3"><path d="M30 90C28 78 30 66 36 62c4 8 3 20-2 28z"/><path d="M66 90C68 78 66 66 60 62c-4 8-3 20 2 28z"/><path d="M42 92C40 76 42 62 48 56c6 6 8 20 6 36z"/></g></svg>`,
-青江菜:`<svg viewBox="0 0 96 96"><g stroke="#2f5a26" stroke-width="1.4" stroke-linejoin="round"><path d="M34 90C26 82 24 62 32 50c6 8 8 26 6 40z" fill="#5ba33f"/><path d="M62 90C70 82 72 62 64 50c-6 8-8 26-6 40z" fill="#4f9137"/><path d="M48 92C40 78 40 56 48 42c8 14 8 36 0 50z" fill="#6fb84a"/></g><g fill="#eef3e0" stroke="#c2cfa6" stroke-width="1.3"><path d="M30 90C28 78 30 66 36 62c4 8 3 20-2 28z"/><path d="M66 90C68 78 66 66 60 62c-4 8-3 20 2 28z"/><path d="M42 92C40 76 42 62 48 56c6 6 8 20 6 36z"/></g></svg>`,
-小白菜:`<svg viewBox="0 0 96 96"><g stroke="#274d20" stroke-width="1.4" stroke-linejoin="round"><path d="M48 90C34 84 28 64 34 44C40 56 44 74 50 90z" fill="#6fb84a"/><path d="M48 90C62 84 68 64 62 44C56 56 52 74 46 90z" fill="#5ba33f"/><path d="M48 92C42 76 42 54 48 40C54 54 54 76 48 92z" fill="#7ec756"/></g><g stroke="#274d20" stroke-width="1.3" stroke-linejoin="round"><path d="M34 46C25 40 22 28 30 20C39 26 42 38 40 48z" fill="#8ec85a"/><path d="M62 46C71 40 74 28 66 20C57 26 54 38 56 48z" fill="#8ec85a"/><path d="M48 40C40 32 40 18 48 10C56 18 56 32 48 40z" fill="#9ac877"/></g><g stroke="#eef3e0" stroke-width="2.2" stroke-linecap="round"><path d="M44 90 44 68"/><path d="M52 90 52 68"/></g></svg>`,
-芥藍菜:`<svg viewBox="0 0 96 96"><path d="M48 92C47 74 47 52 48 34" stroke="#a7c47e" stroke-width="7" fill="none" stroke-linecap="round"/><g stroke="#2f5a26" stroke-width="1.5" stroke-linejoin="round"><path d="M46 66C30 66 16 56 12 46C28 44 42 52 48 66z" fill="#4a8a5a"/><path d="M50 72C66 70 80 60 84 50C68 48 54 58 48 72z" fill="#3f7d50"/><path d="M47 48C34 46 24 36 22 28C36 28 46 36 49 48z" fill="#4a8a5a"/></g><g fill="#eef0d8" stroke="#cfd6a8" stroke-width="1"><circle cx="45" cy="26" r="3.2"/><circle cx="52" cy="24" r="3.2"/><circle cx="48" cy="20" r="3.2"/><circle cx="43" cy="21" r="2.6"/><circle cx="55" cy="29" r="2.6"/></g></svg>`,
-蕹菜:`<svg viewBox="0 0 96 96"><g stroke="#2f5a26" stroke-width="2.6" fill="none" stroke-linecap="round"><path d="M42 90C40 64 40 40 44 18" stroke="#5ba33f"/><path d="M50 90C50 62 52 38 55 16" stroke="#6fb84a"/><path d="M58 90C58 66 60 44 63 24" stroke="#4f9137"/></g><g stroke="#2f5a26" stroke-width="1.1" stroke-linejoin="round"><path d="M44 20C39 12 42 4 51 4C52 13 49 18 44 22z" fill="#6fb84a"/><path d="M55 18C52 9 59 3 66 6C63 14 59 17 54 20z" fill="#5ba33f"/><path d="M40 42C31 41 25 33 26 26C35 28 41 34 43 43z" fill="#5ba33f"/><path d="M53 40C62 38 68 31 68 24C59 26 54 32 51 41z" fill="#6fb84a"/><path d="M44 64C35 63 29 56 29 49C38 51 43 57 46 65z" fill="#4f9137"/></g></svg>`,
-空心菜:`<svg viewBox="0 0 96 96"><g stroke="#2f5a26" stroke-width="2.6" fill="none" stroke-linecap="round"><path d="M42 90C40 64 40 40 44 18" stroke="#5ba33f"/><path d="M50 90C50 62 52 38 55 16" stroke="#6fb84a"/><path d="M58 90C58 66 60 44 63 24" stroke="#4f9137"/></g><g stroke="#2f5a26" stroke-width="1.1" stroke-linejoin="round"><path d="M44 20C39 12 42 4 51 4C52 13 49 18 44 22z" fill="#6fb84a"/><path d="M55 18C52 9 59 3 66 6C63 14 59 17 54 20z" fill="#5ba33f"/><path d="M40 42C31 41 25 33 26 26C35 28 41 34 43 43z" fill="#5ba33f"/><path d="M53 40C62 38 68 31 68 24C59 26 54 32 51 41z" fill="#6fb84a"/><path d="M44 64C35 63 29 56 29 49C38 51 43 57 46 65z" fill="#4f9137"/></g></svg>`,
-茼蒿:`<svg viewBox="0 0 96 96"><g stroke="#2f5a26" stroke-width="1.1" stroke-linejoin="round"><path d="M48 92C47 72 47 52 48 38" stroke="#8fb06a" stroke-width="3.5" fill="none" stroke-linecap="round"/><g fill="#5ba33f"><path d="M48 40C46 30 47 20 48 12C49 20 50 30 48 40z"/><path d="M47 34C40 30 33 30 28 24C35 22 40 24 47 28z" fill="#6fb84a"/><path d="M49 34C56 30 63 30 68 24C61 22 56 24 49 28z" fill="#4f9137"/><path d="M46 44C38 42 30 44 24 38C31 34 38 36 46 38z" fill="#6fb84a"/><path d="M50 44C58 42 66 44 72 38C65 34 58 36 50 38z" fill="#5ba33f"/><path d="M45 54C37 54 28 58 23 52C30 48 38 48 45 50z" fill="#4f9137"/><path d="M51 54C59 54 68 58 73 52C66 48 58 48 51 50z" fill="#6fb84a"/></g></g></svg>`,
-甘藍:`<svg viewBox="0 0 96 96"><circle cx="48" cy="52" r="34" fill="#7bb15a" stroke="#274d20" stroke-width="1.6"/><path d="M48 18C34 26 24 40 20 56c8-6 18-8 28-8 10 0 20 2 28 8-4-16-14-30-28-38z" fill="#9ac877" stroke="#3f7d34" stroke-width="1.3"/><g stroke="#3f7d34" stroke-width="1.3" fill="none" opacity=".7"><path d="M48 20C48 34 48 50 48 66"/><path d="M32 30C38 44 42 54 46 66"/><path d="M64 30C58 44 54 54 50 66"/></g><path d="M48 20C46 22 46 26 48 30c2-4 2-8 0-10z" fill="#c7e0a0"/></svg>`,
-包心白菜:`<svg viewBox="0 0 96 96"><path d="M34 88C28 66 28 40 40 20c4 0 6 0 8 2 2-2 4-2 8-2 12 20 12 46 6 68z" fill="#eaf2d8" stroke="#274d20" stroke-width="1.5"/><path d="M40 22C36 44 36 66 40 86" stroke="#cdd9b0" stroke-width="2" fill="none"/><path d="M56 22C60 44 60 66 56 86" stroke="#cdd9b0" stroke-width="2" fill="none"/><path d="M40 20C36 14 40 6 48 6c8 0 12 8 8 14-4-6-12-6-16 0z" fill="#7ec756" stroke="#274d20" stroke-width="1.4"/><path d="M42 26C40 20 44 14 48 14c4 0 8 6 6 12-4-4-8-4-12 0z" fill="#9ac877"/></svg>`,
-莧菜:`<svg viewBox="0 0 96 96"><path d="M48 92C48 68 48 44 48 24" stroke="#7a3b46" stroke-width="3" fill="none" stroke-linecap="round"/><g stroke="#5a1f2a" stroke-width="1.3" stroke-linejoin="round"><path d="M46 66C32 68 20 60 16 48C30 46 42 52 48 66z" fill="#9c4f5a"/><path d="M50 70C64 68 76 58 80 46C66 46 54 56 48 70z" fill="#b56672"/><path d="M47 44C35 44 24 36 20 26C34 26 44 34 49 46z" fill="#9c4f5a"/><path d="M49 40C61 38 71 30 75 20C61 22 51 30 47 42z" fill="#b56672"/></g></svg>`,
-芥菜:`<svg viewBox="0 0 96 96"><g stroke="#274d20" stroke-width="1.4" stroke-linejoin="round"><path d="M48 90C30 84 20 66 22 44C25 52 30 54 34 50C31 58 37 62 42 58C39 64 42 74 48 90z" fill="#5ba33f"/><path d="M48 90C66 84 76 66 74 44C71 52 66 54 62 50C65 58 59 62 54 58C57 64 54 74 48 90z" fill="#4a8330"/><path d="M48 92C43 70 43 42 48 22C53 42 53 70 48 92z" fill="#6fb84a"/></g><g stroke="#bcd39a" stroke-width="2" fill="none" opacity=".8"><path d="M48 88 48 30"/><path d="M40 78C34 68 28 58 26 50"/><path d="M56 78C62 68 68 58 70 50"/></g></svg>`,
-芒果:`<svg viewBox="0 0 96 96"><path d="M28 44C30 26 50 16 68 24C84 31 86 52 76 66C66 80 42 80 32 68C26 61 26 54 28 44z" fill="#f2b134" stroke="#b57d16" stroke-width="1.7"/><path d="M40 36C34 48 36 62 48 68C42 56 44 44 52 34C48 32 43 33 40 36z" fill="#e0533b" opacity=".8"/><path d="M64 22C66 15 73 13 79 16C75 21 69 23 64 24z" fill="#4f8a3f" stroke="#2f5a26" stroke-width="1.2"/><path d="M64 24C64 20 65 17 67 15" stroke="#7a5a1a" stroke-width="2" fill="none"/></svg>`,
-愛文:`<svg viewBox="0 0 96 96"><path d="M28 44C30 26 50 16 68 24C84 31 86 52 76 66C66 80 42 80 32 68C26 61 26 54 28 44z" fill="#e0533b" stroke="#a3341f" stroke-width="1.7"/><path d="M40 60C34 48 36 34 50 28C44 40 46 52 54 62C50 65 44 64 40 60z" fill="#f2b134" opacity=".5"/><path d="M64 22C66 15 73 13 79 16C75 21 69 23 64 24z" fill="#4f8a3f" stroke="#2f5a26" stroke-width="1.2"/></svg>`,
-金煌:`<svg viewBox="0 0 96 96"><path d="M16 54C16 40 34 28 56 28C80 28 88 42 86 54C84 66 66 74 44 72C26 70 16 66 16 54z" fill="#f2c024" stroke="#b58a12" stroke-width="1.7"/><path d="M30 46C26 56 30 66 44 68C36 58 38 48 48 42C42 40 34 42 30 46z" fill="#f7d95a" opacity=".65"/><path d="M78 30C81 23 88 22 93 26C88 30 82 31 77 31z" fill="#4f8a3f" stroke="#2f5a26" stroke-width="1.2"/></svg>`,
-凱特:`<svg viewBox="0 0 96 96"><path d="M28 44C30 26 50 16 68 24C84 31 86 52 76 66C66 80 42 80 32 68C26 61 26 54 28 44z" fill="#6fae3f" stroke="#4a7d28" stroke-width="1.7"/><path d="M56 30C68 28 80 34 82 46C74 40 64 40 56 44z" fill="#e0533b" opacity=".8"/><path d="M64 22C66 15 73 13 79 16C75 21 69 23 64 24z" fill="#4f8a3f" stroke="#2f5a26" stroke-width="1.2"/></svg>`,
-玉文:`<svg viewBox="0 0 96 96"><path d="M26 44C28 24 50 14 70 22C86 29 88 52 78 67C67 82 40 82 30 68C24 61 24 54 26 44z" fill="#d63f2e" stroke="#8f2a1c" stroke-width="1.7"/><path d="M40 60C34 48 36 34 50 28C44 40 46 52 54 62C50 65 44 64 40 60z" fill="#f2b134" opacity=".4"/><path d="M66 20C68 13 75 11 81 14C77 19 71 21 66 22z" fill="#4f8a3f" stroke="#2f5a26" stroke-width="1.2"/></svg>`,
-鳳梨:`<svg viewBox="0 0 96 96"><g stroke="#2f5a26" stroke-width="1.4" stroke-linejoin="round" fill="#5ba33f"><path d="M48 34C44 20 44 10 48 4c4 6 4 16 0 30z"/><path d="M48 32C40 22 34 16 28 14c2 10 8 18 18 22z"/><path d="M48 32C56 22 62 16 68 14c-2 10-8 18-18 22z"/><path d="M48 30C42 26 36 24 32 24c2 6 8 8 16 10z" fill="#6fb84a"/><path d="M48 30C54 26 60 24 64 24c-2 6-8 8-16 10z" fill="#6fb84a"/></g><ellipse cx="48" cy="58" rx="24" ry="30" fill="#e8b93e" stroke="#a9821b" stroke-width="1.6"/><g stroke="#a9821b" stroke-width="1.2" opacity=".8"><path d="M30 44L66 72"/><path d="M66 44L30 72"/><path d="M28 58L68 58"/><path d="M40 34L40 84"/><path d="M56 34L56 84"/></g></svg>`,
-金鑽:`<svg viewBox="0 0 96 96"><g stroke="#2f5a26" stroke-width="1.4" stroke-linejoin="round" fill="#5ba33f"><path d="M48 34C44 20 44 10 48 4c4 6 4 16 0 30z"/><path d="M48 32C40 22 34 16 28 14c2 10 8 18 18 22z"/><path d="M48 32C56 22 62 16 68 14c-2 10-8 18-18 22z"/></g><ellipse cx="48" cy="58" rx="24" ry="30" fill="#f0c63f" stroke="#a9821b" stroke-width="1.6"/><g stroke="#9a7418" stroke-width="1.1" opacity=".85"><path d="M30 44L66 72"/><path d="M66 44L30 72"/><path d="M28 58L68 58"/></g></svg>`,
-金鑽鳳梨:`<svg viewBox="0 0 96 96"><g stroke="#2f5a26" stroke-width="1.4" stroke-linejoin="round" fill="#5ba33f"><path d="M48 34C44 20 44 10 48 4c4 6 4 16 0 30z"/><path d="M48 32C40 22 34 16 28 14c2 10 8 18 18 22z"/><path d="M48 32C56 22 62 16 68 14c-2 10-8 18-18 22z"/></g><ellipse cx="48" cy="58" rx="24" ry="30" fill="#f0c63f" stroke="#a9821b" stroke-width="1.6"/><g stroke="#9a7418" stroke-width="1.1" opacity=".85"><path d="M30 44L66 72"/><path d="M66 44L30 72"/><path d="M28 58L68 58"/></g></svg>`,
-香蕉:`<svg viewBox="0 0 96 96"><path d="M18 34C22 58 42 78 66 76C78 75 84 68 82 60C74 68 60 66 48 58C34 48 26 40 26 32C22 30 18 30 18 34z" fill="#f4cf45" stroke="#c19b1a" stroke-width="1.6"/><path d="M24 40C28 60 46 76 66 72" stroke="#e0b52e" stroke-width="1.4" fill="none"/><path d="M30 32C34 54 52 70 70 66" stroke="#f4cf45" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M30 32C34 54 52 70 70 66" stroke="#c19b1a" stroke-width="1.4" fill="none"/><path d="M18 34C16 28 18 22 24 20" stroke="#6b5a1a" stroke-width="3.4" fill="none" stroke-linecap="round"/></svg>`,
-西瓜:`<svg viewBox="0 0 96 96"><circle cx="42" cy="52" r="30" fill="#3f8a3f" stroke="#265826" stroke-width="1.6"/><g stroke="#245223" stroke-width="3" fill="none" opacity=".8"><path d="M42 22C36 34 36 70 42 82"/><path d="M24 32C20 44 20 60 24 72"/><path d="M60 32C64 44 64 60 60 72"/></g><path d="M64 30L86 22L80 46C72 44 66 38 64 30z" fill="#e35d68" stroke="#265826" stroke-width="1.6"/><path d="M64 30L86 22" stroke="#f7f2df" stroke-width="3"/><g fill="#2b1a1a"><circle cx="74" cy="30" r="1.6"/><circle cx="78" cy="34" r="1.6"/><circle cx="72" cy="36" r="1.6"/></g></svg>`,
-木瓜:`<svg viewBox="0 0 96 96"><path d="M40 88C26 82 22 60 28 40C32 26 40 18 48 18C56 18 64 26 68 40C74 60 70 82 56 88C50 90 46 90 40 88z" fill="#ef9a3d" stroke="#b5701c" stroke-width="1.6"/><path d="M48 18C46 14 46 10 48 8C50 10 50 14 48 18z" fill="#4f8a3f" stroke="#2f5a26" stroke-width="1.2"/><ellipse cx="48" cy="58" rx="12" ry="22" fill="#e07d2a" opacity=".55"/><g fill="#3a2418"><circle cx="48" cy="48" r="2"/><circle cx="44" cy="56" r="2"/><circle cx="52" cy="56" r="2"/><circle cx="46" cy="64" r="2"/><circle cx="51" cy="64" r="2"/><circle cx="48" cy="70" r="2"/></g></svg>`};
-function cropSvg(crop,variety){return CROP_SVG[variety]||CROP_SVG[crop]||"";}
-/* 水果品項/品種多、插圖難精準 → 改用放大鏡，點了直接 Google 圖片搜尋看實際照片（零版權，不自存圖） */
+/* 品項說明彈窗的 Google 圖片搜尋 URL（零版權、不自存圖）：查該品項/品種實際照片 */
 function cropSearchURL(crop,variety){const q=(variety&&variety!==crop)?`${variety} ${crop}`:crop;
   return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(q)}`;}
-const SEARCH_SVG=`<svg viewBox="0 0 96 96"><circle cx="42" cy="42" r="23" fill="rgba(111,184,74,.12)" stroke="#6fb84a" stroke-width="7"/><line x1="59" y1="59" x2="80" y2="80" stroke="#6fb84a" stroke-width="8" stroke-linecap="round"/></svg>`;
-/* 蔬菜插圖已全面取消 → 蔬菜用 emoji、水果用放大鏡；點圖示都開「說明」彈窗(內含 Google 查圖) */
-function cropIconHTML(crop,variety){return (cropCat(crop)==="水果")?SEARCH_SVG:cropIcon(crop);}
 const CROP_TIP={
   菠菜:"葉片翠綠挺立、根部帶淡紅為佳；葉黃、莖空、有黏液代表不新鮮。",
   青江白菜:"葉色鮮綠、梗白脆、無黃葉爛心；捏起來紮實有重量較新鮮。",
@@ -893,12 +854,10 @@ function cropTip(c,variety){if(variety&&VAR_TIP[variety])return VAR_TIP[variety]
 const CROP_PHOTO={};   // 例：{ 芒果:"imgs/mango.jpg", 愛文:"imgs/mango-aiwen.jpg" }
 function cropPhoto(crop,variety){return CROP_PHOTO[variety]||CROP_PHOTO[crop]||"";}
 function openCropInfo(crop,label){const nm=label&&label!==crop?`${crop}·${label}`:crop;
-  const ic=document.getElementById("ciIcon");
-  ic.innerHTML=(cropCat(crop)==="水果")?SEARCH_SVG:cropIcon(crop);   // 水果→放大鏡、蔬菜→emoji（插圖已取消）
   document.getElementById("ciName").textContent=nm;
   document.getElementById("ciTip").textContent=cropTip(crop,label);
   const sc=document.getElementById("ciSearch");if(sc){sc.href=cropSearchURL(crop,label);
-    sc.textContent=(cropCat(crop)==="水果")?"🔍 用 Google 查詢「"+(label&&label!==crop?label:crop)+"」實際照片":"🔍 用 Google 搜尋實際照片";}
+    sc.textContent="🔍 用 Google 查詢「"+(label&&label!==crop?label:crop)+"」實際照片";}
   document.getElementById("cropInfo").classList.add("on");}
 function closeCropInfo(){document.getElementById("cropInfo").classList.remove("on");}
 function priceView(disp,variety){const es=sortedEntries(variety?variantSeries(disp,variety):seriesFor(disp));
@@ -1013,17 +972,17 @@ function renderBoard(){
     hint.textContent=`搜尋結果 ${list.length} 筆（含未在清單的品項）`;el.appendChild(hint);}
   list.forEach(disp=>{const pv=priceView(disp);const card=document.createElement("button");card.className="mcard";
     const vlabels=varietyLabels(disp);const hasVar=vlabels.length>=2;
-    const tapCrop=()=>{if(hasVar){PICK=(PICK===disp?null:disp);renderBoard();}else openDetail(disp,null);};
+    // 單一品項→點卡片開「品項說明＋Google 查圖」；多品項→展開各品種（各品種再點開說明）
+    const tapCrop=()=>{if(hasVar){PICK=(PICK===disp?null:disp);renderBoard();}else openCropInfo(disp,null);};
     const chev=hasVar?(PICK===disp?"▴":"▾"):"›";
-    const icon=`<span class="cropicon" data-info="1">${cropIconHTML(disp)}</span>`;
-    if(!pv){card.innerHTML=`<div class="mc-r1">${icon}<span class="mc-nm">${disp}</span>
+    if(!pv){card.innerHTML=`<div class="mc-r1"><span class="mc-nm">${disp}</span>
       <span class="mc-none">近期無成交</span><span class="chev">${chev}</span></div>`;
-      card.onclick=tapCrop;wireIcon(card,disp,null);el.appendChild(card);}
+      card.onclick=tapCrop;el.appendChild(card);}
     else{
     const es=pv.es;const prev=es.length>1?es[es.length-2][1].avg:pv.avg;const chg=pv.avg-prev;const chgP=prev?chg/prev*100:0;
     const dcls=chg>0.01?"up":chg<-0.01?"dn":"mid";const arr=chg>0.01?"▲":chg<-0.01?"▼":"＝";
     const tag=pv.stale>14?`<span class="tag season">非當季·最後成交 ${pv.date.slice(5)}</span>`:`<span class="tag ${pv.cls}">${pv.say}</span>`;
-    card.innerHTML=`<div class="mc-r1">${icon}
+    card.innerHTML=`<div class="mc-r1">
         <span class="mc-nm">${disp}${hasVar?` <span class="mc-vhint">${vlabels.length} 品種</span>`:""}</span>
         <span class="mc-px"><span class="mc-v mono">${pxU(pv.avg).toFixed(1)}</span><span class="mc-u">${unitU()}</span></span>
       </div>
@@ -1032,21 +991,16 @@ function renderBoard(){
         <span class="mc-chg ${dcls} mono">${arr}${chgP>=0?"+":""}${chgP.toFixed(1)}%</span>
         <span class="chev">${chev}</span>
       </div>`;
-    card.onclick=tapCrop;wireIcon(card,disp,null);el.appendChild(card);}
-    // 品種下拉：點作物展開，選「全部」或某品種→進 K 線；縮圖可點看挑選要訣
+    card.onclick=tapCrop;el.appendChild(card);}
+    // 品種下拉：只列各品種（無「全部綜合」），點品種→開該品種的說明＋Google 查圖
     if(hasVar&&PICK===disp){const dd=document.createElement("div");dd.className="vdrop";
-      dd.innerHTML=`<button class="vopt" data-v=""><span class="cropicon" data-info="1">${cropIconHTML(disp)}</span><span class="vname">${disp}（全部綜合）</span></button>`+
-        vlabels.map(l=>{const s=variantSeries(disp,l);const ks=Object.keys(s).sort();const last=ks.length?s[ks[ks.length-1]]:null;
-          return `<button class="vopt" data-v="${l}"><span class="cropicon" data-info="1">${cropIconHTML(disp,l)}</span><span class="vname">${l}</span>${last?`<span class="vprice mono">${pxU(last.avg).toFixed(1)} ${unitU()}</span>`:""}</button>`;}).join("");
-      dd.querySelectorAll(".vopt").forEach(o=>{const lab=o.dataset.v||null;
-        o.onclick=(e)=>{e.stopPropagation();openDetail(disp,lab);};wireIcon(o,disp,lab);});
+      dd.innerHTML=vlabels.map(l=>{const s=variantSeries(disp,l);const ks=Object.keys(s).sort();const last=ks.length?s[ks[ks.length-1]]:null;
+          return `<button class="vopt" data-v="${l}"><span class="vname">${l}</span>${last?`<span class="vprice mono">${pxU(last.avg).toFixed(1)} ${unitU()}</span>`:""}</button>`;}).join("");
+      dd.querySelectorAll(".vopt").forEach(o=>{const lab=o.dataset.v;
+        o.onclick=(e)=>{e.stopPropagation();openCropInfo(disp,lab);};});
       el.appendChild(dd);}
   });
 }
-/* 縮圖(emoji)點擊→挑選要訣彈窗；阻止冒泡以免觸發卡片/選項本身 */
-function wireIcon(root,crop,label){const ic=root.querySelector(".cropicon");if(!ic)return;
-  ic.onclick=(e)=>{e.stopPropagation();openCropInfo(crop,label);};}   // 點圖示→說明彈窗(含 Google 查圖鈕)
-function selectCrop(d){openDetail(d,null);}   // 相容舊呼叫
 /* 買賣價註記：批發拍賣是「一個成交價」，農夫扣承銷手續費後實得 */
 const FEE_FARMER=0.06;
 function roleNoteHTML(avg){const u=unitU();
