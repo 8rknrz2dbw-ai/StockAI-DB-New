@@ -443,7 +443,7 @@
   <nav class="tabs">
     <button class="tab on" data-t="market">行情看板</button>
     <button class="tab" data-t="forecast">採收預判</button>
-    <button class="tab" data-t="harvest">田區搶收</button>
+    <button class="tab" data-t="harvest">田區巡查</button>
   </nav>
 
   <div class="view on" id="view-market">
@@ -647,7 +647,7 @@
 <script>
 /* ══════ 基礎 ══════ */
 const VERSION="v1.2.0";
-/* 精準務農（farmer）：行情看板＋田區搶收＋採收預判。單一身分 App、無角色切換。
+/* 精準務農（farmer）：行情看板＋採收預判＋田區巡查。單一身分 App、無角色切換。
    （原「精準進貨/商人」批發比價功能已自本 repo 移除，改由另一支獨立 App 交付。） */
 const APP="farmer";
 const APP_NAME="精準務農";
@@ -1723,7 +1723,7 @@ function switchTab(m){
 }
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchTab(t.dataset.t)));
 
-/* 單一身分 App（精準務農）：分頁固定為 行情看板／採收預判／田區搶收，無角色切換。 */
+/* 單一身分 App（精準務農）：分頁固定為 行情看板／採收預判／田區巡查，無角色切換。 */
 function applyRole(){
   const active=document.querySelector(".tab.on");
   if(!active||active.style.display==="none")switchTab("market");
