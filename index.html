@@ -33,7 +33,7 @@
   :focus-visible{outline:3px solid var(--leaf);outline-offset:2px;}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
   .wrap{max-width:760px;margin:0 auto;
-    padding:calc(0.9rem + env(safe-area-inset-top)) calc(0.8rem + env(safe-area-inset-right)) 3rem calc(0.8rem + env(safe-area-inset-left));}
+    padding:0 calc(0.8rem + env(safe-area-inset-right)) 3rem calc(0.8rem + env(safe-area-inset-left));}
 
   header{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;padding-bottom:0.7rem;border-bottom:1px solid var(--line);}
   header h1{font-size:1.6rem;font-weight:900;margin:0;letter-spacing:3px;line-height:1.1;
@@ -45,7 +45,9 @@
     width:2.4rem;height:2.4rem;border-radius:50%;font-size:1.2rem;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
   .hgroup{margin-left:auto;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;justify-content:flex-end;}
   .upd{font-size:0.72rem;color:var(--muted);white-space:nowrap;}
-  header.slim{gap:0.5rem;padding-top:0.1rem;justify-content:flex-start;}
+  /* 頁首固定置頂（含瀏海安全區），資料往上捲時滑到它下面、不會蓋過去 */
+  header.slim{gap:0.5rem;justify-content:flex-start;position:sticky;top:0;z-index:30;background:var(--bg);
+    padding-top:calc(0.45rem + env(safe-area-inset-top));}
   header.slim .gear{margin-left:auto;}
   .hright{display:flex;align-items:center;gap:0.5rem;flex:0 0 auto;}
   .badge{padding:0.15rem 0.55rem;border-radius:999px;font-size:0.7rem;font-weight:700;border:1px solid var(--line);white-space:nowrap;}
@@ -136,12 +138,16 @@
   .tag.season::before{display:none;}   /* 非當季為描述性標籤、字較長，省去圓點以單行呈現 */
 
   /* === 行情看板 v1.2：大卡列表 + 點進去的詳細頁 === */
-  .boardtop{position:sticky;top:0;z-index:6;background:var(--bg);padding:0.2rem 0 0.6rem;
+  .boardtop{position:sticky;top:var(--hdr-h,0);z-index:6;background:var(--bg);padding:0.2rem 0 0.6rem;
     display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.7rem;}
   .boardtop .catbar{margin:0;}
   .mktrow{display:flex;align-items:center;gap:0.6rem;}
-  .mktlabel{font-size:0.95rem;color:var(--muted);font-weight:600;white-space:nowrap;}
+  .mktlabel{font-size:0.95rem;color:var(--muted);font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:0.3rem;}
   .mktlabel b{color:var(--leaf);font-weight:900;}
+  .mktsel{background:var(--panel2);border:1px solid var(--leaf-dim);color:var(--leaf);font-weight:900;font-size:1rem;
+    border-radius:999px;padding:0.28rem 1.7rem 0.28rem 0.8rem;-webkit-appearance:none;appearance:none;font-family:inherit;
+    background-image:linear-gradient(45deg,transparent 50%,var(--leaf) 50%),linear-gradient(135deg,var(--leaf) 50%,transparent 50%);
+    background-position:calc(100% - 15px) 55%,calc(100% - 10px) 55%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;}
   .unitbar{margin-left:auto;flex:0 0 auto;}
   .searchrow{display:flex;position:relative;}
   .cropsearch{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--paper);
@@ -238,14 +244,17 @@
   .pickbtns button:active{background:var(--leaf-dim);color:var(--bg);}
   .pickgrp{margin-top:0.6rem;} .pickh{font-size:0.85rem;color:var(--muted);font-weight:800;margin:0.35rem 0 0.3rem;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;}
   .pickh small{color:var(--leaf);font-weight:700;}
-  .pickgrid{display:flex;flex-wrap:wrap;gap:0.4rem;}
-  .chip{display:inline-flex;align-items:center;gap:0.35rem;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:0.35rem 0.7rem;font-size:0.95rem;cursor:pointer;user-select:none;}
-  .chip .chiptop{display:inline-flex;align-items:center;gap:0.35rem;}
-  .chip.chip-v{flex-direction:column;align-items:flex-start;gap:0.2rem;border-radius:12px;}
-  .chip .chipnm{display:inline-flex;align-items:center;gap:0.3rem;} .chip .chipvn{font-size:0.66rem;color:var(--cool);font-weight:800;}
-  .chip .chipvar{color:var(--muted);font-size:0.72rem;padding-left:1.4rem;line-height:1.25;}
-  .chip.on{background:var(--leaf-dim);color:var(--bg);border-color:var(--leaf-dim);font-weight:800;}
-  .chip input{width:1.05rem;height:1.05rem;accent-color:var(--leaf);margin:0;}
+  /* 我的品項：整齊清單，每項一列(勾選＋品名)、有品種者品種各自獨立小標(不擠成一串) */
+  .picklist{display:flex;flex-direction:column;gap:0.4rem;}
+  .pickrow{display:flex;flex-direction:column;gap:0.3rem;background:var(--panel2);border:1px solid var(--line);
+    border-radius:12px;padding:0.55rem 0.75rem;cursor:pointer;user-select:none;}
+  .pickrow.on{border-color:var(--leaf-dim);background:rgba(110,143,60,.16);}
+  .pickrow .prtop{display:flex;align-items:center;gap:0.55rem;}
+  .pickrow .prtop input{width:1.15rem;height:1.15rem;accent-color:var(--leaf);margin:0;flex:0 0 auto;}
+  .pickrow .prnm{font-weight:800;font-size:1.05rem;} .pickrow.on .prnm{color:var(--leaf);}
+  .pickrow .prcount{font-size:0.66rem;font-weight:800;color:var(--bg);background:var(--cool);border-radius:999px;padding:0.05rem 0.4rem;}
+  .pickrow .prvars{display:flex;flex-wrap:wrap;gap:0.3rem;padding-left:1.7rem;}
+  .pickrow .prvar{font-size:0.74rem;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:0.12rem 0.5rem;white-space:nowrap;}
 
   /* 田區搶收 */
   .alert{border:1px solid #5a2c1f;border-radius:var(--radius);
@@ -462,7 +471,7 @@
       <div class="boardtop">
         <div class="catbar" id="catbar"></div>
         <div class="mktrow">
-          <span class="mktlabel" id="mktLabel"></span>
+          <span class="mktlabel"><select class="mktsel" id="mktLabelSel" aria-label="選擇果菜市場"></select> · 批發</span>
           <div class="unitbar" id="unitbar"></div>
         </div>
         <div class="searchrow">
@@ -661,7 +670,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.5.0";
+const VERSION="v1.6.0";
 /* 精準務農（farmer）：行情看板＋採收預判＋田園巡查。單一身分 App、無角色切換。
    （原「精準進貨/商人」批發比價功能已自本 repo 移除，改由另一支獨立 App 交付。） */
 const APP="farmer";
@@ -1036,7 +1045,9 @@ function renderBoard(){
   const searching=!!SEARCH.trim();
   const cb=document.getElementById("catbar");if(cb&&searching)cb.style.display="none";  // 搜尋時隱藏蔬果分類
   // 行情看板專注在行情本身：風雨/颱風資訊只在「田區搶收」頁呈現，看板頁不顯示（避免混淆）
-  const ml=document.getElementById("mktLabel");if(ml)ml.innerHTML=`<b>${MARKET}</b> · 批發`;
+  const mlsel=document.getElementById("mktLabelSel");   // 看板上的市場下拉（與設定同步）
+  if(mlsel){mlsel.innerHTML=marketNames().map(m=>`<option value="${m}"${m===MARKET?" selected":""}>${m}</option>`).join("");
+    mlsel.onchange=e=>switchMarket(e.target.value);}
   const cs=document.getElementById("cropSearch");if(cs)cs.placeholder=`🔍 搜尋此市場 ${availableCrops().length} 種品項…`;
   const ub=document.getElementById("unitbar");if(ub){ub.innerHTML=unitToggleHTML("ubSeg");bindUnitToggle(ub);}
   const el=document.getElementById("board");el.innerHTML="";
@@ -1684,11 +1695,12 @@ function renderCropPick(){
     const grp=document.createElement("div");grp.className="pickgrp";
     grp.innerHTML=`<div class="pickh"><span>${emoji} ${cat} <small>(${nsel}/${items.length})</small></span>
       <span class="pickbtns"><button type="button" data-catall="1">全選</button><button type="button" data-catall="0">取消全選</button></span></div>`;
-    const grid=document.createElement("div");grid.className="pickgrid";
-    items.forEach(c=>{const on=watch.includes(c);const vls=varietyLabels(c);const hasV=vls.length>=2;
-      const lab=document.createElement("label");lab.className="chip"+(on?" on":"")+(hasV?" chip-v":"");
-      lab.innerHTML=`<span class="chiptop"><input type="checkbox" value="${c}"${on?" checked":""}><span class="chipnm">${c}${hasV?` <b class="chipvn">${vls.length}種</b>`:""}</span></span>`
-        +(hasV?`<small class="chipvar">${vls.slice(0,6).join("・")}${vls.length>6?"…":""}</small>`:"");
+    const grid=document.createElement("div");grid.className="picklist";
+    items.forEach(c=>{const on=watch.includes(c);const vls=varietyLabels(c);
+      const vtags=vls.length?`<div class="prvars">${vls.map(v=>`<span class="prvar">${v}</span>`).join("")}</div>`:"";
+      const lab=document.createElement("label");lab.className="pickrow"+(on?" on":"");
+      lab.innerHTML=`<span class="prtop"><input type="checkbox" value="${c}"${on?" checked":""}>`
+        +`<span class="prnm">${c}</span>${vls.length>=2?`<span class="prcount">${vls.length} 種</span>`:""}</span>${vtags}`;
       grid.appendChild(lab);});
     grp.appendChild(grid);box.appendChild(grp);
     grp.querySelector('[data-catall="1"]').onclick=()=>{const w=new Set(watchCrops());items.forEach(c=>w.add(c));setW([...w]);};
@@ -1697,7 +1709,7 @@ function renderCropPick(){
   box.querySelectorAll("input[type=checkbox]").forEach(cb=>cb.onchange=()=>{
     const c=cb.value;let w=watchCrops().slice();
     if(cb.checked){if(!w.includes(c))w.push(c);}else{w=w.filter(x=>x!==c);}
-    S.setWatch(MARKET,w);cb.closest(".chip").classList.toggle("on",cb.checked);
+    S.setWatch(MARKET,w);cb.closest(".pickrow").classList.toggle("on",cb.checked);
     if(!cb.checked&&CUR===c){CUR=null;}
     const cnt=box.querySelector(".pickcount b");if(cnt)cnt.textContent=w.length;
     MKTMODE="list";DETAIL=null;renderBoard();   // 改看板清單後回列表
@@ -1735,9 +1747,14 @@ document.getElementById("ffGeo").addEventListener("click",()=>{
 ["ffLat","ffLng"].forEach(id=>document.getElementById(id).addEventListener("input",updateFfArea));
 
 document.getElementById("fsRow").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.fs=b.dataset.v;applyFont();});
-document.getElementById("mktSelect").addEventListener("change",async e=>{MARKET=e.target.value;S.market=MARKET;
+/* 切換果菜市場：看板下拉與設定下拉共用；切完同步兩邊的選取值 */
+async function switchMarket(mk){if(!mk)return;MARKET=mk;S.market=mk;
   CUR=null;DETAIL=null;CURVAR=null;PICK=null;MKTMODE="list";SEARCH="";const cs=document.getElementById("cropSearch");if(cs)cs.value="";
-  await loadMarket(MARKET);renderBoard();renderSettings();});
+  await loadMarket(mk);
+  const a=document.getElementById("mktSelect");if(a)a.value=mk;
+  const b=document.getElementById("mktLabelSel");if(b)b.value=mk;
+  renderBoard();renderSettings();}
+document.getElementById("mktSelect").addEventListener("change",e=>switchMarket(e.target.value));
 document.getElementById("regionSelect").addEventListener("change",e=>{S.region=e.target.value;
   renderHarvest();renderBoard();});   // 換地區→天氣建議即時更新
 /* 搜尋自動完成下拉：輸入即列出符合品項，「開頭符合」優先，點一項＝直接看該品項 */
@@ -1870,6 +1887,10 @@ function singleRoleUI(){
   document.documentElement.dataset.app=APP;
 }
 
+/* 量固定頁首高度→ CSS 變數 --hdr-h，讓看板 sticky 子列貼在頁首正下方（含瀏海安全區） */
+function setHdrH(){const h=document.querySelector("header.slim");if(h)document.documentElement.style.setProperty("--hdr-h",h.offsetHeight+"px");}
+window.addEventListener("resize",setHdrH);
+window.addEventListener("orientationchange",()=>setTimeout(setHdrH,250));
 /* ══════ 啟動 ══════ */
 (async function(){
   applyFont();
@@ -1879,6 +1900,7 @@ function singleRoleUI(){
   const {index,live}=await loadIndex();INDEX=index;
   document.getElementById("updated").textContent="更新："+(index.updated||"—");
   const mode=document.getElementById("mode");mode.className="badge "+(live?"live":"demo");mode.textContent=live?"實際資料":"示範資料";
+  setHdrH();   // 量固定頁首高度 → 看板 sticky 子列(市場/搜尋)貼在頁首正下方
   const names=marketNames();
   MARKET=(S.market&&names.includes(S.market))?S.market:(names.includes(DEFAULT_MARKET)?DEFAULT_MARKET:names[0]);
   await loadMarket(MARKET);
