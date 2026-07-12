@@ -684,7 +684,7 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.9.0";
+const VERSION="v1.10.0";
 /* 精準務農（farmer）：行情看板＋採收預判＋田園巡查。單一身分 App、無角色切換。
    （原「精準進貨/商人」批發比價功能已自本 repo 移除，改由另一支獨立 App 交付。） */
 const APP="farmer";
@@ -1727,16 +1727,30 @@ const VEG_SUBTYPE=[
   [/蘿蔔|菜頭|甘藷|馬鈴薯|薯|芋|薑|蒜|蓮藕|藕|牛蒡|洋蔥|山藥|荸薺/,2],
   [/筍|菇|蕈|木耳/,3]];
 function subtypeRank(c){for(const [re,r] of VEG_SUBTYPE)if(re.test(c))return r;return 9;}
-/* 我的品項「類型」小標分組（第一版，可再細分/校正）。順序＝顯示順序，先比對到者為準；葉菜類放最後當其餘歸屬。 */
+/* 我的品項「類型」小標分組。順序＝顯示順序，先比對到者為準；末項用 /./ 當其餘歸屬(葉菜/其他水果)。
+   已用線上實際作物名(蔬菜123+水果63)校準到 0 誤分：LEAF_FIRST 先把明顯食葉者(甘薯葉/地瓜葉…)歸葉菜，
+   避免被根莖(薯)/花菜等誤收；水果亦分小標(柑橘/瓜/熱帶/漿果/核果/仁果/柿)。 */
+const LEAF_FIRST=/葉|苗|過貓|龍鬚|水蓮|川七|皇宮|莧|蕹|空心|茼蒿|菠菜|油菜|芹|萵苣|小白菜|青江|包心白|A菜|白菜/;
 const VEG_TYPES=[
   ["甘藍花菜類",/甘藍|高麗|花椰|青花|白花|花菜|芥藍|抱子|娃娃菜/],
-  ["根莖類",/蘿蔔|菜頭|甘藷|甘薯|馬鈴薯|薯$|芋|蓮藕|藕|牛蒡|山藥|荸薺|菱角|防風/],
-  ["蔥蒜薑類",/蔥|蒜|韭|洋蔥|薑/],
-  ["瓜果菜類",/瓜|茄|椒|番茄|秋葵|玉米/],
-  ["豆菜類",/豆|莢|落花生/],
-  ["菇筍類",/筍|菇|蕈|木耳/],
+  ["根莖類",/蘿蔔|菜頭|甘藷|甘薯|馬鈴薯|薯|芋|蓮藕|藕|牛蒡|山藥|薯蕷|荸薺|菱角|防風|菊芋|百合|慈菇/],
+  ["蔥蒜薑類",/蔥|蒜|韭|薑|蕎頭|蕗蕎/],
+  ["瓜果菜類",/瓜|茄|椒|番茄|秋葵|玉米|蒲|匏/],
+  ["豆菜類",/豆|落花生|花生/],
+  ["菇筍類",/筍|菇|蕈|木耳|松茸|洋菇|蘑菇/],
+  ["香辛香草類",/九層塔|羅勒|巴西利|芫荽|香菜|茴香|香椿|香茅|薄荷|紫蘇|月桃|迷迭香|百里香|山葵/],
   ["葉菜類",/./]];
-function vegType(c){for(const [name,re] of VEG_TYPES)if(re.test(c))return name;return "其他";}
+function vegType(c){if(LEAF_FIRST.test(c))return "葉菜類";for(const [name,re] of VEG_TYPES)if(re.test(c))return name;return "其他";}
+const FRUIT_TYPES=[
+  ["柑橘類",/柑|橘|橙|柚|檸檬|萊姆|桔|金棗|茂谷|香櫞/],
+  ["瓜類",/瓜/],
+  ["熱帶水果類",/香蕉|鳳梨|芒果|荔枝|龍眼|釋迦|蓮霧|番石榴|芭樂|紅龍果|火龍|百香|楊桃|榴槤|山竹|波羅蜜|波蘿蜜|椰|酪梨|人心果|黃金果|蛋黃果|紅毛丹|嘉寶果|檳榔|可可|甘蔗/],
+  ["漿果類",/莓|葡萄|桑椹|蔓越|奇異果|石榴/],
+  ["核果類",/桃|李|梅|杏|棗|櫻|枇杷|橄欖/],
+  ["仁果類",/蘋果|梨/],
+  ["柿類",/柿/],
+  ["其他水果",/./]];
+function fruitType(c){for(const [name,re] of FRUIT_TYPES)if(re.test(c))return name;return "其他水果";}
 let PICK_CATOPEN={蔬菜:false,水果:false};   // 分類預設折疊
 let PICK_EXP=new Set();                     // 展開品種的母作物（預設全折疊）
 function renderCropPick(){
@@ -1772,11 +1786,12 @@ function renderCropPick(){
         +`${hasVar?`<button type="button" class="prexp" data-crop="${c}">${exp?"▾":"▸"} 品種</button>`:""}</div>${vtags}`;
       if(hasVar&&!cropOn&&someVar){const cc=row.querySelector('input[data-kind="crop"]');if(cc)cc.indeterminate=true;}   // 部分品種→半勾
       return row;};
-    // 蔬菜依「類型」分小標（葉菜類/甘藍花菜類/根莖類…）；水果一組。全部裝進 body，分類折疊時整包隱藏
-    const order=cat==="蔬菜"?VEG_TYPES.map(t=>t[0]).concat("其他"):["水果"];
-    const bucket={};items.forEach(c=>{const t=cat==="蔬菜"?vegType(c):"水果";(bucket[t]=bucket[t]||[]).push(c);});
+    // 蔬菜／水果都依「類型」分小標（蔬菜:葉菜/甘藍花菜/根莖…；水果:柑橘/瓜/熱帶/漿果…）。全部裝進 body，分類折疊時整包隱藏
+    const isVeg=cat==="蔬菜", TYPES=isVeg?VEG_TYPES:FRUIT_TYPES, typer=isVeg?vegType:fruitType;
+    const order=TYPES.map(t=>t[0]);
+    const bucket={};items.forEach(c=>{const t=typer(c);(bucket[t]=bucket[t]||[]).push(c);});
     order.forEach(tname=>{const list=(bucket[tname]||[]).sort((a,b)=>a.localeCompare(b,"zh-Hant"));if(!list.length)return;
-      if(cat==="蔬菜"){const th=document.createElement("div");th.className="picktype";th.textContent=`${tname}（${list.length}）`;body.appendChild(th);}
+      const th=document.createElement("div");th.className="picktype";th.textContent=`${tname}（${list.length}）`;body.appendChild(th);
       const grid=document.createElement("div");grid.className="picklist";
       list.forEach(c=>grid.appendChild(buildRow(c)));body.appendChild(grid);});
     grp.appendChild(body);
