@@ -1,209 +1,68 @@
 {
-  "tried": [
+  "searches": [
     {
-      "note": "gov.tw:產地價格",
-      "url": "https://data.gov.tw/api/v2/rest/dataset",
-      "params": {
-        "q": "產地價格",
-        "limit": 20
-      },
-      "status": 405,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 556,
-      "error": null
-    },
-    {
-      "note": "gov.tw:產地價格",
-      "url": "https://data.gov.tw/api/front/dataset/search",
-      "params": {
-        "keyword": "產地價格",
-        "page": 1
-      },
-      "status": 404,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 876,
-      "error": null
-    },
-    {
-      "note": "gov.tw:產地價格",
-      "url": "https://data.gov.tw/api/v1/rest/dataset",
-      "params": {
-        "q": "產地價格"
-      },
-      "status": 404,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 876,
-      "error": null
-    },
-    {
-      "note": "gov.tw:產地價格",
-      "url": "https://data.gov.tw/api/dataset/search",
-      "params": {
-        "query": "產地價格"
-      },
-      "status": 404,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 876,
-      "error": null
-    },
-    {
-      "note": "gov.tw:產地價",
-      "url": "https://data.gov.tw/api/v2/rest/dataset",
-      "params": {
-        "q": "產地價",
-        "limit": 20
-      },
-      "status": 405,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 556,
-      "error": null
-    },
-    {
-      "note": "gov.tw:產地價",
-      "url": "https://data.gov.tw/api/front/dataset/search",
-      "params": {
-        "keyword": "產地價",
-        "page": 1
-      },
-      "status": 404,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 876,
-      "error": null
-    },
-    {
-      "note": "gov.tw:產地價",
-      "url": "https://data.gov.tw/api/v1/rest/dataset",
-      "params": {
-        "q": "產地價"
-      },
-      "status": 404,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 876,
-      "error": null
-    },
-    {
-      "note": "gov.tw:產地價",
-      "url": "https://data.gov.tw/api/dataset/search",
-      "params": {
-        "query": "產地價"
-      },
-      "status": 404,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 876,
-      "error": null
-    },
-    {
-      "note": "gov.tw:產地行情",
-      "url": "https://data.gov.tw/api/v2/rest/dataset",
-      "params": {
-        "q": "產地行情",
-        "limit": 20
-      },
-      "status": 405,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 556,
-      "error": null
-    },
-    {
-      "note": "gov.tw:產地行情",
-      "url": "https://data.gov.tw/api/front/dataset/search",
-      "params": {
-        "keyword": "產地行情",
-        "page": 1
-      },
-      "status": 404,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 876,
-      "error": null
-    },
-    {
-      "note": "gov.tw:產地行情",
-      "url": "https://data.gov.tw/api/v1/rest/dataset",
-      "params": {
-        "q": "產地行情"
-      },
-      "status": 404,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 876,
-      "error": null
-    },
-    {
-      "note": "gov.tw:產地行情",
-      "url": "https://data.gov.tw/api/dataset/search",
-      "params": {
-        "query": "產地行情"
-      },
-      "status": 404,
-      "ctype": "text/html;charset=UTF-8",
-      "len": 876,
-      "error": null
-    },
-    {
-      "note": "moa:產地價格",
-      "url": "https://data.moa.gov.tw/api/v1/dataset",
-      "params": {
-        "query": "產地價格"
-      },
+      "kw": "產地價格",
       "status": 200,
-      "ctype": "text/html; charset=utf-8",
-      "len": 10689,
-      "error": null
-    },
-    {
-      "note": "moa:產地價格",
-      "url": "https://data.moa.gov.tw/Service/OpenData/DataList.aspx",
-      "params": {
-        "keyword": "產地價格"
-      },
-      "status": 200,
-      "ctype": "text/html; charset=utf-8",
-      "len": 10689,
-      "error": null
-    },
-    {
-      "note": "moa:產地價格",
-      "url": "https://data.moa.gov.tw/open_search.aspx",
-      "params": {
-        "keyword": "產地價格"
-      },
-      "status": 200,
-      "ctype": "text/html; charset=utf-8",
       "len": 27182,
-      "error": null
+      "links_sample": [
+        "mailto:opendata@moa.gov.tw"
+      ],
+      "chandu_text": [],
+      "unitids": [],
+      "titles": [],
+      "head": "\r\n\r\n<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"utf-8\" />\r\n    <meta property =\"og:type\" content=\"website\"/>\n<meta property =\"og:url\" content=\"/open.aspx\"/>\n<meta property =\"og:image\" content=\"/upload/112(0321)開放平台banner-03縮小.jpg\"/>\n\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\" />\r\n    <meta id=\"goosleSiteVerification\" name=\"google-site-verification\" content=\"rSWS3yAAKmIE_O2ppSqqUyLAANSVVlVVzZ19fD8DG5s\"></meta>\r\n\r\n\r\n    <link rel=\"api\" type=\"application/x.atom+xml\" title=\"農業資料開放平臺\" href=\"https://data.moa.gov.tw/openapi.json\"/>\r\n    <link hr"
     },
     {
-      "note": "moa:產地價",
-      "url": "https://data.moa.gov.tw/api/v1/dataset",
-      "params": {
-        "query": "產地價"
-      },
+      "kw": "產地價",
       "status": 200,
-      "ctype": "text/html; charset=utf-8",
-      "len": 10689,
-      "error": null
-    },
-    {
-      "note": "moa:產地價",
-      "url": "https://data.moa.gov.tw/Service/OpenData/DataList.aspx",
-      "params": {
-        "keyword": "產地價"
-      },
-      "status": 200,
-      "ctype": "text/html; charset=utf-8",
-      "len": 10689,
-      "error": null
-    },
-    {
-      "note": "moa:產地價",
-      "url": "https://data.moa.gov.tw/open_search.aspx",
-      "params": {
-        "keyword": "產地價"
-      },
-      "status": 200,
-      "ctype": "text/html; charset=utf-8",
       "len": 27182,
-      "error": null
+      "links_sample": [
+        "mailto:opendata@moa.gov.tw"
+      ],
+      "chandu_text": [],
+      "unitids": [],
+      "titles": [],
+      "head": "\r\n\r\n<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"utf-8\" />\r\n    <meta property =\"og:type\" content=\"website\"/>\n<meta property =\"og:url\" content=\"/open.aspx\"/>\n<meta property =\"og:image\" content=\"/upload/112(0321)開放平台banner-03縮小.jpg\"/>\n\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\" />\r\n    <meta id=\"goosleSiteVerification\" name=\"google-site-verification\" content=\"rSWS3yAAKmIE_O2ppSqqUyLAANSVVlVVzZ19fD8DG5s\"></meta>\r\n\r\n\r\n    <link rel=\"api\" type=\"application/x.atom+xml\" title=\"農業資料開放平臺\" href=\"https://data.moa.gov.tw/openapi.json\"/>\r\n    <link hr"
+    },
+    {
+      "kw": "產地行情",
+      "status": 200,
+      "len": 27182,
+      "links_sample": [
+        "mailto:opendata@moa.gov.tw"
+      ],
+      "chandu_text": [],
+      "unitids": [],
+      "titles": [],
+      "head": "\r\n\r\n<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"utf-8\" />\r\n    <meta property =\"og:type\" content=\"website\"/>\n<meta property =\"og:url\" content=\"/open.aspx\"/>\n<meta property =\"og:image\" content=\"/upload/112(0321)開放平台banner-03縮小.jpg\"/>\n\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\" />\r\n    <meta id=\"goosleSiteVerification\" name=\"google-site-verification\" content=\"rSWS3yAAKmIE_O2ppSqqUyLAANSVVlVVzZ19fD8DG5s\"></meta>\r\n\r\n\r\n    <link rel=\"api\" type=\"application/x.atom+xml\" title=\"農業資料開放平臺\" href=\"https://data.moa.gov.tw/openapi.json\"/>\r\n    <link hr"
+    },
+    {
+      "kw": "產地",
+      "status": 200,
+      "len": 27182,
+      "links_sample": [
+        "mailto:opendata@moa.gov.tw"
+      ],
+      "chandu_text": [],
+      "unitids": [],
+      "titles": [],
+      "head": "\r\n\r\n<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"utf-8\" />\r\n    <meta property =\"og:type\" content=\"website\"/>\n<meta property =\"og:url\" content=\"/open.aspx\"/>\n<meta property =\"og:image\" content=\"/upload/112(0321)開放平台banner-03縮小.jpg\"/>\n\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\" />\r\n    <meta id=\"goosleSiteVerification\" name=\"google-site-verification\" content=\"rSWS3yAAKmIE_O2ppSqqUyLAANSVVlVVzZ19fD8DG5s\"></meta>\r\n\r\n\r\n    <link rel=\"api\" type=\"application/x.atom+xml\" title=\"農業資料開放平臺\" href=\"https://data.moa.gov.tw/openapi.json\"/>\r\n    <link hr"
     }
   ],
-  "hits": []
+  "datasets": [
+    {
+      "url": "https://data.moa.gov.tw/api/v1/dataset",
+      "status": 200,
+      "len": 10689,
+      "head": "\r\n\r\n<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"utf-8\" />\r\n    <meta property =\"og:type\" content=\"website\"/>\n<meta property =\"og:url\" content=\"error.aspx\"/>\n\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\" />\r\n    <meta id=\"goosleSiteVerification\" name=\"google-site-verification\" content=\"rSWS3yAAKmIE_O2ppSqqUyLAANSVVlVVzZ19fD8DG5s\"></meta>\r\n\r\n\r\n    <link rel=\"api\" type=\"application/x.atom+xml\" title=\"農業資料開放平臺\" href=\"https://data.moa.gov.tw/openapi.json\"/>\r\n    <link href=\"https://use.fontawesome.com/releases/v5.1.0/css/all.css\" integrity=\"sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt\" crossorigin=\"anonymous\" rel=\"stylesheet\">\r\n    <link href=\"/app.css\" rel=\"stylesheet\" />\r\n    <link href=\"/assets/build/app.bundle.css\" rel=\"stylesheet\" />\r\n    <!-- jQuery UI (前台共用) -->\r\n    <link rel=\"stylesheet\" href=\"/javascript/jquery-ui/jquery-ui.min.css\" />\r\n    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->\r\n    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->\r\n    <!--[if lt IE 9]>\r\n  <script src=\"https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js\"></script>\r\n  <script src=\"https://oss.maxcdn.com/respond/1.4.2/respond.min.js\"></script>\r\n  <![endif]-->\r\n    <!-- Global site tag (gtag.js) - Google Analytics -->\r\n    <script async src=\"https://www.googletagmanager.com/gtag/js?id=G-R2CRY7L0BM\"></script>\r\n    <script>\r\n        window.dataLayer = wind",
+      "chandu_text": []
+    },
+    {
+      "url": "https://data.moa.gov.tw/Service/OpenData/DataList.aspx",
+      "status": 200,
+      "len": 10689,
+      "head": "\r\n\r\n<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"utf-8\" />\r\n    <meta property =\"og:type\" content=\"website\"/>\n<meta property =\"og:url\" content=\"error.aspx\"/>\n\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\" />\r\n    <meta id=\"goosleSiteVerification\" name=\"google-site-verification\" content=\"rSWS3yAAKmIE_O2ppSqqUyLAANSVVlVVzZ19fD8DG5s\"></meta>\r\n\r\n\r\n    <link rel=\"api\" type=\"application/x.atom+xml\" title=\"農業資料開放平臺\" href=\"https://data.moa.gov.tw/openapi.json\"/>\r\n    <link href=\"https://use.fontawesome.com/releases/v5.1.0/css/all.css\" integrity=\"sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt\" crossorigin=\"anonymous\" rel=\"stylesheet\">\r\n    <link href=\"/app.css\" rel=\"stylesheet\" />\r\n    <link href=\"/assets/build/app.bundle.css\" rel=\"stylesheet\" />\r\n    <!-- jQuery UI (前台共用) -->\r\n    <link rel=\"stylesheet\" href=\"/javascript/jquery-ui/jquery-ui.min.css\" />\r\n    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->\r\n    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->\r\n    <!--[if lt IE 9]>\r\n  <script src=\"https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js\"></script>\r\n  <script src=\"https://oss.maxcdn.com/respond/1.4.2/respond.min.js\"></script>\r\n  <![endif]-->\r\n    <!-- Global site tag (gtag.js) - Google Analytics -->\r\n    <script async src=\"https://www.googletagmanager.com/gtag/js?id=G-R2CRY7L0BM\"></script>\r\n    <script>\r\n        window.dataLayer = wind",
+      "chandu_text": []
+    }
+  ]
 }
