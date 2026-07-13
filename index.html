@@ -573,6 +573,11 @@
         <button data-v="s">小</button><button data-v="m">中</button><button data-v="l">大</button><button data-v="xl">特大</button>
       </div></div>
 
+    <div class="setblk"><h4>天氣預報地區（全國）</h4>
+      <select class="mkt" id="regionSelect"></select>
+      <p class="hintline">選你所在縣市，天氣預報／農事建議依此顯示。若有填座標的田，會自動以田所在縣市為準。</p>
+    </div>
+
     <div class="setcat">行情看板</div>
     <div class="setblk"><h4>果菜市場</h4><select class="mkt" id="mktSelect"></select></div>
 
@@ -581,12 +586,7 @@
       <div class="croppick" id="cropPick"></div>
     </div>
 
-    <div class="setcat">天氣與田區</div>
-    <div class="setblk"><h4>天氣預報地區（全國）</h4>
-      <select class="mkt" id="regionSelect"></select>
-      <p class="hintline">選你所在縣市，天氣預報／農事建議依此顯示。若有填座標的田，會自動以田所在縣市為準。</p>
-    </div>
-
+    <div class="setcat">田區（搶收／採收用）</div>
     <div class="setblk"><h4>我的田區（搶收/採收用）</h4>
       <div id="fieldList"></div>
       <button class="addbtn" id="fieldAddBtn">＋ 新增一塊田</button>
@@ -703,11 +703,16 @@
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.0.0";
+const VERSION="v1.0.1";
 /* 版本更新紀錄（最新在最上面）。未來每次改版就在陣列最前面新增一筆：
    {v:版本, date:"YYYY-MM-DD", title:"一句話重點", items:[本次更新條列…]}。
    會顯示在「設定→關於 App→更新內容」。 */
 const CHANGELOG=[
+  {v:"v1.0.1", date:"2026-07-13", title:"小調整", items:[
+    "設定：「天氣預報地區」移到「字體大小」下方，設定更順手。",
+    "颱風：已遠離（暴風圈通過、距離拉開）的颱風不再顯示「追蹤中」，只在接近／繞回台灣時才提醒。",
+    "新版更新：改版時自動用彈窗提醒這版改了什麼（看過就不再跳）。",
+  ]},
   {v:"v1.0.0", date:"2026-07-13", title:"正式上線 🎉", items:[
     "行情看板：全台 19 個果菜批發市場的蔬菜／水果均價、漲跌與偏貴/偏便宜標籤，可切換公斤／台斤。",
     "價格走勢：點品項看 K 線（日／週／月・近 2 年）與逐日明細；多品種可分別看各自走勢。",
@@ -1942,6 +1947,14 @@ function renderChangelog(){const box=document.getElementById("clList");if(!box)r
     ${c.title?`<div class="cltitle">${c.title}</div>`:""}
     <ul class="cllist">${c.items.map(t=>`<li>${t}</li>`).join("")}</ul></div>`).join("");}
 function openChangelog(){renderChangelog();document.getElementById("clModal").classList.add("on");}
+/* 新版更新彈窗：改版後第一次開啟自動跳「更新內容」一次；看過(記 vs_seenver)就不再跳（含關掉也不再跳）。 */
+function maybeShowWhatsNew(){
+  try{const cur=(CHANGELOG[0]||{}).v;if(!cur)return;
+    if(localStorage.getItem("vs_seenver")===cur)return;
+    localStorage.setItem("vs_seenver",cur);   // 先標記已看 → 之後(含關掉)不再跳
+    openChangelog();
+  }catch(e){}
+}
 function closeChangelog(){document.getElementById("clModal").classList.remove("on");}
 document.getElementById("aWhatsnew").addEventListener("click",openChangelog);
 document.getElementById("closeCl").addEventListener("click",closeChangelog);
@@ -2058,6 +2071,7 @@ window.addEventListener("orientationchange",()=>setTimeout(setHdrH,250));
   populateFcCrop();applyFcMode();
   document.getElementById("fcDate").value=todayISO();
   applyRole();   // 依角色顯示/隱藏分頁
+  maybeShowWhatsNew();   // 改版後第一次開啟：自動跳「更新內容」一次
 })();
 /* PWA：註冊 Service Worker（可安裝到主畫面、離線可用）。失敗不影響網頁運作。 */
 if("serviceWorker" in navigator){
