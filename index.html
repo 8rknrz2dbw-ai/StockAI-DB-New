@@ -708,10 +708,9 @@ const VERSION="v1.0.1";
    {v:版本, date:"YYYY-MM-DD", title:"一句話重點", items:[本次更新條列…]}。
    會顯示在「設定→關於 App→更新內容」。 */
 const CHANGELOG=[
-  {v:"v1.0.1", date:"2026-07-13", title:"小調整", items:[
-    "設定：「天氣預報地區」移到「字體大小」下方，設定更順手。",
-    "颱風：已遠離（暴風圈通過、距離拉開）的颱風不再顯示「追蹤中」，只在接近／繞回台灣時才提醒。",
-    "新版更新：改版時自動用彈窗提醒這版改了什麼（看過就不再跳）。",
+  {v:"v1.0.1", date:"2026-07-13", title:"設定更順手 ⚙️", items:[
+    "【改善】設定選單重新排序：「天氣預報地區」移到「字體大小」下方、「我的品項」移到「我的田區」上方。",
+    "【新增】改版後第一次開啟會自動彈一次這版的「本次更新」，快速告訴你改了什麼（看過就不再跳）。",
   ]},
   {v:"v1.0.0", date:"2026-07-13", title:"正式上線 🎉", items:[
     "行情看板：全台 19 個果菜批發市場的蔬菜／水果均價、漲跌與偏貴/偏便宜標籤，可切換公斤／台斤。",
@@ -1940,19 +1939,20 @@ document.getElementById("aFeedback").addEventListener("click",()=>{
 function openFaq(){document.getElementById("faqModal").classList.add("on");}
 function closeFaq(){document.getElementById("faqModal").classList.remove("on");}
 /* 更新內容：由 CHANGELOG 渲染（專業版本紀錄，最新在上） */
-function renderChangelog(){const box=document.getElementById("clList");if(!box)return;
-  box.innerHTML=CHANGELOG.map((c,i)=>`<div class="clitem${i===0?" clnew":""}">
+function renderChangelog(latestOnly){const box=document.getElementById("clList");if(!box)return;
+  const list=latestOnly?CHANGELOG.slice(0,1):CHANGELOG;   // 自動彈窗只顯示「這一版」；手動看則列全部
+  box.innerHTML=list.map((c,i)=>`<div class="clitem${i===0?" clnew":""}">
     <div class="clhead"><span class="clver">${c.v}</span>${i===0?'<span class="clbadge">最新</span>':""}
       <span class="cldate">${c.date}</span></div>
     ${c.title?`<div class="cltitle">${c.title}</div>`:""}
     <ul class="cllist">${c.items.map(t=>`<li>${t}</li>`).join("")}</ul></div>`).join("");}
-function openChangelog(){renderChangelog();document.getElementById("clModal").classList.add("on");}
-/* 新版更新彈窗：改版後第一次開啟自動跳「更新內容」一次；看過(記 vs_seenver)就不再跳（含關掉也不再跳）。 */
+function openChangelog(){renderChangelog(false);document.getElementById("clModal").classList.add("on");}
+/* 新版更新彈窗：改版後第一次開啟自動跳一次、且只顯示「這個版本改了什麼」；看過(記 vs_seenver)就不再跳（含關掉也不再跳）。 */
 function maybeShowWhatsNew(){
   try{const cur=(CHANGELOG[0]||{}).v;if(!cur)return;
     if(localStorage.getItem("vs_seenver")===cur)return;
     localStorage.setItem("vs_seenver",cur);   // 先標記已看 → 之後(含關掉)不再跳
-    openChangelog();
+    renderChangelog(true);document.getElementById("clModal").classList.add("on");   // 只顯示本版（簡易、非整份歷史）
   }catch(e){}
 }
 function closeChangelog(){document.getElementById("clModal").classList.remove("on");}
