@@ -1,0 +1,209 @@
+{
+  "tried": [
+    {
+      "note": "gov.tw:產地價格",
+      "url": "https://data.gov.tw/api/v2/rest/dataset",
+      "params": {
+        "q": "產地價格",
+        "limit": 20
+      },
+      "status": 405,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 556,
+      "error": null
+    },
+    {
+      "note": "gov.tw:產地價格",
+      "url": "https://data.gov.tw/api/front/dataset/search",
+      "params": {
+        "keyword": "產地價格",
+        "page": 1
+      },
+      "status": 404,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 876,
+      "error": null
+    },
+    {
+      "note": "gov.tw:產地價格",
+      "url": "https://data.gov.tw/api/v1/rest/dataset",
+      "params": {
+        "q": "產地價格"
+      },
+      "status": 404,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 876,
+      "error": null
+    },
+    {
+      "note": "gov.tw:產地價格",
+      "url": "https://data.gov.tw/api/dataset/search",
+      "params": {
+        "query": "產地價格"
+      },
+      "status": 404,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 876,
+      "error": null
+    },
+    {
+      "note": "gov.tw:產地價",
+      "url": "https://data.gov.tw/api/v2/rest/dataset",
+      "params": {
+        "q": "產地價",
+        "limit": 20
+      },
+      "status": 405,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 556,
+      "error": null
+    },
+    {
+      "note": "gov.tw:產地價",
+      "url": "https://data.gov.tw/api/front/dataset/search",
+      "params": {
+        "keyword": "產地價",
+        "page": 1
+      },
+      "status": 404,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 876,
+      "error": null
+    },
+    {
+      "note": "gov.tw:產地價",
+      "url": "https://data.gov.tw/api/v1/rest/dataset",
+      "params": {
+        "q": "產地價"
+      },
+      "status": 404,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 876,
+      "error": null
+    },
+    {
+      "note": "gov.tw:產地價",
+      "url": "https://data.gov.tw/api/dataset/search",
+      "params": {
+        "query": "產地價"
+      },
+      "status": 404,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 876,
+      "error": null
+    },
+    {
+      "note": "gov.tw:產地行情",
+      "url": "https://data.gov.tw/api/v2/rest/dataset",
+      "params": {
+        "q": "產地行情",
+        "limit": 20
+      },
+      "status": 405,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 556,
+      "error": null
+    },
+    {
+      "note": "gov.tw:產地行情",
+      "url": "https://data.gov.tw/api/front/dataset/search",
+      "params": {
+        "keyword": "產地行情",
+        "page": 1
+      },
+      "status": 404,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 876,
+      "error": null
+    },
+    {
+      "note": "gov.tw:產地行情",
+      "url": "https://data.gov.tw/api/v1/rest/dataset",
+      "params": {
+        "q": "產地行情"
+      },
+      "status": 404,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 876,
+      "error": null
+    },
+    {
+      "note": "gov.tw:產地行情",
+      "url": "https://data.gov.tw/api/dataset/search",
+      "params": {
+        "query": "產地行情"
+      },
+      "status": 404,
+      "ctype": "text/html;charset=UTF-8",
+      "len": 876,
+      "error": null
+    },
+    {
+      "note": "moa:產地價格",
+      "url": "https://data.moa.gov.tw/api/v1/dataset",
+      "params": {
+        "query": "產地價格"
+      },
+      "status": 200,
+      "ctype": "text/html; charset=utf-8",
+      "len": 10689,
+      "error": null
+    },
+    {
+      "note": "moa:產地價格",
+      "url": "https://data.moa.gov.tw/Service/OpenData/DataList.aspx",
+      "params": {
+        "keyword": "產地價格"
+      },
+      "status": 200,
+      "ctype": "text/html; charset=utf-8",
+      "len": 10689,
+      "error": null
+    },
+    {
+      "note": "moa:產地價格",
+      "url": "https://data.moa.gov.tw/open_search.aspx",
+      "params": {
+        "keyword": "產地價格"
+      },
+      "status": 200,
+      "ctype": "text/html; charset=utf-8",
+      "len": 27182,
+      "error": null
+    },
+    {
+      "note": "moa:產地價",
+      "url": "https://data.moa.gov.tw/api/v1/dataset",
+      "params": {
+        "query": "產地價"
+      },
+      "status": 200,
+      "ctype": "text/html; charset=utf-8",
+      "len": 10689,
+      "error": null
+    },
+    {
+      "note": "moa:產地價",
+      "url": "https://data.moa.gov.tw/Service/OpenData/DataList.aspx",
+      "params": {
+        "keyword": "產地價"
+      },
+      "status": 200,
+      "ctype": "text/html; charset=utf-8",
+      "len": 10689,
+      "error": null
+    },
+    {
+      "note": "moa:產地價",
+      "url": "https://data.moa.gov.tw/open_search.aspx",
+      "params": {
+        "keyword": "產地價"
+      },
+      "status": 200,
+      "ctype": "text/html; charset=utf-8",
+      "len": 27182,
+      "error": null
+    }
+  ],
+  "hits": []
+}
