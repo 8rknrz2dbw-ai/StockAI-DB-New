@@ -1,6 +1,6 @@
 {
   "key_set": true,
-  "generated": "2026-07-13T18:42:47.310783+08:00",
+  "generated": "2026-07-14T02:12:19.902299+08:00",
   "W-C0034-001_warning": {
     "info": {
       "__list_len__": 1,
@@ -77,7 +77,7 @@
           "CwaTyNo": "str=09",
           "AnalysisData": {
             "Fix": {
-              "__list_len__": 93,
+              "__list_len__": 94,
               "__item__": {
                 "DateTime": "str=2026-07-01T08:00:00+08:00",
                 "CoordinateLongitude": "str=163.5",
@@ -92,21 +92,18 @@
           },
           "ForecastData": {
             "Fix": {
-              "__list_len__": 5,
+              "__list_len__": 2,
               "__item__": {
-                "InitialTime": "str=2026-07-13T14:00:00+08:00",
+                "InitialTime": "str=2026-07-13T20:00:00+08:00",
                 "ForecastHour": "str=6",
-                "CoordinateLongitude": "str=118.7",
-                "CoordinateLatitude": "str=34.7",
-                "MaxWindSpeed": "str=18",
-                "MaxGustSpeed": "str=25",
-                "Pressure": "str=995",
-                "MovingSpeed": "str=11",
+                "CoordinateLongitude": "str=119.4",
+                "CoordinateLatitude": "str=35.6",
+                "MaxWindSpeed": "str=15",
+                "MaxGustSpeed": "str=23",
+                "Pressure": "str=992",
+                "MovingSpeed": "str=22",
                 "MovingDirection": "str=NE",
-                "Circle15ms": {
-                  "Radius": "str=120"
-                },
-                "Radius70PercentProbability": "str=30"
+                "Radius70PercentProbability": "str=70"
               }
             }
           }
@@ -116,13 +113,13 @@
   },
   "O-A0002-001_rain": {
     "Station": {
-      "__list_len__": 1321,
+      "__list_len__": 1323,
       "__item__": {
         "StationName": "str=九份二山",
         "StationId": "str=C1I230",
         "Maintainer": "str=中央氣象署",
         "ObsTime": {
-          "DateTime": "str=2026-07-13T18:30:00+08:00"
+          "DateTime": "str=2026-07-14T02:00:00+08:00"
         },
         "GeoInfo": {
           "Coordinates": {
@@ -142,31 +139,31 @@
         },
         "RainfallElement": {
           "Now": {
-            "Precipitation": "str=94.5"
+            "Precipitation": "str=0.0"
           },
           "Past10Min": {
-            "Precipitation": "str=4.5"
+            "Precipitation": "str=0.0"
           },
           "Past1hr": {
-            "Precipitation": "str=52.0"
+            "Precipitation": "str=0.0"
           },
           "Past3hr": {
-            "Precipitation": "str=94.5"
+            "Precipitation": "str=0.0"
           },
           "Past6Hr": {
-            "Precipitation": "str=94.5"
+            "Precipitation": "str=11.5"
           },
           "Past12hr": {
-            "Precipitation": "str=94.5"
+            "Precipitation": "str=129.5"
           },
           "Past24hr": {
-            "Precipitation": "str=94.5"
+            "Precipitation": "str=129.5"
           },
           "Past2days": {
-            "Precipitation": "str=95.5"
+            "Precipitation": "str=129.5"
           },
           "Past3days": {
-            "Precipitation": "str=220.5"
+            "Precipitation": "str=130.5"
           }
         }
       }
@@ -177,7 +174,7 @@
     "StationId": "A0K420",
     "Maintainer": "中央氣象署",
     "ObsTime": {
-      "DateTime": "2026-07-13T18:30:00+08:00"
+      "DateTime": "2026-07-14T02:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -223,10 +220,10 @@
         "Precipitation": "0.0"
       },
       "Past2days": {
-        "Precipitation": "4.0"
+        "Precipitation": "0.0"
       },
       "Past3days": {
-        "Precipitation": "17.0"
+        "Precipitation": "4.0"
       }
     }
   },
@@ -234,7 +231,7 @@
     "StationName": "箔子寮",
     "StationId": "C0K600",
     "ObsTime": {
-      "DateTime": "2026-07-13T18:00:00+08:00"
+      "DateTime": "2026-07-14T02:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -258,15 +255,15 @@
       "TownCode": "10009190"
     },
     "WeatherElement": {
-      "Weather": "陰有雷",
+      "Weather": "-99",
       "Now": {
         "Precipitation": "0.0"
       },
-      "WindDirection": "204.0",
-      "WindSpeed": "8.4",
-      "AirTemperature": "30.0",
-      "RelativeHumidity": "75",
-      "AirPressure": "1003.9",
+      "WindDirection": "173.0",
+      "WindSpeed": "5.3",
+      "AirTemperature": "28.4",
+      "RelativeHumidity": "78",
+      "AirPressure": "1005.5",
       "GustInfo": {
         "PeakGustSpeed": "-99",
         "Occurred_at": {
@@ -277,9 +274,9 @@
       "DailyExtreme": {
         "DailyHigh": {
           "TemperatureInfo": {
-            "AirTemperature": "31.4",
+            "AirTemperature": "29.9",
             "Occurred_at": {
-              "DateTime": "2026-07-13T14:30:00+08:00"
+              "DateTime": "2026-07-14T00:10:00+08:00"
             }
           }
         },
@@ -287,7 +284,7 @@
           "TemperatureInfo": {
             "AirTemperature": "28.4",
             "Occurred_at": {
-              "DateTime": "2026-07-13T04:40:00+08:00"
+              "DateTime": "2026-07-14T02:00:00+08:00"
             }
           }
         }
@@ -307,7 +304,7 @@
             "time": {
               "__list_len__": 3,
               "__item__": {
-                "startTime": "str=2026-07-13 18:00:00",
+                "startTime": "str=2026-07-14 00:00:00",
                 "endTime": "str=2026-07-14 06:00:00",
                 "parameter": {
                   "parameterName": "str=多雲短暫陣雨",
