@@ -460,6 +460,16 @@
   .faqsheet .faqq{font-weight:800;font-size:0.95rem;color:var(--paper);display:flex;gap:0.5rem;}
   .faqsheet .faqq b{color:var(--leaf);flex:0 0 auto;}
   .faqsheet .faqa{font-size:0.85rem;color:var(--muted);line-height:1.7;margin-top:0.4rem;}
+  /* 更新內容（版本紀錄） */
+  .clitem{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:0.8rem 0.9rem;margin-top:0.55rem;}
+  .clitem.clnew{border-color:var(--leaf-dim);}
+  .clhead{display:flex;align-items:center;gap:0.5rem;}
+  .clver{font-weight:900;font-size:1.05rem;color:var(--leaf);}
+  .clbadge{background:var(--leaf);color:var(--bg);font-size:0.66rem;font-weight:800;border-radius:999px;padding:0.08rem 0.5rem;}
+  .cldate{margin-left:auto;font-size:0.78rem;color:var(--muted);}
+  .cltitle{font-weight:800;font-size:0.9rem;color:var(--paper);margin:0.4rem 0 0.1rem;}
+  .cllist{margin:0.3rem 0 0;padding-left:1.15rem;}
+  .cllist li{font-size:0.85rem;color:#dcd8c6;line-height:1.65;margin:0.22rem 0;}
   .toast{position:fixed;left:50%;bottom:2rem;transform:translateX(-50%) translateY(1rem);background:var(--leaf);color:var(--bg);
     font-weight:800;font-size:0.9rem;padding:0.6rem 1.1rem;border-radius:999px;z-index:200;opacity:0;pointer-events:none;
     transition:opacity .25s,transform .25s;box-shadow:0 6px 20px rgba(0,0,0,.4);max-width:88vw;text-align:center;}
@@ -647,6 +657,8 @@
       <div class="about">
         <a class="arow" id="aFeedback">
           <span class="aico">💬</span><span class="alab">意見回饋<span class="asub"> · 給我們建議或回報問題</span></span><span class="achev">›</span></a>
+        <button class="arow" id="aWhatsnew">
+          <span class="aico">📣</span><span class="alab">更新內容<span class="asub"> · 看看這版新增了什麼</span></span><span class="achev">›</span></button>
         <button class="arow" id="aFaq">
           <span class="aico">❓</span><span class="alab">常見問題</span><span class="achev">›</span></button>
         <a class="arow" id="aPrivacy" href="privacy.html" target="_blank" rel="noopener">
@@ -680,11 +692,32 @@
   </div>
 </div>
 
+<div class="modal" id="clModal">
+  <div class="sheet faqsheet" role="dialog" aria-label="更新內容">
+    <h2>更新內容 <button class="close" id="closeCl" aria-label="關閉">✕</button></h2>
+    <div id="clList"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* ══════ 基礎 ══════ */
-const VERSION="v1.10.0";
+const VERSION="v1.0.0";
+/* 版本更新紀錄（最新在最上面）。未來每次改版就在陣列最前面新增一筆：
+   {v:版本, date:"YYYY-MM-DD", title:"一句話重點", items:[本次更新條列…]}。
+   會顯示在「設定→關於 App→更新內容」。 */
+const CHANGELOG=[
+  {v:"v1.0.0", date:"2026-07-13", title:"正式上線 🎉", items:[
+    "行情看板：全台 19 個果菜批發市場的蔬菜／水果均價、漲跌與偏貴/偏便宜標籤，可切換公斤／台斤。",
+    "價格走勢：點品項看 K 線（日／週／月・近 2 年）與逐日明細；多品種可分別看各自走勢。",
+    "採收預判：蔬菜依種植日推算採收期＋同期行情、含本季推薦種植；水果依果樹採收期月份。",
+    "田園巡查：颱風／豪雨來襲前，整合天氣、地勢、成熟度、農藥安全期等因子給搶收決策與倒數。",
+    "天氣與颱風：全國各縣市天氣預報、颱風動態與軌跡／雷達圖。",
+    "我的品項：蔬果依類型分類、可逐品種勾選；設定可一鍵備份匯出／匯入，換手機不流失。",
+    "純網頁 App：免費、免帳號、可加到主畫面、離線可用、不收集個人資料。",
+  ]},
+];
 /* 精準務農（farmer）：行情看板＋採收預判＋田園巡查。單一身分 App、無角色切換。
    （原「精準進貨/商人」批發比價功能已自本 repo 移除，改由另一支獨立 App 交付。） */
 const APP="farmer";
@@ -1675,7 +1708,7 @@ function openSettings(){renderSettings();document.getElementById("modal").classL
 function closeSettings(){document.getElementById("modal").classList.remove("on");}
 /* ══════ 上一頁：左緣右滑手勢＋手機返回鍵，依上層優先關閉彈窗／K線詳細／清搜尋 ══════ */
 function goBack(){
-  const layers=[["faqModal",()=>closeFaq()],["fieldForm",()=>document.getElementById("fieldForm").classList.remove("on")],
+  const layers=[["clModal",()=>closeChangelog()],["faqModal",()=>closeFaq()],["fieldForm",()=>document.getElementById("fieldForm").classList.remove("on")],
     ["cropInfo",()=>closeCropInfo()],["typhoonModal",()=>closeTyphoon()],["modal",()=>closeSettings()]];
   for(const [id,close] of layers){const el=document.getElementById(id);if(el&&el.classList.contains("on")){close();return true;}}
   if(MKTMODE==="detail"){closeDetail();return true;}
@@ -1901,6 +1934,18 @@ document.getElementById("aFeedback").addEventListener("click",()=>{
   location.href="mailto:xin7355@gmail.com?subject="+subj+"&body="+body;});
 function openFaq(){document.getElementById("faqModal").classList.add("on");}
 function closeFaq(){document.getElementById("faqModal").classList.remove("on");}
+/* 更新內容：由 CHANGELOG 渲染（專業版本紀錄，最新在上） */
+function renderChangelog(){const box=document.getElementById("clList");if(!box)return;
+  box.innerHTML=CHANGELOG.map((c,i)=>`<div class="clitem${i===0?" clnew":""}">
+    <div class="clhead"><span class="clver">${c.v}</span>${i===0?'<span class="clbadge">最新</span>':""}
+      <span class="cldate">${c.date}</span></div>
+    ${c.title?`<div class="cltitle">${c.title}</div>`:""}
+    <ul class="cllist">${c.items.map(t=>`<li>${t}</li>`).join("")}</ul></div>`).join("");}
+function openChangelog(){renderChangelog();document.getElementById("clModal").classList.add("on");}
+function closeChangelog(){document.getElementById("clModal").classList.remove("on");}
+document.getElementById("aWhatsnew").addEventListener("click",openChangelog);
+document.getElementById("closeCl").addEventListener("click",closeChangelog);
+document.getElementById("clModal").addEventListener("click",e=>{if(e.target.id==="clModal")closeChangelog();});
 (function(){const h=document.getElementById("aboutFold"),body=document.getElementById("aboutBody");
   if(h&&body)h.addEventListener("click",()=>{const open=body.hasAttribute("hidden");
     if(open){body.removeAttribute("hidden");h.setAttribute("aria-expanded","true");}
