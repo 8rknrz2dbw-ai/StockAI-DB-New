@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""一次性探測：農業部開放平台有沒有「產地價格」開放資料集。輸出 origin_probe.json（含樣本＋抽出的資料集連結）。
-   沙盒擋 data.moa.gov.tw，故由 .github/workflows/probe-origin.yml 於 GitHub Actions 執行。
-   第2版：MOA 端點回 200(HTML)，改成抓 open_search 搜尋頁 HTML → 正則抽出資料集標題/連結/UnitId/API。"""
+"""一次性探測 v3：找「產地價格」開放資料集。data.gov.tw 多為 CKAN → 試 api/3/action/package_search；
+   併試農業部 SPA 的資料 API 候選端點。dump 每個回應前 2500 字供判讀。→ origin_probe.json
+   由 GitHub Actions（有外網）執行（沙盒擋 data.moa.gov.tw）。"""
 import json, re, time
 import requests
 
 UA = {"User-Agent": "Mozilla/5.0 (compatible; erlun-probe/1.0)"}
-OUT = {"searches": [], "datasets": []}
 
 
 def get(url, params=None):
@@ -18,53 +17,39 @@ def get(url, params=None):
         return None, f"ERR {e}"
 
 
-# ── MOA 資料開放平台搜尋頁（HTML）：抓「產地價格/產地價/產地行情」搜尋結果 ──
-for kw in ["產地價格", "產地價", "產地行情", "產地"]:
-    st, html = get("https://data.moa.gov.tw/open_search.aspx", {"keyword": kw})
-    rec = {"kw": kw, "status": st, "len": len(html) if isinstance(html, str) else 0}
-    if isinstance(html, str) and st == 200:
-        # 抽出：資料集詳情連結（open_data_detail / dataset / DataFileService / FromM API）與其前後文字
-        links = re.findall(r'href=["\']([^"\']*(?:open_data|dataset|DataFileService|FromM|OpenData)[^"\']*)["\']', html, re.I)
-        # 抽出含「產地」的可讀文字片段
-        chan = re.findall(r'>([^<>]{2,40}產地[^<>]{0,40})<', html)
-        unitids = re.findall(r'UnitId=(\d+)', html)
-        titles = re.findall(r'title=["\']([^"\']*產地[^"\']*)["\']', html)
-        rec["links_sample"] = list(dict.fromkeys(links))[:30]
-        rec["chandu_text"] = list(dict.fromkeys(chan))[:30]
-        rec["unitids"] = list(dict.fromkeys(unitids))[:40]
-        rec["titles"] = list(dict.fromkeys(titles))[:30]
-        rec["head"] = html[:600]
-    else:
-        rec["head"] = (html or "")[:600]
-    OUT["searches"].append(rec)
-    time.sleep(0.5)
+TESTS = [
+    ("ckan_search", "https://data.gov.tw/api/3/action/package_search", {"q": "產地價格"}),
+    ("ckan_search2", "https://data.gov.tw/api/3/action/package_search", {"q": "產地"}),
+    ("gov_datasetapi", "https://data.gov.tw/api/v2/rest/dataset", {"q": "產地價格", "top": 10}),
+    ("moa_ajax_list", "https://data.moa.gov.tw/api/OpenData/DataList", {"keyword": "產地價格"}),
+    ("moa_ajax_search", "https://data.moa.gov.tw/api/open/DataSet/Search", {"keyword": "產地價格"}),
+    ("moa_od_json", "https://data.moa.gov.tw/Service/OpenData/DataList.aspx", {"IsTransData": "1"}),
+    # 農糧署農產品產銷資訊：即時產地價格查詢（可能的 API）
+    ("afa_origin", "https://amis.afa.gov.tw/producePrice/ProducePriceMonthly.aspx", None),
+]
 
-# ── 也試農業部資料平台的資料集清單 API（看是不是 JSON 目錄） ──
-for url in ["https://data.moa.gov.tw/api/v1/dataset",
-            "https://data.moa.gov.tw/Service/OpenData/DataList.aspx"]:
-    st, txt = get(url)
-    rec = {"url": url, "status": st, "len": len(txt) if isinstance(txt, str) else 0, "head": (txt or "")[:1500]}
-    # 若含產地，抽出片段
+OUT = {"tests": []}
+for name, url, params in TESTS:
+    st, txt = get(url, params)
+    rec = {"name": name, "url": url, "params": params, "status": st,
+           "len": len(txt) if isinstance(txt, str) else 0}
     if isinstance(txt, str):
-        rec["chandu_text"] = list(dict.fromkeys(re.findall(r'[^\s"<>]{0,30}產地[^\s"<>]{0,30}', txt)))[:30]
-    OUT["datasets"].append(rec)
+        rec["head"] = txt[:2500]
+        rec["count"] = re.findall(r'"count"\s*:\s*(\d+)', txt)[:3]
+        rec["chandu"] = list(dict.fromkeys(re.findall(r'[^\s"<>{}\[\],]{0,20}產地[^\s"<>{}\[\],]{0,20}', txt)))[:30]
+        # CKAN: 抽 dataset title
+        rec["titles"] = list(dict.fromkeys(re.findall(r'"title"\s*:\s*"([^"]{2,60})"', txt)))[:30]
+    OUT["tests"].append(rec)
     time.sleep(0.5)
 
-with open("origin_probe.json", "w", encoding="utf-8") as f:
-    json.dump(OUT, f, ensure_ascii=False, indent=2)
+json.dump(OUT, open("origin_probe.json", "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 
 print("=" * 60)
-for s in OUT["searches"]:
-    print(f"[search kw={s['kw']}] status={s['status']} len={s['len']}")
-    if s.get("titles"):
-        print("  產地標題:", s["titles"])
-    if s.get("chandu_text"):
-        print("  含產地文字:", s["chandu_text"][:15])
-    if s.get("unitids"):
-        print("  UnitId:", s["unitids"])
-    if s.get("links_sample"):
-        print("  連結:", s["links_sample"][:15])
-print("-" * 60)
-for d in OUT["datasets"]:
-    print(f"[list {d['url']}] status={d['status']} len={d['len']} 產地={d.get('chandu_text')}")
+for t in OUT["tests"]:
+    print(f"[{t['name']}] status={t['status']} len={t['len']} count={t.get('count')}")
+    if t.get("titles"):
+        print("   titles:", t["titles"][:15])
+    if t.get("chandu"):
+        print("   產地字樣:", t["chandu"][:15])
+    print("   head:", (t.get("head") or "")[:220].replace("\n", " "))
 print("=" * 60)
