@@ -51,6 +51,9 @@ def norm_crop(name):
 MARKETS = ["台北一", "台北二", "三重", "板橋", "宜蘭", "桃農", "台中", "豐原", "東勢",
            "南投", "溪湖", "永靖", "西螺", "嘉義", "高雄", "鳳山", "屏東", "台東", "花蓮"]
 # 沙盒擋 data.moa.gov.tw，市場名以 GitHub Actions 實跑驗證（workflow_dispatch / --discover）。
+# 用戶指定要「強制確認」的候選市場：即使近 14 天動態探索沒看到（可能休市/季節性沒交易），
+# 也用 2 年區間單獨試抓一次；有歷史成交才會留下、否則安全略過。
+EXTRA_MARKETS = ["水里"]
 DISCOVER_DAYS = 14   # 動態探索市場清單時往回看幾天的成交（逐日查；14 天確保各市場至少有一個交易日被看到）
 # API 會回一些「縣市彙總」名（如『台北市場／彰化市場』），無單一市場明細、以 Market 再查得不到 → 濾掉。
 ROLLUP_MARKET = re.compile(r"市場$|彙總|合計|小計")
@@ -229,20 +232,29 @@ def resolve_markets(end):
     real = {nm: c for nm, c in disc.items() if nm and not ROLLUP_MARKET.search(nm)}   # 濾掉『台北市場』等彙總
     if not real:
         print("[fetch_prices] ⚠ 市場探索無結果（API 可能需帶 Market，或當下無外網）→ 退回靜態清單。", file=sys.stderr)
-        return [(m, m) for m in MARKETS]
-    out, used = [], set()
-    for nm, _cnt in sorted(real.items(), key=lambda kv: (-kv[1], kv[0])):
-        short = next((s for s in MARKETS if s in nm), None)   # 能對回既有短名就沿用（維持顯示名/用戶設定不變）
-        display = short or nm
-        if display in used:      # 顯示名撞名 → 改用 API 完整名區隔
-            display = nm
-        if display in used:
+        base = [(m, m) for m in MARKETS]
+    else:
+        out, used = [], set()
+        for nm, _cnt in sorted(real.items(), key=lambda kv: (-kv[1], kv[0])):
+            short = next((s for s in MARKETS if s in nm), None)   # 能對回既有短名就沿用（維持顯示名/用戶設定不變）
+            display = short or nm
+            if display in used:      # 顯示名撞名 → 改用 API 完整名區隔
+                display = nm
+            if display in used:
+                continue
+            used.add(display)
+            out.append((display, nm))
+        print(f"[fetch_prices] 市場清單：探索到 {len(disc)} 個（濾彙總後 {len(real)} 個）、要抓 {len(out)} 個"
+              f"（含合作社/農會等）：{'、'.join(d for d, _ in out)}")
+        base = out
+    # 強制候選市場：探索沒看到的（如水里）也單獨以 2 年區間試抓一次，確認是否有歷史資料。
+    have = {q for _, q in base} | {d for d, _ in base}
+    for m in EXTRA_MARKETS:
+        if m in have or any(m in q for _, q in base):
             continue
-        used.add(display)
-        out.append((display, nm))
-    print(f"[fetch_prices] 市場清單：探索到 {len(disc)} 個（濾彙總後 {len(real)} 個）、要抓 {len(out)} 個"
-          f"（含合作社/農會等）：{'、'.join(d for d, _ in out)}")
-    return out
+        base.append((m, m))
+        print(f"[fetch_prices] 強制候選市場（探索未見）：{m} → 以 2 年區間試抓確認", file=sys.stderr)
+    return base
 
 
 def main():
