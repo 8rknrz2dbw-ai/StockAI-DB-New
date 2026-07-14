@@ -1,23 +1,23 @@
 {
-  "updated": "2026-07-14 05:36",
+  "updated": "2026-07-14 14:23",
   "source": "CWA opendata (W-C0034-005 路徑潛勢)",
   "active": false,
   "tracking": false,
   "departing": true,
-  "name": "巴威",
+  "name": "海神",
   "warning": "颱風遠離中",
   "land_warning": false,
   "invade_prob": 0.0,
   "eta_iso": null,
   "eta_text": "追蹤中",
-  "min_dist_km": 1480,
+  "min_dist_km": 1925,
   "rain_24h_mm": 200.0,
   "rain_1h_mm": 0.0,
   "rain": {
     "h1": 0.0,
     "h3": 0.0,
-    "h6": 0.0,
-    "h12": 88.0,
+    "h6": 0.5,
+    "h12": 0.5,
     "h24": 200.0,
     "d2": 200.0,
     "d3": 200.5
@@ -25,20 +25,20 @@
   "forecast_gust_ms": null,
   "track": [
     {
-      "t": "2026-07-14T08:00:00+08:00",
-      "lat": 37.1,
-      "lng": 120.7,
+      "t": "2026-07-14T14:00:00+08:00",
+      "lat": 13.3,
+      "lng": 135.0,
       "r15": 0,
       "r25": 0,
-      "gust": 20.0
+      "gust": 23.0
     },
     {
-      "t": "2026-07-14T14:00:00+08:00",
-      "lat": 37.9,
-      "lng": 122.5,
+      "t": "2026-07-14T20:00:00+08:00",
+      "lat": 14.0,
+      "lng": 135.7,
       "r15": 0,
       "r25": 0,
-      "gust": null
+      "gust": 15.0
     }
   ]
 }
