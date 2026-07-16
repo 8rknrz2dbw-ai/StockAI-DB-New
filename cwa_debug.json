@@ -1,6 +1,6 @@
 {
   "key_set": true,
-  "generated": "2026-07-16T14:37:18.979414+08:00",
+  "generated": "2026-07-16T20:10:57.189298+08:00",
   "W-C0034-001_warning": {
     "info": {
       "__list_len__": 1,
@@ -71,42 +71,33 @@
         "__list_len__": 1,
         "__item__": {
           "Year": "str=2026",
-          "TyphoonName": "str=HAISHEN",
-          "CwaTyphoonName": "str=海神",
-          "CwaTdNo": "str=11",
-          "CwaTyNo": "str=11",
+          "CwaTdNo": "str=12",
           "AnalysisData": {
             "Fix": {
-              "__list_len__": 5,
+              "__list_len__": 1,
               "__item__": {
-                "DateTime": "str=2026-07-13T08:00:00+08:00",
-                "CoordinateLongitude": "str=136.7",
-                "CoordinateLatitude": "str=10.7",
-                "MaxWindSpeed": "str=18",
+                "DateTime": "str=2026-07-16T14:00:00+08:00",
+                "CoordinateLongitude": "str=151.8",
+                "CoordinateLatitude": "str=4.3",
+                "MaxWindSpeed": "str=15",
                 "MaxGustSpeed": "str=23",
-                "Pressure": "str=1000",
-                "Circle15ms": {
-                  "Radius": "str=80",
-                  "QuadrantRadii": {
-                    "Radius": "…"
-                  }
-                }
+                "Pressure": "str=1004"
               }
             }
           },
           "ForecastData": {
             "Fix": {
-              "__list_len__": 2,
+              "__list_len__": 6,
               "__item__": {
-                "InitialTime": "str=2026-07-14T08:00:00+08:00",
+                "InitialTime": "str=2026-07-16T14:00:00+08:00",
                 "ForecastHour": "str=6",
-                "CoordinateLongitude": "str=135.0",
-                "CoordinateLatitude": "str=13.3",
+                "CoordinateLongitude": "str=152.0",
+                "CoordinateLatitude": "str=4.4",
                 "MaxWindSpeed": "str=15",
                 "MaxGustSpeed": "str=23",
-                "Pressure": "str=1000",
-                "MovingSpeed": "str=14",
-                "MovingDirection": "str=NE",
+                "Pressure": "str=1004",
+                "MovingSpeed": "str=4",
+                "MovingDirection": "str=ENE",
                 "Radius70PercentProbability": "str=50"
               }
             }
@@ -117,13 +108,13 @@
   },
   "O-A0002-001_rain": {
     "Station": {
-      "__list_len__": 1317,
+      "__list_len__": 1329,
       "__item__": {
         "StationName": "str=九份二山",
         "StationId": "str=C1I230",
         "Maintainer": "str=中央氣象署",
         "ObsTime": {
-          "DateTime": "str=2026-07-16T14:30:00+08:00"
+          "DateTime": "str=2026-07-16T20:00:00+08:00"
         },
         "GeoInfo": {
           "Coordinates": {
@@ -143,7 +134,7 @@
         },
         "RainfallElement": {
           "Now": {
-            "Precipitation": "str=0.0"
+            "Precipitation": "str=31.5"
           },
           "Past10Min": {
             "Precipitation": "str=0.0"
@@ -152,22 +143,22 @@
             "Precipitation": "str=0.0"
           },
           "Past3hr": {
-            "Precipitation": "str=0.0"
+            "Precipitation": "str=5.0"
           },
           "Past6Hr": {
-            "Precipitation": "str=0.0"
+            "Precipitation": "str=31.5"
           },
           "Past12hr": {
-            "Precipitation": "str=0.0"
+            "Precipitation": "str=31.5"
           },
           "Past24hr": {
-            "Precipitation": "str=3.5"
+            "Precipitation": "str=31.5"
           },
           "Past2days": {
-            "Precipitation": "str=3.5"
+            "Precipitation": "str=35.0"
           },
           "Past3days": {
-            "Precipitation": "str=5.0"
+            "Precipitation": "str=36.5"
           }
         }
       }
@@ -178,7 +169,7 @@
     "StationId": "A0K420",
     "Maintainer": "中央氣象署",
     "ObsTime": {
-      "DateTime": "2026-07-16T14:30:00+08:00"
+      "DateTime": "2026-07-16T20:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -235,7 +226,7 @@
     "StationName": "箔子寮",
     "StationId": "C0K600",
     "ObsTime": {
-      "DateTime": "2026-07-16T14:00:00+08:00"
+      "DateTime": "2026-07-16T20:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -259,15 +250,15 @@
       "TownCode": "10009190"
     },
     "WeatherElement": {
-      "Weather": "晴",
+      "Weather": "陰",
       "Now": {
         "Precipitation": "0.0"
       },
-      "WindDirection": "234.0",
-      "WindSpeed": "9.2",
-      "AirTemperature": "30.4",
-      "RelativeHumidity": "78",
-      "AirPressure": "1007.3",
+      "WindDirection": "202.0",
+      "WindSpeed": "7.3",
+      "AirTemperature": "28.1",
+      "RelativeHumidity": "82",
+      "AirPressure": "1008.0",
       "GustInfo": {
         "PeakGustSpeed": "-99",
         "Occurred_at": {
@@ -286,9 +277,9 @@
         },
         "DailyLow": {
           "TemperatureInfo": {
-            "AirTemperature": "27.6",
+            "AirTemperature": "27.3",
             "Occurred_at": {
-              "DateTime": "2026-07-16T04:50:00+08:00"
+              "DateTime": "2026-07-16T17:50:00+08:00"
             }
           }
         }
@@ -308,11 +299,11 @@
             "time": {
               "__list_len__": 3,
               "__item__": {
-                "startTime": "str=2026-07-16 12:00:00",
-                "endTime": "str=2026-07-16 18:00:00",
+                "startTime": "str=2026-07-16 18:00:00",
+                "endTime": "str=2026-07-17 06:00:00",
                 "parameter": {
-                  "parameterName": "str=晴時多雲",
-                  "parameterValue": "str=2"
+                  "parameterName": "str=多雲時晴",
+                  "parameterValue": "str=3"
                 }
               }
             }
