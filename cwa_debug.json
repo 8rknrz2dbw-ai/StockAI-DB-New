@@ -1,6 +1,6 @@
 {
   "key_set": true,
-  "generated": "2026-07-17T07:42:25.646909+08:00",
+  "generated": "2026-07-17T15:35:27.101623+08:00",
   "W-C0034-001_warning": {
     "info": {
       "__list_len__": 1,
@@ -108,13 +108,13 @@
   },
   "O-A0002-001_rain": {
     "Station": {
-      "__list_len__": 1331,
+      "__list_len__": 1324,
       "__item__": {
         "StationName": "str=九份二山",
         "StationId": "str=C1I230",
         "Maintainer": "str=中央氣象署",
         "ObsTime": {
-          "DateTime": "str=2026-07-17T07:30:00+08:00"
+          "DateTime": "str=2026-07-17T15:20:00+08:00"
         },
         "GeoInfo": {
           "Coordinates": {
@@ -152,7 +152,7 @@
             "Precipitation": "str=0.0"
           },
           "Past24hr": {
-            "Precipitation": "str=31.5"
+            "Precipitation": "str=26.0"
           },
           "Past2days": {
             "Precipitation": "str=31.5"
@@ -169,7 +169,7 @@
     "StationId": "A0K420",
     "Maintainer": "中央氣象署",
     "ObsTime": {
-      "DateTime": "2026-07-17T07:30:00+08:00"
+      "DateTime": "2026-07-17T15:20:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -226,7 +226,7 @@
     "StationName": "箔子寮",
     "StationId": "C0K600",
     "ObsTime": {
-      "DateTime": "2026-07-17T07:00:00+08:00"
+      "DateTime": "2026-07-17T15:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -254,11 +254,11 @@
       "Now": {
         "Precipitation": "0.0"
       },
-      "WindDirection": "178.0",
-      "WindSpeed": "4.0",
-      "AirTemperature": "28.6",
-      "RelativeHumidity": "79",
-      "AirPressure": "1007.1",
+      "WindDirection": "205.0",
+      "WindSpeed": "7.8",
+      "AirTemperature": "29.5",
+      "RelativeHumidity": "75",
+      "AirPressure": "1005.4",
       "GustInfo": {
         "PeakGustSpeed": "-99",
         "Occurred_at": {
@@ -269,9 +269,9 @@
       "DailyExtreme": {
         "DailyHigh": {
           "TemperatureInfo": {
-            "AirTemperature": "28.6",
+            "AirTemperature": "31.1",
             "Occurred_at": {
-              "DateTime": "2026-07-17T07:00:00+08:00"
+              "DateTime": "2026-07-17T10:00:00+08:00"
             }
           }
         },
@@ -299,11 +299,11 @@
             "time": {
               "__list_len__": 3,
               "__item__": {
-                "startTime": "str=2026-07-17 06:00:00",
+                "startTime": "str=2026-07-17 12:00:00",
                 "endTime": "str=2026-07-17 18:00:00",
                 "parameter": {
-                  "parameterName": "str=晴午後短暫雷陣雨",
-                  "parameterValue": "str=21"
+                  "parameterName": "str=晴時多雲",
+                  "parameterValue": "str=2"
                 }
               }
             }
