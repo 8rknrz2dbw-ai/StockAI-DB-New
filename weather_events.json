@@ -38,5 +38,10 @@
   "date": "2026-07-18",
   "type": "rain",
   "label": "大雨 92mm"
+ },
+ {
+  "date": "2026-07-19",
+  "type": "rain",
+  "label": "大雨 92mm"
  }
 ]
