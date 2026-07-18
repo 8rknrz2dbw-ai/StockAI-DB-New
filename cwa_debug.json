@@ -1,6 +1,6 @@
 {
   "key_set": true,
-  "generated": "2026-07-18T19:18:59.003936+08:00",
+  "generated": "2026-07-18T22:42:15.769639+08:00",
   "W-C0034-001_warning": {
     "info": {
       "__list_len__": 1,
@@ -114,7 +114,7 @@
         "StationId": "str=C1I230",
         "Maintainer": "str=中央氣象署",
         "ObsTime": {
-          "DateTime": "str=2026-07-18T19:10:00+08:00"
+          "DateTime": "str=2026-07-18T22:30:00+08:00"
         },
         "GeoInfo": {
           "Coordinates": {
@@ -140,13 +140,13 @@
             "Precipitation": "str=0.0"
           },
           "Past1hr": {
-            "Precipitation": "str=0.5"
+            "Precipitation": "str=0.0"
           },
           "Past3hr": {
-            "Precipitation": "str=0.5"
+            "Precipitation": "str=0.0"
           },
           "Past6Hr": {
-            "Precipitation": "str=6.0"
+            "Precipitation": "str=0.5"
           },
           "Past12hr": {
             "Precipitation": "str=6.0"
@@ -169,7 +169,7 @@
     "StationId": "A0K420",
     "Maintainer": "中央氣象署",
     "ObsTime": {
-      "DateTime": "2026-07-18T19:10:00+08:00"
+      "DateTime": "2026-07-18T22:30:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -226,7 +226,7 @@
     "StationName": "箔子寮",
     "StationId": "C0K600",
     "ObsTime": {
-      "DateTime": "2026-07-18T19:00:00+08:00"
+      "DateTime": "2026-07-18T22:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -254,11 +254,11 @@
       "Now": {
         "Precipitation": "0.0"
       },
-      "WindDirection": "196.0",
-      "WindSpeed": "4.9",
+      "WindDirection": "195.0",
+      "WindSpeed": "5.0",
       "AirTemperature": "27.7",
-      "RelativeHumidity": "82",
-      "AirPressure": "1005.4",
+      "RelativeHumidity": "83",
+      "AirPressure": "1006.3",
       "GustInfo": {
         "PeakGustSpeed": "-99",
         "Occurred_at": {
