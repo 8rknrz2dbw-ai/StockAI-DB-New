@@ -1,6 +1,6 @@
 {
   "key_set": true,
-  "generated": "2026-07-19T19:21:25.954934+08:00",
+  "generated": "2026-07-19T22:43:51.274303+08:00",
   "W-C0034-001_warning": {
     "info": {
       "__list_len__": 1,
@@ -114,7 +114,7 @@
         "StationId": "str=C1I230",
         "Maintainer": "str=中央氣象署",
         "ObsTime": {
-          "DateTime": "str=2026-07-19T19:10:00+08:00"
+          "DateTime": "str=2026-07-19T22:30:00+08:00"
         },
         "GeoInfo": {
           "Coordinates": {
@@ -134,31 +134,31 @@
         },
         "RainfallElement": {
           "Now": {
-            "Precipitation": "str=18.0"
+            "Precipitation": "str=18.5"
           },
           "Past10Min": {
-            "Precipitation": "str=0.5"
+            "Precipitation": "str=0.0"
           },
           "Past1hr": {
-            "Precipitation": "str=3.5"
+            "Precipitation": "str=0.0"
           },
           "Past3hr": {
-            "Precipitation": "str=4.0"
+            "Precipitation": "str=0.5"
           },
           "Past6Hr": {
-            "Precipitation": "str=13.5"
+            "Precipitation": "str=4.5"
           },
           "Past12hr": {
-            "Precipitation": "str=18.0"
+            "Precipitation": "str=18.5"
           },
           "Past24hr": {
-            "Precipitation": "str=18.0"
+            "Precipitation": "str=18.5"
           },
           "Past2days": {
-            "Precipitation": "str=24.0"
+            "Precipitation": "str=24.5"
           },
           "Past3days": {
-            "Precipitation": "str=24.0"
+            "Precipitation": "str=24.5"
           }
         }
       }
@@ -169,7 +169,7 @@
     "StationId": "A0K420",
     "Maintainer": "中央氣象署",
     "ObsTime": {
-      "DateTime": "2026-07-19T19:10:00+08:00"
+      "DateTime": "2026-07-19T22:30:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -223,42 +223,42 @@
     }
   },
   "O-A0001-001_temp_yunlin_sample": {
-    "StationName": "高鐵雲林",
-    "StationId": "C0K580",
+    "StationName": "箔子寮",
+    "StationId": "C0K600",
     "ObsTime": {
-      "DateTime": "2026-07-19T19:00:00+08:00"
+      "DateTime": "2026-07-19T22:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
         {
           "CoordinateName": "TWD67",
           "CoordinateFormat": "decimal degrees",
-          "StationLatitude": "23.739206",
-          "StationLongitude": "120.409817"
+          "StationLatitude": "23.621487",
+          "StationLongitude": "120.131920"
         },
         {
           "CoordinateName": "WGS84",
           "CoordinateFormat": "decimal degrees",
-          "StationLatitude": "23.737456",
-          "StationLongitude": "120.417944"
+          "StationLatitude": "23.619744",
+          "StationLongitude": "120.140036"
         }
       ],
-      "StationAltitude": "26.0",
+      "StationAltitude": "14.0",
       "CountyName": "雲林縣",
-      "TownName": "虎尾鎮",
+      "TownName": "口湖鄉",
       "CountyCode": "10009",
-      "TownCode": "10009030"
+      "TownCode": "10009190"
     },
     "WeatherElement": {
       "Weather": "陰",
       "Now": {
         "Precipitation": "0.0"
       },
-      "WindDirection": "215.0",
-      "WindSpeed": "2.0",
-      "AirTemperature": "28.2",
-      "RelativeHumidity": "83",
-      "AirPressure": "1004.7",
+      "WindDirection": "186.0",
+      "WindSpeed": "5.0",
+      "AirTemperature": "27.3",
+      "RelativeHumidity": "84",
+      "AirPressure": "1006.9",
       "GustInfo": {
         "PeakGustSpeed": "-99",
         "Occurred_at": {
@@ -269,17 +269,17 @@
       "DailyExtreme": {
         "DailyHigh": {
           "TemperatureInfo": {
-            "AirTemperature": "31.5",
+            "AirTemperature": "28.9",
             "Occurred_at": {
-              "DateTime": "2026-07-19T10:30:00+08:00"
+              "DateTime": "2026-07-19T10:20:00+08:00"
             }
           }
         },
         "DailyLow": {
           "TemperatureInfo": {
-            "AirTemperature": "25.8",
+            "AirTemperature": "26.8",
             "Occurred_at": {
-              "DateTime": "2026-07-19T03:40:00+08:00"
+              "DateTime": "2026-07-19T07:20:00+08:00"
             }
           }
         }
