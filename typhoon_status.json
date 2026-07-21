@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-21 17:44",
+  "updated": "2026-07-21 23:57",
   "source": "CWA opendata (W-C0034-005 路徑潛勢)",
   "active": false,
   "tracking": false,
@@ -11,16 +11,16 @@
   "eta_iso": null,
   "eta_text": "追蹤中",
   "min_dist_km": 3964,
-  "rain_24h_mm": 33.0,
-  "rain_1h_mm": 11.0,
+  "rain_24h_mm": 37.0,
+  "rain_1h_mm": 0.0,
   "rain": {
-    "h1": 11.0,
-    "h3": 33.0,
-    "h6": 33.0,
-    "h12": 33.0,
-    "h24": 33.0,
-    "d2": 34.0,
-    "d3": 37.5
+    "h1": 0.0,
+    "h3": 0.0,
+    "h6": 3.5,
+    "h12": 37.0,
+    "h24": 37.0,
+    "d2": 38.0,
+    "d3": 40.0
   },
   "forecast_gust_ms": null,
   "track": [
