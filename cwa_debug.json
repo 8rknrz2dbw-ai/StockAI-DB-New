@@ -1,6 +1,6 @@
 {
   "key_set": true,
-  "generated": "2026-07-21T04:50:37.165514+08:00",
+  "generated": "2026-07-21T08:15:45.360025+08:00",
   "W-C0034-001_warning": {
     "info": {
       "__list_len__": 1,
@@ -108,13 +108,13 @@
   },
   "O-A0002-001_rain": {
     "Station": {
-      "__list_len__": 1333,
+      "__list_len__": 1332,
       "__item__": {
         "StationName": "str=九份二山",
         "StationId": "str=C1I230",
         "Maintainer": "str=中央氣象署",
         "ObsTime": {
-          "DateTime": "str=2026-07-21T04:40:00+08:00"
+          "DateTime": "str=2026-07-21T08:00:00+08:00"
         },
         "GeoInfo": {
           "Coordinates": {
@@ -149,7 +149,7 @@
             "Precipitation": "str=0.0"
           },
           "Past12hr": {
-            "Precipitation": "str=22.5"
+            "Precipitation": "str=0.0"
           },
           "Past24hr": {
             "Precipitation": "str=27.5"
@@ -169,7 +169,7 @@
     "StationId": "A0K420",
     "Maintainer": "中央氣象署",
     "ObsTime": {
-      "DateTime": "2026-07-21T04:40:00+08:00"
+      "DateTime": "2026-07-21T08:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -226,7 +226,7 @@
     "StationName": "箔子寮",
     "StationId": "C0K600",
     "ObsTime": {
-      "DateTime": "2026-07-21T04:00:00+08:00"
+      "DateTime": "2026-07-21T08:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -250,15 +250,15 @@
       "TownCode": "10009190"
     },
     "WeatherElement": {
-      "Weather": "晴",
+      "Weather": "多雲",
       "Now": {
-        "Precipitation": "0.0"
+        "Precipitation": "1.0"
       },
-      "WindDirection": "165.0",
-      "WindSpeed": "3.4",
-      "AirTemperature": "27.6",
-      "RelativeHumidity": "85",
-      "AirPressure": "1007.6",
+      "WindDirection": "173.0",
+      "WindSpeed": "1.9",
+      "AirTemperature": "28.0",
+      "RelativeHumidity": "86",
+      "AirPressure": "1009.4",
       "GustInfo": {
         "PeakGustSpeed": "-99",
         "Occurred_at": {
@@ -277,9 +277,9 @@
         },
         "DailyLow": {
           "TemperatureInfo": {
-            "AirTemperature": "27.6",
+            "AirTemperature": "26.8",
             "Occurred_at": {
-              "DateTime": "2026-07-21T02:50:00+08:00"
+              "DateTime": "2026-07-21T05:10:00+08:00"
             }
           }
         }
@@ -299,8 +299,8 @@
             "time": {
               "__list_len__": 3,
               "__item__": {
-                "startTime": "str=2026-07-21 00:00:00",
-                "endTime": "str=2026-07-21 06:00:00",
+                "startTime": "str=2026-07-21 06:00:00",
+                "endTime": "str=2026-07-21 18:00:00",
                 "parameter": {
                   "parameterName": "str=晴時多雲",
                   "parameterValue": "str=2"
