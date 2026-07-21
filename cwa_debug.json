@@ -1,6 +1,6 @@
 {
   "key_set": true,
-  "generated": "2026-07-21T23:57:28.583424+08:00",
+  "generated": "2026-07-22T04:40:35.068941+08:00",
   "W-C0034-001_warning": {
     "info": {
       "__list_len__": 1,
@@ -114,7 +114,7 @@
         "StationId": "str=C1I230",
         "Maintainer": "str=中央氣象署",
         "ObsTime": {
-          "DateTime": "str=2026-07-21T23:50:00+08:00"
+          "DateTime": "str=2026-07-22T04:30:00+08:00"
         },
         "GeoInfo": {
           "Coordinates": {
@@ -134,7 +134,7 @@
         },
         "RainfallElement": {
           "Now": {
-            "Precipitation": "str=115.5"
+            "Precipitation": "str=0.0"
           },
           "Past10Min": {
             "Precipitation": "str=0.0"
@@ -146,19 +146,19 @@
             "Precipitation": "str=0.0"
           },
           "Past6Hr": {
-            "Precipitation": "str=6.0"
+            "Precipitation": "str=0.0"
           },
           "Past12hr": {
-            "Precipitation": "str=115.5"
+            "Precipitation": "str=13.0"
           },
           "Past24hr": {
             "Precipitation": "str=115.5"
           },
           "Past2days": {
-            "Precipitation": "str=143.0"
+            "Precipitation": "str=115.5"
           },
           "Past3days": {
-            "Precipitation": "str=161.5"
+            "Precipitation": "str=143.0"
           }
         }
       }
@@ -169,7 +169,7 @@
     "StationId": "A0K420",
     "Maintainer": "中央氣象署",
     "ObsTime": {
-      "DateTime": "2026-07-21T23:50:00+08:00"
+      "DateTime": "2026-07-22T04:30:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -226,7 +226,7 @@
     "StationName": "高鐵雲林",
     "StationId": "C0K580",
     "ObsTime": {
-      "DateTime": "2026-07-21T23:00:00+08:00"
+      "DateTime": "2026-07-22T04:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -250,15 +250,15 @@
       "TownCode": "10009030"
     },
     "WeatherElement": {
-      "Weather": "陰",
+      "Weather": "晴",
       "Now": {
         "Precipitation": "0.0"
       },
-      "WindDirection": "79.0",
-      "WindSpeed": "1.0",
-      "AirTemperature": "27.5",
-      "RelativeHumidity": "87",
-      "AirPressure": "1007.7",
+      "WindDirection": "198.0",
+      "WindSpeed": "0.6",
+      "AirTemperature": "26.9",
+      "RelativeHumidity": "88",
+      "AirPressure": "1006.8",
       "GustInfo": {
         "PeakGustSpeed": "-99",
         "Occurred_at": {
@@ -269,17 +269,17 @@
       "DailyExtreme": {
         "DailyHigh": {
           "TemperatureInfo": {
-            "AirTemperature": "34.2",
+            "AirTemperature": "27.0",
             "Occurred_at": {
-              "DateTime": "2026-07-21T13:10:00+08:00"
+              "DateTime": "2026-07-22T03:30:00+08:00"
             }
           }
         },
         "DailyLow": {
           "TemperatureInfo": {
-            "AirTemperature": "26.1",
+            "AirTemperature": "26.5",
             "Occurred_at": {
-              "DateTime": "2026-07-21T05:10:00+08:00"
+              "DateTime": "2026-07-22T01:00:00+08:00"
             }
           }
         }
