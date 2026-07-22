@@ -43,5 +43,10 @@
   "date": "2026-07-19",
   "type": "rain",
   "label": "大雨 92mm"
+ },
+ {
+  "date": "2026-07-22",
+  "type": "typhoon",
+  "label": "颱風"
  }
 ]
