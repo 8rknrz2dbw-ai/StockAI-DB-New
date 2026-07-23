@@ -53,5 +53,10 @@
   "date": "2026-07-23",
   "type": "typhoon",
   "label": "颱風"
+ },
+ {
+  "date": "2026-07-24",
+  "type": "typhoon",
+  "label": "未命名"
  }
 ]
