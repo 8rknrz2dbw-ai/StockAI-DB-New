@@ -1,6 +1,6 @@
 {
   "key_set": true,
-  "generated": "2026-07-24T04:35:29.503394+08:00",
+  "generated": "2026-07-24T08:14:45.470622+08:00",
   "W-C0034-001_warning": {
     "info": {
       "__list_len__": 1,
@@ -16,17 +16,17 @@
           "valueName": "str=profile:CAP-TWP:Event:1.0",
           "value": "str=typhoon"
         },
-        "effective": "str=2026-07-24T02:30:00+08:00",
-        "onset": "str=2026-07-24T02:30:00+08:00",
-        "expires": "str=2026-07-24T06:30:00+08:00",
+        "effective": "str=2026-07-24T05:30:00+08:00",
+        "onset": "str=2026-07-24T05:30:00+08:00",
+        "expires": "str=2026-07-24T09:30:00+08:00",
         "senderName": "str=中央氣象署",
         "headline": "str=海上颱風警報",
         "description": {
           "section": {
-            "__list_len__": 6,
+            "__list_len__": 7,
             "__item__": {
               "title": "str=命名與位置",
-              "value": "str=輕度颱風 未命名（國際命名 NONAME）24日2時的中心位置在北緯 18.2 度，東經 125.0 度，即在鵝鑾鼻的東"
+              "value": "str=輕度颱風 紅霞（國際命名 NOUL）24日5時的中心位置在北緯 18.4 度，東經 124.3 度，即在鵝鑾鼻的東南方約"
             }
           },
           "typhoon-info": {
@@ -36,7 +36,7 @@
                 "__list_len__": 4,
                 "__item__": {
                   "title": "str=警報報數",
-                  "value": "str=2"
+                  "value": "str=3"
                 }
               }
             }
@@ -51,7 +51,7 @@
           }
         },
         "area": {
-          "__list_len__": 3,
+          "__list_len__": 5,
           "__item__": {
             "areaDesc": "str=巴士海峽東部",
             "polygon": "str=20.000032,121.500000 20.000032,121.000000 20.500032,121.0000"
@@ -69,13 +69,13 @@
         "__list_len__": 1,
         "__item__": {
           "Year": "str=2026",
-          "TyphoonName": "str=NONAME",
-          "CwaTyphoonName": "str=未命名",
+          "TyphoonName": "str=NOUL",
+          "CwaTyphoonName": "str=紅霞",
           "CwaTdNo": "str=13",
           "CwaTyNo": "str=12",
           "AnalysisData": {
             "Fix": {
-              "__list_len__": 8,
+              "__list_len__": 9,
               "__item__": {
                 "DateTime": "str=2026-07-22T14:00:00+08:00",
                 "CoordinateLongitude": "str=132.6",
@@ -90,16 +90,16 @@
           },
           "ForecastData": {
             "Fix": {
-              "__list_len__": 8,
+              "__list_len__": 7,
               "__item__": {
-                "InitialTime": "str=2026-07-24T02:00:00+08:00",
+                "InitialTime": "str=2026-07-24T05:00:00+08:00",
                 "ForecastHour": "str=6",
-                "CoordinateLongitude": "str=123.5",
-                "CoordinateLatitude": "str=18.5",
+                "CoordinateLongitude": "str=122.8",
+                "CoordinateLatitude": "str=18.9",
                 "MaxWindSpeed": "str=20",
                 "MaxGustSpeed": "str=28",
                 "Pressure": "str=995",
-                "MovingSpeed": "str=27",
+                "MovingSpeed": "str=28",
                 "MovingDirection": "str=WNW",
                 "Circle15ms": {
                   "Radius": "str=80"
@@ -114,13 +114,13 @@
   },
   "O-A0002-001_rain": {
     "Station": {
-      "__list_len__": 1334,
+      "__list_len__": 1336,
       "__item__": {
         "StationName": "str=九份二山",
         "StationId": "str=C1I230",
         "Maintainer": "str=中央氣象署",
         "ObsTime": {
-          "DateTime": "str=2026-07-24T04:30:00+08:00"
+          "DateTime": "str=2026-07-24T08:00:00+08:00"
         },
         "GeoInfo": {
           "Coordinates": {
@@ -175,7 +175,7 @@
     "StationId": "A0K420",
     "Maintainer": "中央氣象署",
     "ObsTime": {
-      "DateTime": "2026-07-24T04:30:00+08:00"
+      "DateTime": "2026-07-24T08:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -232,7 +232,7 @@
     "StationName": "高鐵雲林",
     "StationId": "C0K580",
     "ObsTime": {
-      "DateTime": "2026-07-24T04:00:00+08:00"
+      "DateTime": "2026-07-24T08:00:00+08:00"
     },
     "GeoInfo": {
       "Coordinates": [
@@ -256,15 +256,15 @@
       "TownCode": "10009030"
     },
     "WeatherElement": {
-      "Weather": "晴",
+      "Weather": "陰",
       "Now": {
         "Precipitation": "0.0"
       },
-      "WindDirection": "0.0",
-      "WindSpeed": "0.0",
-      "AirTemperature": "26.6",
-      "RelativeHumidity": "92",
-      "AirPressure": "1003.7",
+      "WindDirection": "30.0",
+      "WindSpeed": "0.5",
+      "AirTemperature": "28.6",
+      "RelativeHumidity": "86",
+      "AirPressure": "1005.0",
       "GustInfo": {
         "PeakGustSpeed": "-99",
         "Occurred_at": {
@@ -275,17 +275,17 @@
       "DailyExtreme": {
         "DailyHigh": {
           "TemperatureInfo": {
-            "AirTemperature": "28.3",
+            "AirTemperature": "28.6",
             "Occurred_at": {
-              "DateTime": "2026-07-24T00:10:00+08:00"
+              "DateTime": "2026-07-24T08:00:00+08:00"
             }
           }
         },
         "DailyLow": {
           "TemperatureInfo": {
-            "AirTemperature": "26.6",
+            "AirTemperature": "26.5",
             "Occurred_at": {
-              "DateTime": "2026-07-24T04:00:00+08:00"
+              "DateTime": "2026-07-24T04:10:00+08:00"
             }
           }
         }
